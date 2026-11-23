@@ -1,0 +1,41 @@
+{
+  "pendingForRecipient": {
+    "id": "20000000-0000-4000-8000-000000000001",
+    "recruitmentId": "10000000-0000-4000-8000-000000000001",
+    "candidateId": "00000000-0000-4000-8000-000000000002",
+    "ownerId": "00000000-0000-4000-8000-000000000001",
+    "kind": "apply",
+    "status": "pending",
+    "createdAt": "2026-11-24T01:02:03Z",
+    "canRespond": true
+  },
+  "acceptedDetailForCaptain": {
+    "id": "20000000-0000-4000-8000-000000000001",
+    "recruitmentId": "10000000-0000-4000-8000-000000000001",
+    "candidateId": "00000000-0000-4000-8000-000000000002",
+    "ownerId": "00000000-0000-4000-8000-000000000001",
+    "kind": "apply",
+    "status": "accepted",
+    "createdAt": "2026-11-24T01:02:03Z",
+    "respondedAt": "2026-11-24T01:03:04Z",
+    "canRespond": false,
+    "counterpartQq": "DEMO-QQ-002"
+  },
+  "declinedDetailForCaptain": {
+    "id": "20000000-0000-4000-8000-000000000002",
+    "recruitmentId": "10000000-0000-4000-8000-000000000001",
+    "candidateId": "00000000-0000-4000-8000-000000000003",
+    "ownerId": "00000000-0000-4000-8000-000000000001",
+    "kind": "invite",
+    "status": "declined",
+    "createdAt": "2026-11-24T01:04:00Z",
+    "respondedAt": "2026-11-24T01:05:00Z",
+    "canRespond": false
+  },
+  "nonParticipant": {
+    "status": 404,
+    "body": {
+      "error": { "code": "not_found", "message": "未找到记录" }
+    }
+  }
+}
