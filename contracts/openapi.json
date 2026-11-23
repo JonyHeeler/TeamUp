@@ -271,6 +271,77 @@
         }
       }
     },
+    "/api/v1/profiles/{user_id}/evidence/{image_id}": {
+      "get": {
+        "summary": "Profile Evidence",
+        "operationId": "profile_evidence_api_v1_profiles__user_id__evidence__image_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "User Id"
+            }
+          },
+          {
+            "name": "image_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Image Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
     "/api/v1/me/profile": {
       "get": {
         "summary": "My Profile",
@@ -388,6 +459,24 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/competitions": {
+      "get": {
+        "summary": "Competitions",
+        "operationId": "competitions_api_v1_competitions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompetitionList"
                 }
               }
             }
@@ -881,6 +970,47 @@
   },
   "components": {
     "schemas": {
+      "Competition": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "nameEn": {
+            "type": "string",
+            "title": "Nameen"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "nameEn"
+        ],
+        "title": "Competition"
+      },
+      "CompetitionList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Competition"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "CompetitionList"
+      },
       "Decision": {
         "properties": {
           "decision": {
@@ -1219,6 +1349,14 @@
           "userId": {
             "type": "string",
             "title": "Userid"
+          },
+          "evidenceIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Evidenceids"
           }
         },
         "additionalProperties": false,
@@ -1227,7 +1365,8 @@
           "nickname",
           "skills",
           "contribution",
-          "userId"
+          "userId",
+          "evidenceIds"
         ],
         "title": "Profile"
       },
@@ -1304,6 +1443,28 @@
           },
           "publicFields": {
             "$ref": "#/components/schemas/PublicFields"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/RetainEvidence"
+                    },
+                    {
+                      "$ref": "#/components/schemas/UploadEvidence"
+                    }
+                  ]
+                },
+                "type": "array",
+                "maxItems": 3
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence"
           }
         },
         "additionalProperties": false,
@@ -1412,6 +1573,21 @@
               }
             ],
             "title": "Experience"
+          },
+          "evidenceIds": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidenceids"
           }
         },
         "additionalProperties": false,
@@ -1576,6 +1752,21 @@
         ],
         "title": "RecruitmentList"
       },
+      "RetainEvidence": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "RetainEvidence"
+      },
       "SessionInput": {
         "properties": {
           "persona": {
@@ -1594,6 +1785,23 @@
           "persona"
         ],
         "title": "SessionInput"
+      },
+      "UploadEvidence": {
+        "properties": {
+          "image": {
+            "type": "string",
+            "maxLength": 10666668,
+            "minLength": 1,
+            "title": "Image",
+            "description": "Base64 image data"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "image"
+        ],
+        "title": "UploadEvidence"
       },
       "User": {
         "properties": {

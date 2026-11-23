@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from app.competitions import OFFICIAL_COMPETITIONS
 from app.db.models import Contact, Profile, Recruitment, Skill, User
 from app.db.session import SessionLocal
 from app.demo import PERSONAS
@@ -43,7 +44,7 @@ def seed():
         rows = [
             (
                 "10000000-0000-4000-8000-000000000001",
-                "数学建模校赛",
+                OFFICIAL_COMPETITIONS["math-modeling"].name,
                 "数学建模队",
                 1,
                 "清洗问卷数据、汇总关键指标并参与建模",
@@ -51,7 +52,7 @@ def seed():
             ),
             (
                 "10000000-0000-4000-8000-000000000002",
-                "校园创新创业大赛",
+                OFFICIAL_COMPETITIONS["campus-innovation"].name,
                 "校园创新组",
                 2,
                 "实现原型和设计展示页",

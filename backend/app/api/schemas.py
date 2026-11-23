@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
+from app.services.evidence import BASE64_LIMIT, MAX_EVIDENCE
+
 
 class DTO(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -31,7 +33,7 @@ class PublicFields(DTO):
     experience: bool = False
 
 
-class ProfileInput(DTO):
+class ProfileFields(DTO):
     nickname: Text80 | None = None
     skills: list[Skill] = Field(min_length=1)
     contribution: Text500
@@ -41,9 +43,24 @@ class ProfileInput(DTO):
     publicFields: PublicFields = Field(default_factory=PublicFields)
 
 
-class Profile(ProfileInput):
+class RetainEvidence(DTO):
+    id: UUID
+
+
+class UploadEvidence(DTO):
+    image: str = Field(min_length=1, max_length=BASE64_LIMIT, description="Base64 image data")
+
+
+class ProfileInput(ProfileFields):
+    evidence: list[RetainEvidence | UploadEvidence] | None = Field(
+        default=None, max_length=MAX_EVIDENCE
+    )
+
+
+class Profile(ProfileFields):
     userId: str
     nickname: str
+    evidenceIds: list[UUID]
 
 
 class PublicProfile(DTO):
@@ -54,10 +71,21 @@ class PublicProfile(DTO):
     major: str | None = None
     grade: str | None = None
     experience: str | None = None
+    evidenceIds: list[UUID] | None = None
 
 
 class ProfileList(DTO):
     items: list[PublicProfile]
+
+
+class Competition(DTO):
+    id: str
+    name: str
+    nameEn: str
+
+
+class CompetitionList(DTO):
+    items: list[Competition]
 
 
 class RecruitmentInput(DTO):

@@ -1,4 +1,10 @@
 {
+  "competitions": {
+    "items": [
+      { "id": "math-modeling", "name": "数学建模校赛", "nameEn": "Campus Mathematical Modeling Contest" },
+      { "id": "campus-innovation", "name": "校园创新创业大赛", "nameEn": "Campus Innovation & Entrepreneurship Contest" }
+    ]
+  },
   "personas": {
     "captain": { "userId": "00000000-0000-4000-8000-000000000001", "nickname": "林舟" },
     "candidate-a": { "userId": "00000000-0000-4000-8000-000000000002", "nickname": "许言" },
@@ -59,6 +65,7 @@
       "major": null,
       "grade": null,
       "experience": null,
+      "evidenceIds": [],
       "publicFields": { "major": false, "grade": false, "experience": false }
     },
     "candidate-a": {
@@ -69,6 +76,7 @@
       "major": null,
       "grade": null,
       "experience": null,
+      "evidenceIds": [],
       "publicFields": { "major": false, "grade": false, "experience": false }
     },
     "candidate-b": {
@@ -79,6 +87,7 @@
       "major": null,
       "grade": null,
       "experience": null,
+      "evidenceIds": [],
       "publicFields": { "major": false, "grade": false, "experience": false }
     }
   }

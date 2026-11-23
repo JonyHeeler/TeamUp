@@ -8,10 +8,11 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    LargeBinary,
     String,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.mysql import CHAR, DATETIME
+from sqlalchemy.dialects.mysql import CHAR, DATETIME, MEDIUMBLOB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -67,6 +68,21 @@ class ProfileSkill(Base):
         uuid_type, ForeignKey("profiles.user_id"), primary_key=True
     )
     skill_code: Mapped[str] = mapped_column(String(32), ForeignKey("skills.code"), primary_key=True)
+
+
+class ProfileEvidence(Base):
+    __tablename__ = "profile_evidence"
+    __table_args__ = (
+        Index("ix_profile_evidence_user_position", "user_id", "position"),
+        CheckConstraint(
+            "OCTET_LENGTH(image) BETWEEN 1 AND 1000000", name="ck_profile_evidence_size"
+        ),
+        table_options,
+    )
+    id: Mapped[str] = mapped_column(uuid_type, primary_key=True)
+    user_id: Mapped[str] = mapped_column(uuid_type, ForeignKey("profiles.user_id"))
+    position: Mapped[int] = mapped_column(Integer)
+    image: Mapped[bytes] = mapped_column(LargeBinary().with_variant(MEDIUMBLOB(), "mysql"))
 
 
 class Recruitment(Base):

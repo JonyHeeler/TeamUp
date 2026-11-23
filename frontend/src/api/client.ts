@@ -7,6 +7,7 @@ export type OwnProfile = Schemas["Profile"] & {
   publicFields: Schemas["PublicFields"];
 };
 export type Recruitment = Schemas["Recruitment"];
+export type Competition = Schemas["Competition"];
 export type Intent = Schemas["IntentDetail"];
 export type RecruitmentInput = Schemas["RecruitmentInput"];
 export type ProfileInput = Schemas["ProfileInput"] & {
@@ -17,11 +18,12 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public fields?: Record<string, string>,
+    public code?: string,
   ) {
     super(message);
   }
 }
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+async function send(path: string, init?: RequestInit): Promise<Response> {
   let response: Response;
   try {
     response = await fetch(`/api/v1${path}`, {
@@ -33,21 +35,31 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       },
     });
   } catch {
-    throw new ApiError("无法连接服务，请检查后端是否启动。");
+    throw new ApiError(
+      "服务暂不可用，请稍后重试。",
+      undefined,
+      "connection_failed",
+    );
   }
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok)
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
     throw new ApiError(
       data.error?.message || `请求失败（${response.status}）`,
       data.error?.fields,
+      data.error?.code,
     );
-  return data as T;
+  }
+  return response;
+}
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  return (await send(path, init)).json() as Promise<T>;
 }
 const write = (method: string, body: unknown): RequestInit => ({
   method,
   body: JSON.stringify(body),
 });
 export const httpApi = {
+  competitions: () => request<Schemas["CompetitionList"]>("/competitions"),
   me: () => request<Me>("/me"),
   session: (persona: Persona) =>
     request<Me>("/demo/session", write("POST", { persona })),
@@ -56,6 +68,8 @@ export const httpApi = {
       `/profiles${skill ? `?skill=${encodeURIComponent(skill)}` : ""}`,
     ),
   profile: (id: string) => request<Profile>(`/profiles/${id}`),
+  evidence: async (userId: string, id: string) =>
+    (await send(`/profiles/${userId}/evidence/${id}`)).blob(),
   ownProfile: () => request<OwnProfile>("/me/profile"),
   saveProfile: (body: ProfileInput) =>
     request<OwnProfile>("/me/profile", write("PUT", body)),
@@ -76,3 +90,17 @@ export const httpApi = {
     request<Intent>(`/intents/${id}/response`, write("POST", { decision })),
 };
 export type Api = typeof httpApi;
+
+export const api: Api =
+  import.meta.env.VITE_TEAMUP_MOCK === "true"
+    ? new Proxy({} as Api, {
+        get:
+          (_target, key: keyof Api) =>
+          (...args: unknown[]) =>
+            import("./mock").then(({ mockApi }) =>
+              (mockApi[key] as (...args: unknown[]) => Promise<unknown>)(
+                ...args,
+              ),
+            ),
+      })
+    : httpApi;

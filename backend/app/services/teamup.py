@@ -2,11 +2,13 @@ from datetime import UTC, datetime
 from typing import Any
 from uuid import uuid4
 
-from sqlalchemy import or_, select, update
+from sqlalchemy import delete, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.db.models import Contact, Intent, Profile, Recruitment, Skill, User
+from app.competitions import OFFICIAL_COMPETITION_NAMES
+from app.db.models import Contact, Intent, Profile, ProfileEvidence, Recruitment, Skill, User
+from app.services.evidence import InvalidEvidence, prepare_image
 
 
 class ServiceError(Exception):
@@ -84,14 +86,81 @@ def list_profiles(db: Session, skill: str | None = None) -> list[dict[str, Any]]
     return [profile_data(p) for p in db.scalars(query.order_by(Profile.user_id))]
 
 
+def evidence_ids(db: Session, user_id: str) -> list[str]:
+    return list(
+        db.scalars(
+            select(ProfileEvidence.id)
+            .where(ProfileEvidence.user_id == user_id)
+            .order_by(ProfileEvidence.position)
+        )
+    )
+
+
+def get_evidence(db: Session, user_id: str, image_id: str, viewer_id: str | None) -> bytes:
+    query = (
+        select(ProfileEvidence.image)
+        .join(Profile, Profile.user_id == ProfileEvidence.user_id)
+        .where(ProfileEvidence.user_id == user_id, ProfileEvidence.id == image_id)
+    )
+    if viewer_id != user_id:
+        query = query.where(Profile.show_experience.is_(True))
+    image = db.scalar(query)
+    if image is None:
+        raise missing()
+    return image
+
+
 def get_profile(db: Session, user_id: str, private: bool = False) -> dict[str, Any]:
     profile = db.get(Profile, user_id)
     if not profile:
         raise missing()
-    return profile_data(profile, private)
+    result = profile_data(profile, private)
+    if private or profile.show_experience:
+        ids = evidence_ids(db, user_id)
+        if private or ids:
+            result["evidenceIds"] = ids
+    return result
+
+
+def replace_evidence(
+    db: Session, user_id: str, entries: list[tuple[str, bytes | None]]
+) -> list[str]:
+    keep = {item_id for item_id, image in entries if image is None}
+    existing = set(evidence_ids(db, user_id))
+    if not keep.issubset(existing):
+        message = "有一张图片证明已失效，请重新打开名片"
+        raise ServiceError(422, "validation_error", message, {"evidence": message})
+    if existing - keep:
+        db.execute(
+            delete(ProfileEvidence).where(
+                ProfileEvidence.user_id == user_id, ProfileEvidence.id.in_(existing - keep)
+            )
+        )
+    for position, (item_id, image) in enumerate(entries):
+        if image is None:
+            db.execute(
+                update(ProfileEvidence)
+                .where(ProfileEvidence.user_id == user_id, ProfileEvidence.id == item_id)
+                .values(position=position)
+            )
+        else:
+            db.add(ProfileEvidence(id=item_id, user_id=user_id, image=image, position=position))
+    return [item_id for item_id, _ in entries]
 
 
 def put_profile(db: Session, user_id: str, data: dict[str, Any]) -> dict[str, Any]:
+    images = data.get("evidence")
+    entries: list[tuple[str, bytes | None]] | None = None
+    if images is not None:
+        try:
+            entries = [
+                (item["id"], None) if "id" in item else (str(uuid4()), prepare_image(item["image"]))
+                for item in images
+            ]
+            if len({item_id for item_id, _ in entries}) != len(entries):
+                raise InvalidEvidence("同一张图片证明只能保留一次")
+        except InvalidEvidence as exc:
+            raise ServiceError(422, "validation_error", str(exc), {"evidence": str(exc)}) from exc
     user = db.scalar(select(User).where(User.id == user_id).with_for_update())
     if not user:
         raise missing()
@@ -117,8 +186,13 @@ def put_profile(db: Session, user_id: str, data: dict[str, Any]) -> dict[str, An
     for field, value in optional.items():
         setattr(profile, field, value)
         setattr(profile, "show_" + field, public.get(field, False))
+    db.flush()
+    result = profile_data(profile, True)
+    result["evidenceIds"] = (
+        evidence_ids(db, user_id) if entries is None else replace_evidence(db, user_id, entries)
+    )
     db.commit()
-    return profile_data(profile, True)
+    return result
 
 
 def recruitment_data(recruitment: Recruitment) -> dict[str, Any]:
@@ -135,7 +209,9 @@ def recruitment_data(recruitment: Recruitment) -> dict[str, Any]:
 
 
 def list_recruitments(db: Session, skill: str | None = None) -> list[dict[str, Any]]:
-    query = select(Recruitment)
+    query = select(Recruitment).where(
+        Recruitment.competition.collate("utf8mb4_bin").in_(OFFICIAL_COMPETITION_NAMES)
+    )
     if skill:
         query = query.where(Recruitment.skills.any(Skill.code == skill))
     return [recruitment_data(r) for r in db.scalars(query.order_by(Recruitment.created_at.desc()))]
@@ -143,19 +219,23 @@ def list_recruitments(db: Session, skill: str | None = None) -> list[dict[str, A
 
 def get_recruitment(db: Session, recruitment_id: str) -> dict[str, Any]:
     recruitment = db.get(Recruitment, recruitment_id)
-    if not recruitment:
+    if not recruitment or recruitment.competition not in OFFICIAL_COMPETITION_NAMES:
         raise missing()
     return recruitment_data(recruitment)
 
 
 def create_recruitment(db: Session, user_id: str, data: dict[str, Any]) -> dict[str, Any]:
+    competition = text(data.get("competition"), 80)
+    if competition not in OFFICIAL_COMPETITION_NAMES:
+        message = "请选择官方比赛"
+        raise ServiceError(422, "validation_error", message, {"competition": message})
     openings = data.get("openings")
     if isinstance(openings, bool) or not isinstance(openings, int) or openings <= 0:
         raise invalid("招募人数须为正整数")
     recruitment = Recruitment(
         id=str(uuid4()),
         owner_id=user_id,
-        competition=text(data.get("competition"), 80),
+        competition=competition,
         team_name=text(data.get("teamName"), 80),
         openings=openings,
         task=text(data.get("task"), 500),
@@ -221,7 +301,7 @@ def create_intent(db: Session, user_id: str, data: dict[str, Any]) -> tuple[dict
     if kind not in ("apply", "invite"):
         raise invalid("意向类型无效")
     recruitment = db.get(Recruitment, data.get("recruitmentId"))
-    if not recruitment:
+    if not recruitment or recruitment.competition not in OFFICIAL_COMPETITION_NAMES:
         raise missing()
     candidate = user_id if kind == "apply" else data.get("candidateId")
     if kind == "invite" and recruitment.owner_id != user_id:

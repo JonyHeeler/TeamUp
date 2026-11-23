@@ -89,6 +89,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/profiles/{user_id}/evidence/{image_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Profile Evidence */
+        get: operations["profile_evidence_api_v1_profiles__user_id__evidence__image_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/profile": {
         parameters: {
             query?: never;
@@ -100,6 +117,23 @@ export interface paths {
         get: operations["my_profile_api_v1_me_profile_get"];
         /** Put Profile */
         put: operations["put_profile_api_v1_me_profile_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/competitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Competitions */
+        get: operations["competitions_api_v1_competitions_get"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -214,6 +248,20 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** Competition */
+        Competition: {
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Nameen */
+            nameEn: string;
+        };
+        /** CompetitionList */
+        CompetitionList: {
+            /** Items */
+            items: components["schemas"]["Competition"][];
+        };
         /** Decision */
         Decision: {
             /**
@@ -336,6 +384,8 @@ export interface components {
             publicFields?: components["schemas"]["PublicFields"];
             /** Userid */
             userId: string;
+            /** Evidenceids */
+            evidenceIds: string[];
         };
         /** ProfileInput */
         ProfileInput: {
@@ -352,6 +402,8 @@ export interface components {
             /** Experience */
             experience?: string | null;
             publicFields?: components["schemas"]["PublicFields"];
+            /** Evidence */
+            evidence?: (components["schemas"]["RetainEvidence"] | components["schemas"]["UploadEvidence"])[] | null;
         };
         /** ProfileList */
         ProfileList: {
@@ -392,6 +444,8 @@ export interface components {
             grade?: string | null;
             /** Experience */
             experience?: string | null;
+            /** Evidenceids */
+            evidenceIds?: string[] | null;
         };
         /** Ready */
         Ready: {
@@ -441,6 +495,14 @@ export interface components {
             /** Items */
             items: components["schemas"]["Recruitment"][];
         };
+        /** RetainEvidence */
+        RetainEvidence: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+        };
         /** SessionInput */
         SessionInput: {
             /**
@@ -448,6 +510,14 @@ export interface components {
              * @enum {string}
              */
             persona: "captain" | "candidate-a" | "candidate-b";
+        };
+        /** UploadEvidence */
+        UploadEvidence: {
+            /**
+             * Image
+             * @description Base64 image data
+             */
+            image: string;
         };
         /** User */
         User: {
@@ -690,6 +760,56 @@ export interface operations {
             };
         };
     };
+    profile_evidence_api_v1_profiles__user_id__evidence__image_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: string;
+                image_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/webp": string;
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     my_profile_api_v1_me_profile_get: {
         parameters: {
             query?: never;
@@ -802,6 +922,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    competitions_api_v1_competitions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompetitionList"];
                 };
             };
         };

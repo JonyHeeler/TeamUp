@@ -17,17 +17,21 @@ const data = structuredClone(fixture) as {
 };
 let persona: Persona | null = null;
 let intents: Intent[] = [];
+const pictures = new Map<string, Blob>();
 const current = () => {
   if (!persona) throw new ApiError("请先选择演示身份。");
   return data.personas[persona];
 };
-const publicProfile = (p: OwnProfile): Profile => {
-  const { publicFields, major, grade, experience, ...rest } = p;
+const publicProfile = (p: OwnProfile, withEvidence = false): Profile => {
+  const { publicFields, major, grade, experience, evidenceIds, ...rest } = p;
   return {
     ...rest,
     ...(publicFields.major && major ? { major } : {}),
     ...(publicFields.grade && grade ? { grade } : {}),
     ...(publicFields.experience && experience ? { experience } : {}),
+    ...(withEvidence && publicFields.experience && evidenceIds.length
+      ? { evidenceIds }
+      : {}),
   };
 };
 const view = (i: Intent): Intent => ({
@@ -44,6 +48,7 @@ const lookup = (id: string) => {
   return i;
 };
 export const mockApi: Api = {
+  competitions: async () => fixture.competitions,
   me: async () => current(),
   session: async (p) => {
     persona = p;
@@ -51,22 +56,56 @@ export const mockApi: Api = {
   },
   profiles: async (skill = "") => ({
     items: Object.values(data.ownProfiles)
-      .map(publicProfile)
+      .map((p) => publicProfile(p))
       .filter((p) => !skill || p.skills.includes(skill as Skill)),
   }),
   profile: async (id) => {
     const p = Object.values(data.ownProfiles).find((x) => x.userId === id);
     if (!p) throw new ApiError("未找到名片。");
-    return publicProfile(p);
+    return publicProfile(p, true);
   },
   ownProfile: async () => {
     current();
     return data.ownProfiles[persona!];
   },
+  evidence: async (userId, id) => {
+    const profile = Object.values(data.ownProfiles).find(
+      (entry) => entry.userId === userId,
+    );
+    const image = pictures.get(id);
+    if (
+      !image ||
+      !profile?.evidenceIds.includes(id) ||
+      (!profile.publicFields.experience &&
+        (!persona || current().userId !== userId))
+    )
+      throw new ApiError("未找到图片", undefined, "not_found");
+    return image;
+  },
   saveProfile: async (body) => {
     current();
     const p = data.ownProfiles[persona!];
-    Object.assign(p, body);
+    const { evidence, ...details } = body;
+    if (evidence) {
+      const ids = evidence.map((item) => {
+        if ("id" in item) return item.id;
+        const id = crypto.randomUUID();
+        const type = item.image.startsWith("iVBOR")
+          ? "image/png"
+          : item.image.startsWith("/9j/")
+            ? "image/jpeg"
+            : "image/webp";
+        const bytes = Uint8Array.from(atob(item.image), (character) =>
+          character.charCodeAt(0),
+        );
+        pictures.set(id, new Blob([bytes], { type }));
+        return id;
+      });
+      for (const id of p.evidenceIds)
+        if (!ids.includes(id)) pictures.delete(id);
+      p.evidenceIds = ids;
+    }
+    Object.assign(p, details);
     return p;
   },
   recruitments: async (skill = "") => ({
@@ -75,8 +114,19 @@ export const mockApi: Api = {
     ),
   }),
   createRecruitment: async (body) => {
+    if (
+      !fixture.competitions.items.some(
+        (c) => c.name === body.competition.trim(),
+      )
+    )
+      throw new ApiError(
+        "请选择官方比赛",
+        { competition: "请选择官方比赛" },
+        "validation_error",
+      );
     const t: Recruitment = {
       ...body,
+      competition: body.competition.trim(),
       id: crypto.randomUUID(),
       ownerId: current().userId,
       createdAt: new Date().toISOString(),

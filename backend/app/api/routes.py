@@ -11,6 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.api import schemas as s
+from app.competitions import OFFICIAL_COMPETITIONS
 from app.config import get_settings
 from app.db.session import get_db
 from app.demo import PERSONAS
@@ -24,7 +25,7 @@ def errors(*codes: int):
     return {code: {"model": s.Error} for code in codes}
 
 
-def current_user(request: Request) -> str:
+def optional_user(request: Request) -> str | None:
     settings = get_settings()
     token = request.cookies.get("teamup_session")
     if settings.demo_mode and settings.session_secret and token:
@@ -36,6 +37,13 @@ def current_user(request: Request) -> str:
                 return PERSONAS[persona]
         except (BadSignature, SignatureExpired, TypeError):
             pass
+    return None
+
+
+def current_user(request: Request) -> str:
+    user = optional_user(request)
+    if user is not None:
+        return user
     raise teamup.ServiceError(401, "unauthorized", "请先选择演示身份")
 
 
@@ -98,6 +106,24 @@ def profile(user_id: UUID, db: Session = DB_DEP):
     return teamup.get_profile(db, str(user_id))
 
 
+@router.get(
+    "/profiles/{user_id}/evidence/{image_id}",
+    response_class=Response,
+    responses={
+        200: {"content": {"image/webp": {"schema": {"type": "string", "format": "binary"}}}},
+        **errors(404, 422, 503),
+    },
+)
+def profile_evidence(
+    user_id: UUID, image_id: UUID, viewer: str | None = Depends(optional_user), db: Session = DB_DEP
+) -> Response:
+    return Response(
+        teamup.get_evidence(db, str(user_id), str(image_id), viewer),
+        media_type="image/webp",
+        headers={"X-Content-Type-Options": "nosniff"},
+    )
+
+
 @router.get("/me/profile", response_model=s.Profile, responses=errors(401, 404, 503))
 def my_profile(user: str = Depends(current_user), db: Session = DB_DEP):
     return teamup.get_profile(db, user, private=True)
@@ -105,7 +131,17 @@ def my_profile(user: str = Depends(current_user), db: Session = DB_DEP):
 
 @router.put("/me/profile", response_model=s.Profile, responses=errors(401, 403, 404, 422, 503))
 def put_profile(data: s.ProfileInput, user: str = Depends(current_user), db: Session = DB_DEP):
-    return teamup.put_profile(db, user, data.model_dump(exclude_none=True))
+    return teamup.put_profile(db, user, data.model_dump(mode="json", exclude_none=True))
+
+
+@router.get("/competitions", response_model=s.CompetitionList)
+def competitions() -> s.CompetitionList:
+    return s.CompetitionList(
+        items=[
+            s.Competition(id=competition_id, name=names.name, nameEn=names.english)
+            for competition_id, names in OFFICIAL_COMPETITIONS.items()
+        ]
+    )
 
 
 @router.get("/recruitments", response_model=s.RecruitmentList, responses=errors(422, 503))
