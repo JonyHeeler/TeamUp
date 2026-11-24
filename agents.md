@@ -1,8 +1,8 @@
-# TeamUp 第一阶段开发约定
+# TeamUP 第一阶段开发约定
 
 ## 今晚要验证什么
 
-校内竞赛组队有两种常见需求。队长知道队里缺一个会做数据分析的人，却不知道谁有时间。想参赛的同学有相关经验，却未必愿意在大群里公开自荐。TeamUp 让队长发布招募，也让同学发布可被发现的个人名片，双方看到合适的对象后再决定是否联系。
+校内竞赛组队有两种常见需求。队长知道队里缺一个会做数据分析的人，却不知道谁有时间。想参赛的同学有相关经验，却未必愿意在大群里公开自荐。TeamUP 让队长发布招募，也让同学发布可被发现的个人名片，双方看到合适的对象后再决定是否联系。
 
 **2026 年 11 月 23 日的 Demo 目标**是让两位同学在同一台设备上分饰队长和候选人，三分钟内走通一次「发现合适的人或队 → 表达意向 → 对方同意 → 交换演示联系方式」。成功标准是他们能说清队伍缺谁、同学能做什么，以及谁能在什么时候看到联系方式。
 
@@ -30,11 +30,11 @@ P0 是今晚演示的验收范围。P1 在看完首轮试用反馈后安排。P2
 
 ### 从课程图谱项目取用的做法
 
-| 实际参考位置 | 观察与 TeamUp 的取舍 |
+| 实际参考位置 | 观察与 TeamUP 的取舍 |
 | --- | --- |
-| [后端路由](D:/swufe-course-kg-agent/backend/api/routes.py)、[响应模型](D:/swufe-course-kg-agent/backend/api/schemas.py)、[MySQL 客户端](D:/swufe-course-kg-agent/backend/db/mysql_client.py) | 路由声明响应模型，数据库连接集中管理。沿用 FastAPI、Pydantic、SQLAlchemy 分工。TeamUp 使用 Alembic 管理表结构演进 |
-| [全栈版 HTTP 入口](D:/swufe-course-kg-agent/frontend/src/api/http.ts) | API 地址与错误转换集中在请求层。TeamUp 用一个 fetch 客户端处理相对地址、会话和错误，页面只调用业务方法 |
-| [独立前端的构建配置](D:/swufe-course-kg-frontend/package.json)、[数据客户端](D:/swufe-course-kg-frontend/src/api/client.ts) | React 前端可以独立构建，该版本从静态资源读取课程。TeamUp 借用独立交付方式，组队数据与 QQ 权限由后端实时处理，前端演示样例只用于模拟联调 |
+| [后端路由](D:/swufe-course-kg-agent/backend/api/routes.py)、[响应模型](D:/swufe-course-kg-agent/backend/api/schemas.py)、[MySQL 客户端](D:/swufe-course-kg-agent/backend/db/mysql_client.py) | 路由声明响应模型，数据库连接集中管理。沿用 FastAPI、Pydantic、SQLAlchemy 分工。TeamUP 使用 Alembic 管理表结构演进 |
+| [全栈版 HTTP 入口](D:/swufe-course-kg-agent/frontend/src/api/http.ts) | API 地址与错误转换集中在请求层。TeamUP 用一个 fetch 客户端处理相对地址、会话和错误，页面只调用业务方法 |
+| [独立前端的构建配置](D:/swufe-course-kg-frontend/package.json)、[数据客户端](D:/swufe-course-kg-frontend/src/api/client.ts) | React 前端可以独立构建，该版本从静态资源读取课程。TeamUP 借用独立交付方式，组队数据与 QQ 权限由后端实时处理，前端演示样例只用于模拟联调 |
 
 ### 目录与依赖方向
 
@@ -49,7 +49,7 @@ P0 是今晚演示的验收范围。P1 在看完首轮试用反馈后安排。P2
 
 ## 本地 MySQL 与 Docker
 
-已核对本机 Docker Engine 29.4.3、Compose v5.1.3 和缓存镜像 `mysql:8.0`。课程图谱容器使用宿主端口 3307，酒店项目使用 3308，均已在运行。TeamUp 使用独立 Compose 项目 `teamup`、服务名 `db`、数据库 `teamup`、命名卷 `teamup_mysql_data`。选用本机已有镜像以便离线启动，以下三个新端口在设计核对时均未监听。
+已核对本机 Docker Engine 29.4.3、Compose v5.1.3 和缓存镜像 `mysql:8.0`。课程图谱容器使用宿主端口 3307，酒店项目使用 3308，均已在运行。TeamUP 使用独立 Compose 项目 `teamup`、服务名 `db`、数据库 `teamup`、命名卷 `teamup_mysql_data`。选用本机已有镜像以便离线启动，以下三个新端口在设计核对时均未监听。
 
 | 进程 | 本地地址 | 谁连接 |
 | --- | --- | --- |
@@ -121,7 +121,7 @@ volumes:
 
 1. **先交契约。** 围绕一条招募、一张名片、一对身份编写请求响应模型并导出 OpenAPI。契约样例至少覆盖待回应、同意、婉拒和第三人不可读。前端用样例完成列表、表单、意向页。模拟模式显式开启，正式演示统一连接真实 API。
 2. **接数据库。** 首个工程提交补齐上面的 Compose、环境样例、锁文件、初始 Alembic 迁移和幂等种子命令。种子包含三个虚构用户、三张名片、两条招募、四个技能。按固定键补缺，保留使用者编辑和已产生的意向。
-3. **独立启动。** 以下是首个实现提交需支持的命令。根目录配置好本机环境后运行 `docker compose up -d --wait db`。在 `backend/` 依次运行 `uv sync --frozen`、`uv run alembic upgrade head`、`uv run python -m app.seed`、`uv run uvicorn app.main:app --host 127.0.0.1 --port 8086`。后端配置加载器统一从根目录环境文件读取 TeamUp 参数，迁移与种子复用该加载器。另开终端在 `frontend/` 执行 `npm ci`、`npm run dev`，打开 5180。
+3. **独立启动。** 以下是首个实现提交需支持的命令。根目录配置好本机环境后运行 `docker compose up -d --wait db`。在 `backend/` 依次运行 `uv sync --frozen`、`uv run alembic upgrade head`、`uv run python -m app.seed`、`uv run uvicorn app.main:app --host 127.0.0.1 --port 8086`。后端配置加载器统一从根目录环境文件读取 TeamUP 参数，迁移与种子复用该加载器。另开终端在 `frontend/` 执行 `npm ci`、`npm run dev`，打开 5180。
 4. **交付一条完整路径。** 先跑通发布招募 → 候选人申请 → 队长同意 → 双方在详情看见对方 QQ，再补邀请、婉拒、重复操作和换身份。任一写入失败都保留表单输入，只有 API 确认提交后才更新成功状态。
 
 前端采用 Prettier、两空格缩进、PascalCase 组件和 camelCase 字段。表单有可访问标签，错误靠近字段，用户文本使用 React 默认转义。后端采用 Ruff、四空格、snake_case 标识符、带类型的服务函数。会话按请求创建和关闭，每个业务操作只有一个事务提交点。依赖更新与锁文件同提交，`.env`、虚拟环境、构建产物及数据库卷内容均由 Git 忽略。

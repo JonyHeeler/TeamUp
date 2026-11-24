@@ -160,7 +160,7 @@ def recruitment(recruitment_id: UUID, db: Session = DB_DEP):
     "/recruitments",
     status_code=201,
     response_model=s.Recruitment,
-    responses=errors(401, 403, 422, 503),
+    responses=errors(401, 403, 409, 422, 503),
 )
 def create_recruitment(
     data: s.RecruitmentInput, user: str = Depends(current_user), db: Session = DB_DEP

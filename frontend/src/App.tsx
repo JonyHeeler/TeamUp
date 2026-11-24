@@ -15,10 +15,12 @@ import {
   type Profile,
   type ProfileInput,
   type Recruitment,
-  type RecruitmentInput,
   type Skill,
 } from "./api/client";
-import { copy, type Copy, type Locale } from "./copy";
+import { copy as t } from "./copy";
+import ProfileEditor, { ProfileDetails } from "./ProfileEditor";
+import RecruitmentEditor, { RecruitmentDetails } from "./RecruitmentEditor";
+import Welcome, { BrandMark } from "./Welcome";
 import EvidenceImage from "./EvidenceImage";
 import {
   EVIDENCE_ACCEPT,
@@ -30,69 +32,7 @@ import {
 } from "./evidence";
 import "./style.css";
 
-type Page = "catalog" | "teams" | "people" | "intents" | "profile" | "publish";
-const blankTeam: Omit<RecruitmentInput, "competition"> = {
-  teamName: "",
-  openings: 1,
-  skills: [],
-  task: "",
-};
-const optionalFields = ["major", "grade", "experience"] as const;
-
-function Tags({ skills, t }: { skills: Skill[]; t: Copy }) {
-  return (
-    <ul className="tags" aria-label={t.skills}>
-      {skills.map((skill) => (
-        <li key={skill}>{t.skillNames[skill]}</li>
-      ))}
-    </ul>
-  );
-}
-
-function Skills({
-  t,
-  value,
-  onChange,
-  error,
-}: {
-  t: Copy;
-  value: Skill[];
-  onChange: (skills: Skill[]) => void;
-  error?: string;
-}) {
-  return (
-    <fieldset
-      className="skill-picker"
-      aria-describedby={error ? "skills-error" : undefined}
-    >
-      <legend>{t.skills}</legend>
-      <div>
-        {(Object.keys(t.skillNames) as Skill[]).map((skill) => (
-          <label className="skill-option" key={skill}>
-            <input
-              type="checkbox"
-              checked={value.includes(skill)}
-              onChange={(event) =>
-                onChange(
-                  event.target.checked
-                    ? [...value, skill]
-                    : value.filter((item) => item !== skill),
-                )
-              }
-            />
-            {t.skillNames[skill]}
-          </label>
-        ))}
-      </div>
-      {error && (
-        <p id="skills-error" className="field-error">
-          {error}
-        </p>
-      )}
-    </fieldset>
-  );
-}
-
+type Page = "welcome" | "teams" | "people" | "intents" | "profile" | "publish";
 function CompetitionArt({ id }: { id: string }) {
   const chart = id === "math-modeling";
   return (
@@ -169,13 +109,9 @@ function Alert({ message }: { message: string }) {
 }
 
 export default function App() {
-  const [locale, setLocale] = useState<Locale>(() =>
-    localStorage.getItem("teamup-locale") === "en" ? "en" : "zh",
-  );
-  const t = copy[locale];
-  const [page, setPage] = useState<Page>("catalog");
+  const [page, setPage] = useState<Page>("welcome");
   const [competitions, setCompetitions] = useState<Competition[] | null>(null);
-  const [competition, setCompetition] = useState<Competition | null>(null);
+  const [competition, setCompetition] = useState("");
   const [teams, setTeams] = useState<Recruitment[]>([]);
   const [people, setPeople] = useState<Profile[]>([]);
   const [intents, setIntents] = useState<Intent[]>([]);
@@ -183,6 +119,7 @@ export default function App() {
   const [me, setMe] = useState<Me | null>(null);
   const [persona, setPersona] = useState<Persona | "">("");
   const [skill, setSkill] = useState<Skill | "">("");
+  const [collegeFilter, setCollegeFilter] = useState("");
   const [failure, setFailure] = useState<unknown>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [notice, setNotice] = useState<
@@ -197,31 +134,29 @@ export default function App() {
   const [proofs, setProofs] = useState<EvidenceDraft[]>([]);
   const [preparingImages, setPreparingImages] = useState(false);
   const [imageProblem, setImageProblem] = useState<ImageProblem | null>(null);
-  const [team, setTeam] = useState(blankTeam);
   const epoch = useRef(0);
   const requestRevision = useRef(0);
   const viewRevision = useRef(0);
   const heading = useRef<HTMLHeadingElement>(null);
   const focusHeading = useRef(false);
 
-  const nameOf = (item: Competition) =>
-    locale === "en" ? item.nameEn : item.name;
-  const competitionName = (name: string) => {
-    const official = competitions?.find((item) => item.name === name);
-    return official ? nameOf(official) : name;
-  };
   const teamsFor = (item: Competition) =>
     teams.filter((entry) => entry.competition === item.name);
   const ownTeams = me
     ? teams.filter((entry) => entry.ownerId === me.userId)
     : [];
-  const contestTeams = competition
-    ? teamsFor(competition).filter(
-        (entry) => !skill || entry.skills.includes(skill),
-      )
-    : [];
+  const matchingTeams = competition
+    ? teams.filter((entry) => entry.competition === competition)
+    : teams;
+  const colleges = [
+    ...new Set(
+      people.flatMap((entry) => (entry.college ? [entry.college] : [])),
+    ),
+  ].sort((left, right) => left.localeCompare(right, "zh"));
   const matchingPeople = people.filter(
-    (entry) => !skill || entry.skills.includes(skill),
+    (entry) =>
+      (!skill || entry.skills.includes(skill)) &&
+      (!collegeFilter || entry.college === collegeFilter),
   );
   const teamName = (id: string) =>
     teams.find((entry) => entry.id === id)?.teamName ?? t.unknownTeam;
@@ -233,40 +168,38 @@ export default function App() {
     personName(
       entry.candidateId === me?.userId ? entry.ownerId : entry.candidateId,
     );
+  const sentIntents: Intent[] = [];
+  const receivedIntents: Intent[] = [];
+  for (const entry of intents) {
+    const sender = entry.kind === "apply" ? entry.candidateId : entry.ownerId;
+    (sender === me?.userId ? sentIntents : receivedIntents).push(entry);
+  }
+  const requestColumns = [
+    {
+      id: "sent-requests",
+      title: t.sentIntents,
+      empty: t.emptySentIntents,
+      items: sentIntents,
+    },
+    {
+      id: "received-requests",
+      title: t.receivedIntents,
+      empty: t.emptyReceivedIntents,
+      items: receivedIntents,
+    },
+  ];
 
   function describeError(error: unknown): string {
     if (!(error instanceof ApiError)) return t.failed;
     if (error.code === "unauthorized") return t.needPersona;
-    if (locale === "zh") return error.message;
-    switch (error.code) {
-      case "forbidden":
-      case "invalid_origin":
-        return t.forbidden;
-      case "not_found":
-        return t.missing;
-      case "validation_error":
-        return t.validation;
-      case "conflict":
-        return t.conflict;
-      case "database_unavailable":
-      case "connection_failed":
-        return t.offline;
-      default:
-        return t.failed;
-    }
+    return error.message;
   }
   const error = failure ? describeError(failure) : "";
   const fieldError = (key: string) => {
     const message = Object.entries(fieldErrors).find(
-      ([field]) => field.split(".")[0] === key,
+      ([field]) => field === key || field.startsWith(key + "."),
     )?.[1];
-    return (
-      message && (
-        <small className="field-error">
-          {locale === "en" ? t.validation : message}
-        </small>
-      )
-    );
+    return message && <small className="field-error">{message}</small>;
   };
 
   const load = useCallback(async (user: Me | null, generation: number) => {
@@ -288,12 +221,6 @@ export default function App() {
         setFailure(error);
     }
   }, []);
-
-  useEffect(() => {
-    document.title = t.brand;
-    document.documentElement.lang = locale === "zh" ? "zh-CN" : "en";
-    localStorage.setItem("teamup-locale", locale);
-  }, [locale, t.brand]);
 
   useEffect(() => {
     let active = true;
@@ -347,8 +274,8 @@ export default function App() {
     setPage(next);
     setPreparingImages(false);
     setImageProblem(null);
-    if (next === "catalog") setCompetition(null);
     setSkill("");
+    setCollegeFilter("");
     setPerson(null);
     setIntent(null);
     clearFeedback();
@@ -368,11 +295,12 @@ export default function App() {
       setIntents([]);
       setProfile(null);
       setProofs([]);
-      setTeam(blankTeam);
       sessionStorage.setItem("teamup-persona", next);
       setPersona(next);
       setMe(user);
-      navigate(competition ? "teams" : "catalog");
+      navigate(
+        page === "publish" ? "teams" : page === "profile" ? "people" : page,
+      );
     } catch (error) {
       if (generation === epoch.current) setFailure(error);
     } finally {
@@ -420,12 +348,37 @@ export default function App() {
         ...details
       } = await api.ownProfile();
       if (generation === epoch.current && view === viewRevision.current) {
-        setProfile(details);
+        setProfile({
+          ...details,
+          college: details.college ?? "",
+          qq: details.qq ?? "",
+        });
         setProofs((evidenceIds ?? []).map((id) => ({ id })));
       }
     } catch (error) {
-      if (generation === epoch.current && view === viewRevision.current)
-        setFailure(error);
+      if (generation === epoch.current && view === viewRevision.current) {
+        if (error instanceof ApiError && error.code === "not_found") {
+          setProfile({
+            nickname: me.nickname,
+            college: "",
+            qq: "",
+            contribution: "",
+            skills: [],
+            publicFields: {
+              college: true,
+              major: false,
+              grade: false,
+              experience: false,
+              availability: false,
+              preferredRole: false,
+              interests: false,
+            },
+          });
+          setProofs([]);
+        } else {
+          setFailure(error);
+        }
+      }
     }
   }
 
@@ -480,8 +433,7 @@ export default function App() {
   }
 
   function chooseCompetition(item: Competition) {
-    setCompetition(item);
-    setTeam(blankTeam);
+    setCompetition(item.name);
     navigate("teams");
   }
 
@@ -493,18 +445,14 @@ export default function App() {
     navigate("publish");
   }
 
-  const title =
-    page === "teams" && competition
-      ? nameOf(competition)
-      : {
-          catalog: t.catalog,
-          teams: t.teams,
-          people: t.people,
-          intents: t.intents,
-          profile: t.profile,
-          publish: t.create,
-        }[page];
-  const filterSkills = page === "teams" || page === "people";
+  const title = {
+    welcome: t.welcome,
+    teams: t.teams,
+    people: t.people,
+    intents: t.intents,
+    profile: t.profile,
+    publish: t.create,
+  }[page];
   const status = (entry: Intent) => (
     <span className={"status " + entry.status}>{t[entry.status]}</span>
   );
@@ -513,21 +461,34 @@ export default function App() {
     <>
       <header className="topbar">
         <div className="toolbar">
-          <button className="brand" onClick={() => navigate("catalog")}>
+          <button
+            className="brand"
+            aria-label={t.brand + " · " + t.brandEnglish}
+            onClick={() => navigate("welcome")}
+          >
             <span className="brand-mark" aria-hidden="true">
-              <i />
-              <i />
+              <BrandMark />
             </span>
-            {t.brand}
+            <span className="brand-wordmark">
+              {t.brand}
+              <span lang="en">{t.brandEnglish}</span>
+            </span>
           </button>
           <nav aria-label={t.navigation}>
             <button
+              aria-current={page === "welcome" ? "page" : undefined}
+              onClick={() => navigate("welcome")}
+            >
+              {t.welcome}
+            </button>
+            <button
               aria-current={
-                ["catalog", "teams", "publish"].includes(page)
-                  ? "page"
-                  : undefined
+                ["teams", "publish"].includes(page) ? "page" : undefined
               }
-              onClick={() => navigate("catalog")}
+              onClick={() => {
+                setCompetition("");
+                navigate("teams");
+              }}
             >
               {t.teams}
             </button>
@@ -547,13 +508,6 @@ export default function App() {
             </button>
           </nav>
           <div className="toolbar-actions">
-            <button
-              className="language"
-              aria-label={t.language}
-              onClick={() => setLocale(locale === "zh" ? "en" : "zh")}
-            >
-              {locale === "zh" ? "EN" : "中文"}
-            </button>
             <select
               aria-label={t.persona}
               className="persona"
@@ -582,44 +536,94 @@ export default function App() {
           </div>
         </div>
       </header>
-      <main className="workspace" inert={switching} aria-busy={switching}>
-        {(page === "teams" || page === "publish" || page === "profile") && (
+      <main
+        className={page === "welcome" ? "welcome-page" : "workspace"}
+        inert={switching}
+        aria-busy={switching}
+      >
+        {(page === "publish" || page === "profile") && (
           <button
             className="back"
-            onClick={() =>
-              navigate(
-                page === "teams"
-                  ? "catalog"
-                  : page === "publish"
-                    ? "teams"
-                    : "people",
-              )
-            }
+            onClick={() => navigate(page === "publish" ? "teams" : "people")}
           >
             <span className="chevron left" aria-hidden="true" />
-            {page === "teams"
-              ? t.allCompetitions
-              : page === "publish" && competition
-                ? nameOf(competition)
-                : t.people}
+            {page === "publish" ? t.teams : t.people}
           </button>
         )}
-        <div className="page-heading">
-          <h1 ref={heading} tabIndex={-1}>
-            {title}
-          </h1>
-          {page === "teams" && competition && (
-            <button className="primary" onClick={createTeam}>
-              <span aria-hidden="true">＋</span> {t.create}
-            </button>
-          )}
-          {page === "people" && (
-            <button className="secondary" onClick={() => void openProfile()}>
-              {t.editProfile}
-            </button>
-          )}
-        </div>
-        {filterSkills && (
+        {page === "welcome" ? (
+          <Welcome heading={heading}>
+            {competitions ? (
+              competitions.length > 0 ? (
+                <div className="competition-grid">
+                  {competitions.map((item) => (
+                    <button
+                      className="competition-card"
+                      key={item.id}
+                      onClick={() => chooseCompetition(item)}
+                    >
+                      <CompetitionArt id={item.id} />
+                      <span className="competition-caption">
+                        <span className="caption-content">
+                          <strong>{item.name}</strong>
+                          {loaded && (
+                            <span>{t.teamCount(teamsFor(item).length)}</span>
+                          )}
+                        </span>
+                        <span className="card-arrow" aria-hidden="true">
+                          <i className="chevron" />
+                        </span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="empty">{t.emptyCatalog}</p>
+              )
+            ) : error ? (
+              <Alert message={error} />
+            ) : (
+              <p className="empty" role="status">
+                {t.loading}
+              </p>
+            )}
+          </Welcome>
+        ) : (
+          <div className="page-heading">
+            <h1 ref={heading} tabIndex={-1}>
+              {title}
+            </h1>
+            {page === "teams" && (
+              <button className="primary" onClick={createTeam}>
+                <span aria-hidden="true">＋</span> {t.create}
+              </button>
+            )}
+            {page === "people" && (
+              <button className="secondary" onClick={() => void openProfile()}>
+                {t.editProfile}
+              </button>
+            )}
+          </div>
+        )}
+        {page === "teams" && (
+          <div className="view-tools">
+            <select
+              aria-label={t.filterCompetition}
+              value={competition}
+              onChange={(event) => {
+                setCompetition(event.target.value);
+                clearFeedback();
+              }}
+            >
+              <option value="">{t.allCompetitions}</option>
+              {competitions?.map((item) => (
+                <option key={item.id} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+        {page === "people" && (
           <div className="view-tools">
             <select
               aria-label={t.filter}
@@ -633,61 +637,37 @@ export default function App() {
                 </option>
               ))}
             </select>
+            <select
+              aria-label={t.filterCollege}
+              value={collegeFilter}
+              onChange={(event) => setCollegeFilter(event.target.value)}
+            >
+              <option value="">{t.allColleges}</option>
+              {colleges.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
           </div>
         )}
-        {!person && !intent && <Alert message={error} />}
-        {notice && (
+        {page !== "welcome" && !person && !intent && <Alert message={error} />}
+        {page !== "welcome" && notice && (
           <p className="notice" role="status">
             {t[notice]}
           </p>
         )}
 
-        {page === "catalog" &&
-          (competitions ? (
-            competitions.length > 0 ? (
-              <div className="competition-grid">
-                {competitions.map((item) => (
-                  <button
-                    className="competition-card"
-                    key={item.id}
-                    onClick={() => chooseCompetition(item)}
-                  >
-                    <CompetitionArt id={item.id} />
-                    <span className="competition-caption">
-                      <span className="caption-content">
-                        <strong>{nameOf(item)}</strong>
-                        {loaded && (
-                          <span>{t.teamCount(teamsFor(item).length)}</span>
-                        )}
-                      </span>
-                      <span className="card-arrow" aria-hidden="true">
-                        <i className="chevron" />
-                      </span>
-                    </span>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <p className="empty">{t.emptyCatalog}</p>
-            )
-          ) : (
-            !error && (
-              <p className="empty" role="status">
-                {t.loading}
-              </p>
-            )
-          ))}
-
-        {page === "teams" && competition && (
+        {page === "teams" && (
           <div className="results">
-            {contestTeams.map((entry) => (
+            {matchingTeams.map((entry) => (
               <article className="result-card" key={entry.id}>
                 <div className="result-heading">
                   <h2>{entry.teamName}</h2>
                   <span className="badge">{t.openCount(entry.openings)}</span>
                 </div>
-                <Tags skills={entry.skills} t={t} />
-                <p className="body-text">{entry.task}</p>
+                <p className="team-competition">{entry.competition}</p>
+                <RecruitmentDetails recruitment={entry} />
                 {entry.ownerId === me?.userId ? (
                   <span className="owned">{t.yourTeam}</span>
                 ) : (
@@ -723,9 +703,13 @@ export default function App() {
                 )}
               </article>
             ))}
-            {!contestTeams.length && !error && (
+            {!matchingTeams.length && !error && (
               <p className="empty">
-                {loaded ? (skill ? t.emptyMatches : t.emptyTeams) : t.loading}
+                {loaded
+                  ? competition
+                    ? t.emptyMatches
+                    : t.emptyTeams
+                  : t.loading}
               </p>
             )}
           </div>
@@ -759,21 +743,7 @@ export default function App() {
                     </button>
                   )}
                 </div>
-                <Tags skills={entry.skills} t={t} />
-                <p className="body-text">{entry.contribution}</p>
-                {(entry.major || entry.grade || entry.experience) && (
-                  <dl className="details">
-                    {optionalFields.map(
-                      (field) =>
-                        entry[field] && (
-                          <div key={field}>
-                            <dt>{t[field]}</dt>
-                            <dd>{entry[field]}</dd>
-                          </div>
-                        ),
-                    )}
-                  </dl>
-                )}
+                <ProfileDetails profile={entry} />
               </article>
             ))}
             {!matchingPeople.length && !error && (
@@ -784,139 +754,94 @@ export default function App() {
 
         {page === "intents" &&
           (me ? (
-            intents.length ? (
-              <div className="request-list">
-                {intents.map((entry) => (
-                  <button
-                    className="request-row"
-                    key={entry.id}
-                    onClick={() =>
-                      void openDetail(() => api.intent(entry.id), setIntent)
-                    }
-                  >
-                    <span className="request-text">
-                      <strong>{teamName(entry.recruitmentId)}</strong>
-                      <span>
-                        {[
-                          entry.kind === "apply" ? t.application : t.invitation,
-                          otherParty(entry),
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </span>
-                    </span>
-                    {entry.canRespond ? (
-                      <span className="status pending">{t.actionRequired}</span>
-                    ) : (
-                      status(entry)
+            <div className="request-columns">
+              {requestColumns.map(({ id, title, empty, items }) => (
+                <section
+                  key={id}
+                  aria-labelledby={id}
+                  className="request-column"
+                >
+                  <h2 id={id}>{title}</h2>
+                  <div className="request-list">
+                    {items.map((entry) => (
+                      <button
+                        className="request-row"
+                        key={entry.id}
+                        onClick={() =>
+                          void openDetail(() => api.intent(entry.id), setIntent)
+                        }
+                      >
+                        <span className="request-text">
+                          <strong>{teamName(entry.recruitmentId)}</strong>
+                          <span>
+                            {[
+                              entry.kind === "apply"
+                                ? t.application
+                                : t.invitation,
+                              otherParty(entry),
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </span>
+                        </span>
+                        {entry.canRespond ? (
+                          <span className="status pending">
+                            {t.actionRequired}
+                          </span>
+                        ) : (
+                          status(entry)
+                        )}
+                        <span className="chevron" aria-hidden="true" />
+                      </button>
+                    ))}
+                    {!items.length && (
+                      <p className="empty">{loaded ? empty : t.loading}</p>
                     )}
-                    <span className="chevron" aria-hidden="true" />
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <p className="empty">{t.emptyIntents}</p>
-            )
+                  </div>
+                </section>
+              ))}
+            </div>
           ) : (
             <p className="empty">{t.needPersona}</p>
           ))}
 
-        {page === "publish" && competition && (
-          <form
-            className="editor"
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (!team.skills.length) {
-                setFieldErrors({ skills: t.pickSkill });
-                return;
-              }
+        {page === "publish" && (
+          <RecruitmentEditor
+            competitions={competitions ?? []}
+            initialCompetition={competition}
+            busy={busy}
+            fieldError={fieldError}
+            onPublish={(draft) =>
               void run(
-                () =>
-                  api.createRecruitment({
-                    ...team,
-                    competition: competition.name,
-                  }),
+                () => api.createRecruitment(draft),
                 (created) => {
                   setTeams((items) => [
                     created,
                     ...items.filter((item) => item.id !== created.id),
                   ]);
+                  setCompetition(created.competition);
                   navigate("teams");
                   setNotice("published");
-                  setTeam(blankTeam);
                 },
-              );
-            }}
-          >
-            <div className="form-row">
-              <label>
-                {t.teamName}
-                <input
-                  required
-                  maxLength={80}
-                  value={team.teamName}
-                  onChange={(event) =>
-                    setTeam({ ...team, teamName: event.target.value })
-                  }
-                />
-                {fieldError("teamName")}
-              </label>
-              <label>
-                {t.openings}
-                <input
-                  type="number"
-                  min={1}
-                  max={2147483647}
-                  required
-                  value={team.openings || ""}
-                  onChange={(event) =>
-                    setTeam({ ...team, openings: Number(event.target.value) })
-                  }
-                />
-                {fieldError("openings")}
-              </label>
-            </div>
-            <Skills
-              t={t}
-              value={team.skills}
-              onChange={(value) => setTeam({ ...team, skills: value })}
-              error={
-                fieldErrors.skills ||
-                Object.keys(fieldErrors).some((key) =>
-                  key.startsWith("skills."),
-                )
-                  ? t.pickSkill
-                  : undefined
-              }
-            />
-            <label>
-              {t.task}
-              <textarea
-                required
-                maxLength={500}
-                value={team.task}
-                onChange={(event) =>
-                  setTeam({ ...team, task: event.target.value })
-                }
-              />
-              {fieldError("task")}
-            </label>
-            <div className="form-actions">
-              <button className="primary" disabled={busy}>
-                {t.create}
-              </button>
-            </div>
-          </form>
+              )
+            }
+          />
         )}
 
         {page === "profile" &&
           (profile ? (
-            <form
-              className="editor"
-              onSubmit={(event) => {
-                event.preventDefault();
+            <ProfileEditor
+              profile={profile}
+              onChange={setProfile}
+              fieldError={fieldError}
+              skillError={fieldErrors.skills}
+              busy={busy || preparingImages}
+              onSave={() => {
                 if (preparingImages) return;
-                if (!profile.skills.length) {
+                const customSkills = (profile.customSkills ?? [])
+                  .map((skill) => skill.trim())
+                  .filter(Boolean);
+                if (!profile.skills.length && !customSkills.length) {
                   setFieldErrors({ skills: t.pickSkill });
                   return;
                 }
@@ -924,6 +849,7 @@ export default function App() {
                   () =>
                     api.saveProfile({
                       ...profile,
+                      customSkills,
                       evidence: proofs.map((item) =>
                         item.dataUrl
                           ? { image: item.dataUrl.split(",", 2)[1] }
@@ -939,96 +865,6 @@ export default function App() {
                 );
               }}
             >
-              <label>
-                {t.nickname}
-                <input
-                  required
-                  maxLength={80}
-                  value={profile.nickname ?? ""}
-                  onChange={(event) =>
-                    setProfile({ ...profile, nickname: event.target.value })
-                  }
-                />
-                {fieldError("nickname")}
-              </label>
-              <Skills
-                t={t}
-                value={profile.skills}
-                onChange={(values) =>
-                  setProfile({ ...profile, skills: values })
-                }
-                error={
-                  fieldErrors.skills ||
-                  Object.keys(fieldErrors).some((key) =>
-                    key.startsWith("skills."),
-                  )
-                    ? t.pickSkill
-                    : undefined
-                }
-              />
-              <label>
-                {t.contribution}
-                <textarea
-                  required
-                  maxLength={500}
-                  value={profile.contribution}
-                  onChange={(event) =>
-                    setProfile({ ...profile, contribution: event.target.value })
-                  }
-                />
-                {fieldError("contribution")}
-              </label>
-              {optionalFields.map((field) => (
-                <div className="profile-setting" key={field}>
-                  <label>
-                    {t[field]}
-                    {field === "experience" ? (
-                      <textarea
-                        placeholder={t.optional}
-                        maxLength={500}
-                        value={profile[field] ?? ""}
-                        onChange={(event) =>
-                          setProfile({
-                            ...profile,
-                            [field]: event.target.value,
-                          })
-                        }
-                      />
-                    ) : (
-                      <input
-                        placeholder={t.optional}
-                        maxLength={80}
-                        value={profile[field] ?? ""}
-                        onChange={(event) =>
-                          setProfile({
-                            ...profile,
-                            [field]: event.target.value,
-                          })
-                        }
-                      />
-                    )}
-                    {fieldError(field)}
-                  </label>
-                  <label className="visibility">
-                    {t.public}
-                    <input
-                      type="checkbox"
-                      role="switch"
-                      aria-label={t[field] + " · " + t.public}
-                      checked={profile.publicFields[field] ?? false}
-                      onChange={(event) =>
-                        setProfile({
-                          ...profile,
-                          publicFields: {
-                            ...profile.publicFields,
-                            [field]: event.target.checked,
-                          },
-                        })
-                      }
-                    />
-                  </label>
-                </div>
-              ))}
               <fieldset className="proofs">
                 <legend>{t.evidence}</legend>
                 <div className="proof-grid">
@@ -1087,12 +923,7 @@ export default function App() {
                 )}
                 {fieldError("evidence")}
               </fieldset>
-              <div className="form-actions">
-                <button className="primary" disabled={busy || preparingImages}>
-                  {t.save}
-                </button>
-              </div>
-            </form>
+            </ProfileEditor>
           ) : (
             !error && (
               <p className="empty" role="status">
@@ -1109,21 +940,7 @@ export default function App() {
           close={closeDetail}
         >
           <Alert message={error} />
-          <Tags skills={person.skills} t={t} />
-          <p className="body-text">{person.contribution}</p>
-          {(person.major || person.grade || person.experience) && (
-            <dl className="details">
-              {optionalFields.map(
-                (field) =>
-                  person[field] && (
-                    <div key={field}>
-                      <dt>{t[field]}</dt>
-                      <dd>{person[field]}</dd>
-                    </div>
-                  ),
-              )}
-            </dl>
-          )}
+          <ProfileDetails profile={person} />
           {person.evidenceIds && person.evidenceIds.length > 0 && (
             <div className="proof-grid" role="group" aria-label={t.evidence}>
               {person.evidenceIds.map((id, index) => (
@@ -1146,7 +963,7 @@ export default function App() {
                 <option value="">{t.inviteTeam}</option>
                 {ownTeams.map((entry) => (
                   <option key={entry.id} value={entry.id}>
-                    {entry.teamName} · {competitionName(entry.competition)}
+                    {entry.teamName} · {entry.competition}
                   </option>
                 ))}
               </select>

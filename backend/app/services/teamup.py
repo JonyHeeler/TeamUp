@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from re import fullmatch
 from typing import Any
 from uuid import uuid4
 
@@ -9,6 +10,17 @@ from sqlalchemy.orm import Session
 from app.competitions import OFFICIAL_COMPETITION_NAMES
 from app.db.models import Contact, Intent, Profile, ProfileEvidence, Recruitment, Skill, User
 from app.services.evidence import InvalidEvidence, prepare_image
+from app.services.team_numbers import TeamNumberExhausted, next_team_number
+
+PROFILE_FIELDS = {
+    "college": "college",
+    "major": "major",
+    "grade": "grade",
+    "experience": "experience",
+    "availability": "availability",
+    "preferredRole": "preferred_role",
+    "interests": "interests",
+}
 
 
 class ServiceError(Exception):
@@ -23,6 +35,10 @@ def missing() -> ServiceError:
 
 def invalid(message: str) -> ServiceError:
     return ServiceError(422, "validation_error", message)
+
+
+def invalid_field(field: str, message: str) -> ServiceError:
+    return ServiceError(422, "validation_error", message, {field: message})
 
 
 def now() -> datetime:
@@ -46,8 +62,10 @@ def optional_text(value: Any, maximum: int) -> str | None:
 
 
 def get_skills(db: Session, codes: Any) -> list[Skill]:
-    if not isinstance(codes, list) or not codes or any(not isinstance(c, str) for c in codes):
-        raise invalid("请至少选择一项技能")
+    if not isinstance(codes, list) or any(not isinstance(c, str) for c in codes):
+        raise invalid("技能无效")
+    if not codes:
+        return []
     codes = list(dict.fromkeys(codes))
     skills = list(db.scalars(select(Skill).where(Skill.code.in_(codes))))
     if len(skills) != len(codes):
@@ -60,15 +78,26 @@ def profile_data(profile: Profile, private: bool = False) -> dict[str, Any]:
         "userId": profile.user_id,
         "nickname": profile.user.nickname,
         "skills": sorted(s.code for s in profile.skills),
-        "contribution": profile.contribution,
+        "contribution": profile.introduction,
+        "customSkills": profile.custom_skills or [],
     }
-    for field in ("major", "grade", "experience"):
-        if private or getattr(profile, "show_" + field):
-            result[field] = getattr(profile, field)
+    for field, attribute in PROFILE_FIELDS.items():
+        value = getattr(profile, attribute)
+        if private or (value and getattr(profile, "show_" + attribute)):
+            result[field] = value
+    custom_fields = profile.custom_fields or []
     if private:
         result["publicFields"] = {
-            field: getattr(profile, "show_" + field) for field in ("major", "grade", "experience")
+            field: getattr(profile, "show_" + attribute)
+            for field, attribute in PROFILE_FIELDS.items()
         }
+        result["customFields"] = custom_fields
+    else:
+        result["customFields"] = [
+            {"label": field["label"], "value": field["value"]}
+            for field in custom_fields
+            if field["isPublic"]
+        ]
     return result
 
 
@@ -115,6 +144,9 @@ def get_profile(db: Session, user_id: str, private: bool = False) -> dict[str, A
     if not profile:
         raise missing()
     result = profile_data(profile, private)
+    if private:
+        contact = db.get(Contact, user_id)
+        result["qq"] = contact.qq if contact else None
     if private or profile.show_experience:
         ids = evidence_ids(db, user_id)
         if private or ids:
@@ -164,30 +196,46 @@ def put_profile(db: Session, user_id: str, data: dict[str, Any]) -> dict[str, An
     user = db.scalar(select(User).where(User.id == user_id).with_for_update())
     if not user:
         raise missing()
-    contribution = text(data.get("contribution"), 500)
+    introduction = text(data.get("contribution"), 500)
+    college = text(data.get("college"), 80)
     skills = get_skills(db, data.get("skills"))
+    custom_skills = list(dict.fromkeys(data.get("customSkills", [])))
+    if not skills and not custom_skills:
+        raise invalid_field("skills", "请至少选择或填写一项技能")
+    custom_fields = data.get("customFields", [])
+    if len({field["label"].casefold() for field in custom_fields}) != len(custom_fields):
+        raise invalid_field("customFields", "自定义字段名称不能重复")
     optional = {
         field: optional_text(data.get(field), 500 if field == "experience" else 80)
-        for field in ("major", "grade", "experience")
+        for field in PROFILE_FIELDS
+        if field != "college"
     }
     public = data.get("publicFields", {})
-    if not isinstance(public, dict) or any(
-        not isinstance(public.get(field, False), bool) for field in optional
-    ):
-        raise invalid("公开字段无效")
     nickname = text(data.get("nickname", user.nickname), 80)
+    qq = text(data.get("qq"), 64)
+    contact = db.get(Contact, user_id)
+    if not fullmatch(r"[0-9]{5,12}", qq) and (contact is None or qq != contact.qq):
+        raise invalid_field("qq", "请输入 5 至 12 位数字的 QQ 号")
+    if contact is None:
+        db.add(Contact(user_id=user_id, qq=qq))
+    else:
+        contact.qq = qq
     profile = db.get(Profile, user_id)
     if not profile:
         profile = Profile(user_id=user_id)
         db.add(profile)
     user.nickname = nickname
-    profile.contribution = contribution
+    profile.introduction = introduction
     profile.skills = skills
-    for field, value in optional.items():
-        setattr(profile, field, value)
-        setattr(profile, "show_" + field, public.get(field, False))
+    profile.custom_skills = custom_skills
+    profile.custom_fields = custom_fields
+    values = {"college": college, **optional}
+    for field, attribute in PROFILE_FIELDS.items():
+        setattr(profile, attribute, values[field])
+        setattr(profile, "show_" + attribute, public.get(field, field == "college"))
     db.flush()
     result = profile_data(profile, True)
+    result["qq"] = qq
     result["evidenceIds"] = (
         evidence_ids(db, user_id) if entries is None else replace_evidence(db, user_id, entries)
     )
@@ -201,9 +249,11 @@ def recruitment_data(recruitment: Recruitment) -> dict[str, Any]:
         "ownerId": recruitment.owner_id,
         "competition": recruitment.competition,
         "teamName": recruitment.team_name,
+        "teamNumber": recruitment.team_number,
         "openings": recruitment.openings,
         "skills": sorted(s.code for s in recruitment.skills),
-        "task": recruitment.task,
+        "requirements": recruitment.requirements or [],
+        "background": recruitment.background,
         "createdAt": timestamp(recruitment.created_at),
     }
 
@@ -230,17 +280,36 @@ def create_recruitment(db: Session, user_id: str, data: dict[str, Any]) -> dict[
         message = "请选择官方比赛"
         raise ServiceError(422, "validation_error", message, {"competition": message})
     openings = data.get("openings")
-    if isinstance(openings, bool) or not isinstance(openings, int) or openings <= 0:
-        raise invalid("招募人数须为正整数")
+    requirements = data.get("requirements", [])
+    if len(requirements) != openings:
+        raise invalid_field("requirements", "为每个招募名额填写一条需求")
+    positions = []
+    codes = []
+    for index, requirement in enumerate(requirements):
+        skills = list(dict.fromkeys(requirement.get("skills", [])))
+        expectation = optional_text(requirement.get("expectation"), 500)
+        if not skills and expectation is None:
+            raise invalid_field(f"requirements.{index}", "请选择技能标签或填写期望")
+        positions.append({"skills": skills, "expectation": expectation})
+        codes.extend(skills)
+    all_skills = get_skills(db, codes)
+    background = text(data.get("background"), 1200)
+    created_at = now()
+    try:
+        number = next_team_number(db, created_at)
+    except TeamNumberExhausted as exc:
+        raise ServiceError(409, "team_number_exhausted", str(exc)) from exc
     recruitment = Recruitment(
         id=str(uuid4()),
         owner_id=user_id,
         competition=competition,
-        team_name=text(data.get("teamName"), 80),
+        team_name=optional_text(data.get("teamName"), 80) or number,
+        team_number=number,
         openings=openings,
-        task=text(data.get("task"), 500),
-        created_at=now(),
-        skills=get_skills(db, data.get("skills")),
+        background=background,
+        requirements=positions,
+        created_at=created_at,
+        skills=all_skills,
     )
     db.add(recruitment)
     db.commit()
@@ -299,7 +368,7 @@ def get_intent(db: Session, user_id: str, intent_id: str) -> dict[str, Any]:
 def create_intent(db: Session, user_id: str, data: dict[str, Any]) -> tuple[dict[str, Any], bool]:
     kind = data.get("kind")
     if kind not in ("apply", "invite"):
-        raise invalid("意向类型无效")
+        raise invalid("击掌申请类型无效")
     recruitment = db.get(Recruitment, data.get("recruitmentId"))
     if not recruitment or recruitment.competition not in OFFICIAL_COMPETITION_NAMES:
         raise missing()
@@ -359,5 +428,5 @@ def respond_intent(db: Session, user_id: str, intent_id: str, decision: str) -> 
     db.expire_all()
     intent = db.get(Intent, intent_id)
     if result.rowcount == 0 and intent.status != decision:
-        raise ServiceError(409, "conflict", "意向已有不同回应")
+        raise ServiceError(409, "conflict", "击掌申请已有不同回应")
     return intent_data(intent, user_id)

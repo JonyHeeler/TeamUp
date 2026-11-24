@@ -1,6 +1,8 @@
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     CheckConstraint,
     DateTime,
@@ -50,13 +52,23 @@ class Profile(Base):
     __tablename__ = "profiles"
     __table_args__ = table_options
     user_id: Mapped[str] = mapped_column(uuid_type, ForeignKey("users.id"), primary_key=True)
-    contribution: Mapped[str] = mapped_column(String(500))
+    introduction: Mapped[str] = mapped_column("contribution", String(500))
+    college: Mapped[str | None] = mapped_column(String(80))
     major: Mapped[str | None] = mapped_column(String(80))
     grade: Mapped[str | None] = mapped_column(String(80))
     experience: Mapped[str | None] = mapped_column(String(500))
+    availability: Mapped[str | None] = mapped_column(String(80))
+    preferred_role: Mapped[str | None] = mapped_column(String(80))
+    interests: Mapped[str | None] = mapped_column(String(80))
+    custom_skills: Mapped[list[str] | None] = mapped_column(JSON)
+    custom_fields: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON)
+    show_college: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1")
     show_major: Mapped[bool] = mapped_column(Boolean, default=False)
     show_grade: Mapped[bool] = mapped_column(Boolean, default=False)
     show_experience: Mapped[bool] = mapped_column(Boolean, default=False)
+    show_availability: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
+    show_preferred_role: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
+    show_interests: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
     user: Mapped[User] = relationship()
     skills: Mapped[list[Skill]] = relationship(secondary="profile_skills")
 
@@ -89,6 +101,11 @@ class Recruitment(Base):
     __tablename__ = "recruitments"
     __table_args__ = (
         CheckConstraint("openings > 0", name="ck_recruitment_openings"),
+        CheckConstraint(
+            "requirements IS NULL OR (JSON_TYPE(requirements) = 'ARRAY' AND JSON_LENGTH(requirements) = openings)",
+            name="ck_recruitment_requirement_count",
+        ),
+        UniqueConstraint("team_number", name="uq_recruitment_team_number"),
         Index("ix_recruitment_owner_created", "owner_id", "created_at"),
         table_options,
     )
@@ -96,10 +113,21 @@ class Recruitment(Base):
     owner_id: Mapped[str] = mapped_column(uuid_type, ForeignKey("users.id"))
     competition: Mapped[str] = mapped_column(String(80))
     team_name: Mapped[str] = mapped_column(String(80))
+    team_number: Mapped[str] = mapped_column(CHAR(11, charset="ascii", collation="ascii_bin"))
     openings: Mapped[int] = mapped_column(Integer)
-    task: Mapped[str] = mapped_column(String(500))
+    background: Mapped[str] = mapped_column("task", String(1200))
+    requirements: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON(none_as_null=True))
     created_at: Mapped[datetime] = mapped_column(utc_type)
     skills: Mapped[list[Skill]] = relationship(secondary="recruitment_skills")
+
+
+class TeamNumberCounter(Base):
+    __tablename__ = "team_number_counters"
+    __table_args__ = table_options
+    day: Mapped[str] = mapped_column(
+        CHAR(8, charset="ascii", collation="ascii_bin"), primary_key=True
+    )
+    last_index: Mapped[int] = mapped_column(Integer)
 
 
 class RecruitmentSkill(Base):

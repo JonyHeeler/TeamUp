@@ -262,6 +262,18 @@ export interface components {
             /** Items */
             items: components["schemas"]["Competition"][];
         };
+        /** CustomField */
+        CustomField: {
+            /** Label */
+            label: string;
+            /** Value */
+            value: string;
+            /**
+             * Ispublic
+             * @default false
+             */
+            isPublic: boolean;
+        };
         /** Decision */
         Decision: {
             /**
@@ -372,18 +384,32 @@ export interface components {
             /** Nickname */
             nickname: string;
             /** Skills */
-            skills: ("data-analysis" | "development" | "design" | "presentation")[];
+            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management")[];
             /** Contribution */
             contribution: string;
+            /** College */
+            college?: string | null;
             /** Major */
             major?: string | null;
             /** Grade */
             grade?: string | null;
             /** Experience */
             experience?: string | null;
+            /** Availability */
+            availability?: string | null;
+            /** Preferredrole */
+            preferredRole?: string | null;
+            /** Interests */
+            interests?: string | null;
+            /** Customskills */
+            customSkills?: string[];
+            /** Customfields */
+            customFields?: components["schemas"]["CustomField"][];
             publicFields?: components["schemas"]["PublicFields"];
             /** Userid */
             userId: string;
+            /** Qq */
+            qq: string | null;
             /** Evidenceids */
             evidenceIds: string[];
         };
@@ -392,16 +418,30 @@ export interface components {
             /** Nickname */
             nickname?: string | null;
             /** Skills */
-            skills: ("data-analysis" | "development" | "design" | "presentation")[];
+            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management")[];
             /** Contribution */
             contribution: string;
+            /** College */
+            college: string;
             /** Major */
             major?: string | null;
             /** Grade */
             grade?: string | null;
             /** Experience */
             experience?: string | null;
+            /** Availability */
+            availability?: string | null;
+            /** Preferredrole */
+            preferredRole?: string | null;
+            /** Interests */
+            interests?: string | null;
+            /** Customskills */
+            customSkills?: string[];
+            /** Customfields */
+            customFields?: components["schemas"]["CustomField"][];
             publicFields?: components["schemas"]["PublicFields"];
+            /** Qq */
+            qq: string;
             /** Evidence */
             evidence?: (components["schemas"]["RetainEvidence"] | components["schemas"]["UploadEvidence"])[] | null;
         };
@@ -410,8 +450,20 @@ export interface components {
             /** Items */
             items: components["schemas"]["PublicProfile"][];
         };
+        /** PublicCustomField */
+        PublicCustomField: {
+            /** Label */
+            label: string;
+            /** Value */
+            value: string;
+        };
         /** PublicFields */
         PublicFields: {
+            /**
+             * College
+             * @default true
+             */
+            college: boolean;
             /**
              * Major
              * @default false
@@ -427,6 +479,21 @@ export interface components {
              * @default false
              */
             experience: boolean;
+            /**
+             * Availability
+             * @default false
+             */
+            availability: boolean;
+            /**
+             * Preferredrole
+             * @default false
+             */
+            preferredRole: boolean;
+            /**
+             * Interests
+             * @default false
+             */
+            interests: boolean;
         };
         /** PublicProfile */
         PublicProfile: {
@@ -435,15 +502,27 @@ export interface components {
             /** Nickname */
             nickname: string;
             /** Skills */
-            skills: ("data-analysis" | "development" | "design" | "presentation")[];
+            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management")[];
             /** Contribution */
             contribution: string;
+            /** College */
+            college?: string | null;
             /** Major */
             major?: string | null;
             /** Grade */
             grade?: string | null;
             /** Experience */
             experience?: string | null;
+            /** Availability */
+            availability?: string | null;
+            /** Preferredrole */
+            preferredRole?: string | null;
+            /** Interests */
+            interests?: string | null;
+            /** Customskills */
+            customSkills?: string[];
+            /** Customfields */
+            customFields?: components["schemas"]["PublicCustomField"][];
             /** Evidenceids */
             evidenceIds?: string[] | null;
         };
@@ -457,16 +536,6 @@ export interface components {
         };
         /** Recruitment */
         Recruitment: {
-            /** Competition */
-            competition: string;
-            /** Teamname */
-            teamName: string;
-            /** Openings */
-            openings: number;
-            /** Skills */
-            skills: ("data-analysis" | "development" | "design" | "presentation")[];
-            /** Task */
-            task: string;
             /** Id */
             id: string;
             /** Ownerid */
@@ -476,24 +545,45 @@ export interface components {
              * Format: date-time
              */
             createdAt: string;
+            /** Competition */
+            competition: string;
+            /** Teamname */
+            teamName: string;
+            /** Teamnumber */
+            teamNumber: string;
+            /** Openings */
+            openings: number;
+            /** Skills */
+            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management")[];
+            /** Requirements */
+            requirements: components["schemas"]["RecruitmentRequirement"][];
+            /** Background */
+            background: string;
         };
         /** RecruitmentInput */
         RecruitmentInput: {
             /** Competition */
             competition: string;
             /** Teamname */
-            teamName: string;
+            teamName?: string | null;
             /** Openings */
             openings: number;
-            /** Skills */
-            skills: ("data-analysis" | "development" | "design" | "presentation")[];
-            /** Task */
-            task: string;
+            /** Requirements */
+            requirements: components["schemas"]["RecruitmentRequirement"][];
+            /** Background */
+            background: string;
         };
         /** RecruitmentList */
         RecruitmentList: {
             /** Items */
             items: components["schemas"]["Recruitment"][];
+        };
+        /** RecruitmentRequirement */
+        RecruitmentRequirement: {
+            /** Skills */
+            skills?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management")[];
+            /** Expectation */
+            expectation?: string | null;
         };
         /** RetainEvidence */
         RetainEvidence: {
@@ -674,7 +764,7 @@ export interface operations {
     profiles_api_v1_profiles_get: {
         parameters: {
             query?: {
-                skill?: ("data-analysis" | "development" | "design" | "presentation") | null;
+                skill?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management") | null;
             };
             header?: never;
             path?: never;
@@ -949,7 +1039,7 @@ export interface operations {
     recruitments_api_v1_recruitments_get: {
         parameters: {
             query?: {
-                skill?: ("data-analysis" | "development" | "design" | "presentation") | null;
+                skill?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management") | null;
             };
             header?: never;
             path?: never;
@@ -1019,6 +1109,15 @@ export interface operations {
             };
             /** @description Forbidden */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

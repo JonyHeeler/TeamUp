@@ -12,7 +12,7 @@ from app.api.routes import router
 from app.config import get_settings
 from app.services import teamup
 
-app = FastAPI(title="TeamUp API", version="1.0.0")
+app = FastAPI(title="TeamUP API", version="1.0.0")
 app.include_router(router)
 logger = logging.getLogger("uvicorn.teamup")
 logging.getLogger("uvicorn.access").disabled = True

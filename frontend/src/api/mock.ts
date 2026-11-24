@@ -23,16 +23,30 @@ const current = () => {
   return data.personas[persona];
 };
 const publicProfile = (p: OwnProfile, withEvidence = false): Profile => {
-  const { publicFields, major, grade, experience, evidenceIds, ...rest } = p;
-  return {
-    ...rest,
-    ...(publicFields.major && major ? { major } : {}),
-    ...(publicFields.grade && grade ? { grade } : {}),
-    ...(publicFields.experience && experience ? { experience } : {}),
-    ...(withEvidence && publicFields.experience && evidenceIds.length
-      ? { evidenceIds }
-      : {}),
+  const result: Profile = {
+    userId: p.userId,
+    nickname: p.nickname,
+    skills: p.skills,
+    contribution: p.contribution,
+    customSkills: p.customSkills,
+    customFields: p.customFields
+      ?.filter((item) => item.isPublic)
+      .map(({ label, value }) => ({ label, value })),
   };
+  for (const field of [
+    "college",
+    "major",
+    "grade",
+    "experience",
+    "availability",
+    "preferredRole",
+    "interests",
+  ] as const) {
+    if (p.publicFields[field] && p[field]) result[field] = p[field];
+  }
+  if (withEvidence && p.publicFields.experience && p.evidenceIds.length)
+    result.evidenceIds = p.evidenceIds;
+  return result;
 };
 const view = (i: Intent): Intent => ({
   ...i,
@@ -44,7 +58,7 @@ const lookup = (id: string) => {
   const i = intents.find(
     (x) => x.id === id && [x.ownerId, x.candidateId].includes(current().userId),
   );
-  if (!i) throw new ApiError("未找到意向。");
+  if (!i) throw new ApiError("未找到击掌申请。");
   return i;
 };
 export const mockApi: Api = {
@@ -83,9 +97,27 @@ export const mockApi: Api = {
     return image;
   },
   saveProfile: async (body) => {
-    current();
+    const identity = current();
     const p = data.ownProfiles[persona!];
     const { evidence, ...details } = body;
+    if (!body.college.trim())
+      throw new ApiError(
+        "请填写学院",
+        { college: "请填写学院" },
+        "validation_error",
+      );
+    if (!/^[0-9]{5,12}$/.test(body.qq.trim()) && body.qq !== p.qq)
+      throw new ApiError(
+        "请输入 5 至 12 位数字的 QQ 号",
+        { qq: "请输入 5 至 12 位数字的 QQ 号" },
+        "validation_error",
+      );
+    if (!body.skills.length && !body.customSkills?.length)
+      throw new ApiError(
+        "请至少选择或填写一项技能",
+        { skills: "请至少选择或填写一项技能" },
+        "validation_error",
+      );
     if (evidence) {
       const ids = evidence.map((item) => {
         if ("id" in item) return item.id;
@@ -106,6 +138,7 @@ export const mockApi: Api = {
       p.evidenceIds = ids;
     }
     Object.assign(p, details);
+    identity.nickname = p.nickname;
     return p;
   },
   recruitments: async (skill = "") => ({
@@ -124,12 +157,44 @@ export const mockApi: Api = {
         { competition: "请选择官方比赛" },
         "validation_error",
       );
+    const owner = current();
+    if (
+      body.requirements.length !== body.openings ||
+      body.requirements.some(
+        (item) => !item.skills?.length && !item.expectation?.trim(),
+      )
+    )
+      throw new ApiError(
+        "请填写每个招募名额的需求",
+        { requirements: "请填写每个招募名额的需求" },
+        "validation_error",
+      );
+    const timestamp = new Date();
+    const day = new Date(timestamp.getTime() + 8 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 10)
+      .replaceAll("-", "");
+    const lastIndex = Math.max(
+      0,
+      ...data.recruitments.items
+        .filter((item) => item.teamNumber.startsWith(day))
+        .map((item) => Number.parseInt(item.teamNumber.slice(8), 36)),
+    );
+    if (lastIndex >= 36 ** 3 - 1)
+      throw new ApiError("今天的队伍编号已用完，请明天再创建");
+    const teamNumber =
+      day + (lastIndex + 1).toString(36).toUpperCase().padStart(3, "0");
     const t: Recruitment = {
       ...body,
       competition: body.competition.trim(),
+      teamName: body.teamName?.trim() || teamNumber,
+      teamNumber,
+      skills: [
+        ...new Set(body.requirements.flatMap((item) => item.skills ?? [])),
+      ],
       id: crypto.randomUUID(),
-      ownerId: current().userId,
-      createdAt: new Date().toISOString(),
+      ownerId: owner.userId,
+      createdAt: timestamp.toISOString(),
     };
     data.recruitments.items.unshift(t);
     return t;
@@ -141,13 +206,13 @@ export const mockApi: Api = {
   }),
   intent: async (id) => {
     const i = lookup(id);
+    const other = i.ownerId === current().userId ? i.candidateId : i.ownerId;
+    const qq = Object.values(data.ownProfiles).find(
+      (profile) => profile.userId === other,
+    )?.qq;
     return {
       ...view(i),
-      ...(i.status === "accepted"
-        ? {
-            counterpartQq: `DEMO-QQ-${i.ownerId === current().userId ? "CANDIDATE" : "CAPTAIN"}`,
-          }
-        : {}),
+      ...(i.status === "accepted" && qq ? { counterpartQq: qq } : {}),
     };
   },
   createIntent: async (body) => {
@@ -160,7 +225,7 @@ export const mockApi: Api = {
       candidateId === t.ownerId ||
       (body.kind === "invite" && t.ownerId !== user.userId)
     )
-      throw new ApiError("无法创建该意向。");
+      throw new ApiError("无法发出这条击掌申请。");
     const existing = intents.find(
       (i) => i.recruitmentId === t.id && i.candidateId === candidateId,
     );
@@ -180,7 +245,7 @@ export const mockApi: Api = {
   },
   respond: async (id, decision) => {
     const i = lookup(id);
-    if (!view(i).canRespond) throw new ApiError("该意向无法回应。");
+    if (!view(i).canRespond) throw new ApiError("该击掌申请无法回应。");
     i.status = decision;
     i.respondedAt = new Date().toISOString();
     return view(i);

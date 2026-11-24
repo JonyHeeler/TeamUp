@@ -15,18 +15,21 @@
       {
         "userId": "00000000-0000-4000-8000-000000000001",
         "nickname": "林舟",
+        "college": "工商管理学院",
         "skills": ["presentation"],
         "contribution": "组织团队并推进项目"
       },
       {
         "userId": "00000000-0000-4000-8000-000000000002",
         "nickname": "许言",
+        "college": "统计学院",
         "skills": ["data-analysis"],
         "contribution": "清洗数据并完成统计分析"
       },
       {
         "userId": "00000000-0000-4000-8000-000000000003",
         "nickname": "周禾",
+        "college": "计算机与人工智能学院",
         "skills": ["development"],
         "contribution": "开发原型并制作展示页面"
       }
@@ -39,9 +42,11 @@
         "ownerId": "00000000-0000-4000-8000-000000000001",
         "competition": "数学建模校赛",
         "teamName": "数学建模队",
+        "teamNumber": "20261124001",
         "openings": 1,
         "skills": ["data-analysis"],
-        "task": "清洗问卷数据、汇总关键指标并参与建模",
+        "background": "清洗问卷数据、汇总关键指标并参与建模",
+        "requirements": [{ "skills": ["data-analysis"], "expectation": null }],
         "createdAt": "2026-11-24T00:00:00Z"
       },
       {
@@ -49,9 +54,14 @@
         "ownerId": "00000000-0000-4000-8000-000000000001",
         "competition": "校园创新创业大赛",
         "teamName": "校园创新组",
+        "teamNumber": "20261124002",
         "openings": 2,
         "skills": ["design", "development"],
-        "task": "实现原型和设计展示页",
+        "background": "实现原型和设计展示页",
+        "requirements": [
+          { "skills": ["development"], "expectation": "实现原型" },
+          { "skills": ["design"], "expectation": "设计展示页" }
+        ],
         "createdAt": "2026-11-24T00:00:00Z"
       }
     ]
@@ -60,35 +70,41 @@
     "captain": {
       "userId": "00000000-0000-4000-8000-000000000001",
       "nickname": "林舟",
+      "college": "工商管理学院",
+      "qq": "DEMO-QQ-001",
       "skills": ["presentation"],
       "contribution": "组织团队并推进项目",
       "major": null,
       "grade": null,
       "experience": null,
       "evidenceIds": [],
-      "publicFields": { "major": false, "grade": false, "experience": false }
+      "publicFields": { "college": true, "major": false, "grade": false, "experience": false, "availability": false, "preferredRole": false, "interests": false }
     },
     "candidate-a": {
       "userId": "00000000-0000-4000-8000-000000000002",
       "nickname": "许言",
+      "college": "统计学院",
+      "qq": "DEMO-QQ-002",
       "skills": ["data-analysis"],
       "contribution": "清洗数据并完成统计分析",
       "major": null,
       "grade": null,
       "experience": null,
       "evidenceIds": [],
-      "publicFields": { "major": false, "grade": false, "experience": false }
+      "publicFields": { "college": true, "major": false, "grade": false, "experience": false, "availability": false, "preferredRole": false, "interests": false }
     },
     "candidate-b": {
       "userId": "00000000-0000-4000-8000-000000000003",
       "nickname": "周禾",
+      "college": "计算机与人工智能学院",
+      "qq": "DEMO-QQ-003",
       "skills": ["development"],
       "contribution": "开发原型并制作展示页面",
       "major": null,
       "grade": null,
       "experience": null,
       "evidenceIds": [],
-      "publicFields": { "major": false, "grade": false, "experience": false }
+      "publicFields": { "college": true, "major": false, "grade": false, "experience": false, "availability": false, "preferredRole": false, "interests": false }
     }
   }
 }

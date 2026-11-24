@@ -7,13 +7,14 @@ export type OwnProfile = Schemas["Profile"] & {
   publicFields: Schemas["PublicFields"];
 };
 export type Recruitment = Schemas["Recruitment"];
+export type RecruitmentRequirement = Schemas["RecruitmentRequirement"];
 export type Competition = Schemas["Competition"];
 export type Intent = Schemas["IntentDetail"];
 export type RecruitmentInput = Schemas["RecruitmentInput"];
 export type ProfileInput = Schemas["ProfileInput"] & {
   publicFields: Schemas["PublicFields"];
 };
-export type Skill = RecruitmentInput["skills"][number];
+export type Skill = Profile["skills"][number];
 export class ApiError extends Error {
   constructor(
     message: string,

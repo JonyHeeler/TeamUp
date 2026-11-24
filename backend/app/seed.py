@@ -4,25 +4,43 @@ from app.competitions import OFFICIAL_COMPETITIONS
 from app.db.models import Contact, Profile, Recruitment, Skill, User
 from app.db.session import SessionLocal
 from app.demo import PERSONAS
+from app.services.team_numbers import next_team_number
+from app.skills import SKILL_LABELS
 
 
 def seed():
     with SessionLocal() as db:
-        for code, label in [
-            ("data-analysis", "数据分析"),
-            ("development", "开发"),
-            ("design", "设计"),
-            ("presentation", "展示"),
-        ]:
+        for code, label in SKILL_LABELS.items():
             if not db.get(Skill, code):
                 db.add(Skill(code=code, label=label))
         db.flush()
         users = [
-            ("captain", "林舟", "DEMO-QQ-001", "组织团队并推进项目", "presentation"),
-            ("candidate-a", "许言", "DEMO-QQ-002", "清洗数据并完成统计分析", "data-analysis"),
-            ("candidate-b", "周禾", "DEMO-QQ-003", "开发原型并制作展示页面", "development"),
+            (
+                "captain",
+                "林舟",
+                "DEMO-QQ-001",
+                "组织团队并推进项目",
+                "presentation",
+                "工商管理学院",
+            ),
+            (
+                "candidate-a",
+                "许言",
+                "DEMO-QQ-002",
+                "清洗数据并完成统计分析",
+                "data-analysis",
+                "统计学院",
+            ),
+            (
+                "candidate-b",
+                "周禾",
+                "DEMO-QQ-003",
+                "开发原型并制作展示页面",
+                "development",
+                "计算机与人工智能学院",
+            ),
         ]
-        for persona, nickname, qq, contribution, skill in users:
+        for persona, nickname, qq, introduction, skill, college in users:
             user_id = PERSONAS[persona]
             if not db.get(User, user_id):
                 db.add(User(id=user_id, nickname=nickname))
@@ -33,7 +51,8 @@ def seed():
                 db.add(
                     Profile(
                         user_id=user_id,
-                        contribution=contribution,
+                        introduction=introduction,
+                        college=college,
                         show_major=False,
                         show_grade=False,
                         show_experience=False,
@@ -59,17 +78,22 @@ def seed():
                 ["development", "design"],
             ),
         ]
-        for recruitment_id, competition, team_name, openings, task, skills in rows:
+        for recruitment_id, competition, team_name, openings, background, skills in rows:
             if not db.get(Recruitment, recruitment_id):
+                created_at = datetime(2026, 11, 24)
                 db.add(
                     Recruitment(
                         id=recruitment_id,
                         owner_id=PERSONAS["captain"],
                         competition=competition,
                         team_name=team_name,
+                        team_number=next_team_number(db, created_at),
                         openings=openings,
-                        task=task,
-                        created_at=datetime(2026, 11, 24),
+                        background=background,
+                        requirements=[
+                            {"skills": skills, "expectation": None} for _ in range(openings)
+                        ],
+                        created_at=created_at,
                         skills=[db.get(Skill, code) for code in skills],
                     )
                 )
