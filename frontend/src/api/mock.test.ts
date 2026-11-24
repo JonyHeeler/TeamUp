@@ -1,5 +1,26 @@
 import { describe, expect, it } from "vitest";
+import fixture from "../../../contracts/examples/demo.json";
 import { mockApi } from "./mock";
+
+describe("demo profiles", () => {
+  it("exposes only the public fields from each complete mock profile", async () => {
+    expect(await mockApi.profiles()).toEqual(fixture.profiles);
+
+    for (const persona of ["captain", "candidate-a", "candidate-b"] as const) {
+      const user = await mockApi.session(persona);
+      const own = await mockApi.ownProfile();
+      expect(own).toEqual(fixture.ownProfiles[persona]);
+      const publicProfile = await mockApi.profile(user.userId);
+      expect(publicProfile).toEqual({
+        ...fixture.profiles.items.find((item) => item.userId === user.userId),
+        ...(own.publicFields.experience
+          ? { evidenceIds: own.evidenceIds }
+          : {}),
+      });
+      expect(publicProfile).not.toHaveProperty("qq");
+    }
+  });
+});
 
 describe("demo intent flow", () => {
   it("keeps contacts private until accepted and preserves a declined duplicate", async () => {

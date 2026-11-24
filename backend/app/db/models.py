@@ -14,7 +14,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.mysql import CHAR, DATETIME, MEDIUMBLOB
+from sqlalchemy.dialects.mysql import CHAR, DATETIME, MEDIUMBLOB, VARCHAR
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -32,6 +32,60 @@ class User(Base):
     __table_args__ = table_options
     id: Mapped[str] = mapped_column(uuid_type, primary_key=True)
     nickname: Mapped[str] = mapped_column(String(80))
+
+
+ascii_id_type = String(64).with_variant(CHAR(64, charset="ascii", collation="ascii_bin"), "mysql")
+student_id_type = String(64).with_variant(
+    VARCHAR(64, charset="ascii", collation="ascii_bin"), "mysql"
+)
+
+
+class StudentAccount(Base):
+    __tablename__ = "student_accounts"
+    __table_args__ = table_options
+    user_id: Mapped[str] = mapped_column(uuid_type, ForeignKey("users.id"), primary_key=True)
+    student_id: Mapped[str] = mapped_column(student_id_type, unique=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+    status: Mapped[str] = mapped_column(Enum("active", "suspended", name="account_status"))
+    verified_at: Mapped[datetime] = mapped_column(utc_type)
+
+
+class AccountChallenge(Base):
+    __tablename__ = "account_challenges"
+    __table_args__ = (Index("ix_account_challenge_student_purpose", "student_id", "purpose"), table_options)
+    token_hash: Mapped[str] = mapped_column(ascii_id_type, primary_key=True)
+    student_id: Mapped[str] = mapped_column(student_id_type)
+    purpose: Mapped[str] = mapped_column(Enum("activate", "reset", name="account_challenge_purpose"))
+    expires_at: Mapped[datetime] = mapped_column(utc_type)
+    consumed_at: Mapped[datetime | None] = mapped_column(utc_type)
+
+
+class AccountSession(Base):
+    __tablename__ = "account_sessions"
+    __table_args__ = (Index("ix_account_session_user", "user_id"), table_options)
+    token_hash: Mapped[str] = mapped_column(ascii_id_type, primary_key=True)
+    user_id: Mapped[str] = mapped_column(uuid_type, ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(utc_type)
+    idle_expires_at: Mapped[datetime] = mapped_column(utc_type)
+    expires_at: Mapped[datetime] = mapped_column(utc_type)
+    revoked_at: Mapped[datetime | None] = mapped_column(utc_type)
+
+
+class AccountAuditEvent(Base):
+    __tablename__ = "account_audit_events"
+    __table_args__ = table_options
+    id: Mapped[str] = mapped_column(uuid_type, primary_key=True)
+    user_id: Mapped[str | None] = mapped_column(uuid_type, ForeignKey("users.id"))
+    event: Mapped[str] = mapped_column(String(80))
+    created_at: Mapped[datetime] = mapped_column(utc_type)
+
+
+class AccountRateLimit(Base):
+    __tablename__ = "account_rate_limits"
+    __table_args__ = table_options
+    key_hash: Mapped[str] = mapped_column(ascii_id_type, primary_key=True)
+    expires_at: Mapped[datetime] = mapped_column(utc_type)
+    attempts: Mapped[int] = mapped_column(Integer)
 
 
 class Contact(Base):
@@ -56,19 +110,15 @@ class Profile(Base):
     college: Mapped[str | None] = mapped_column(String(80))
     major: Mapped[str | None] = mapped_column(String(80))
     grade: Mapped[str | None] = mapped_column(String(80))
+    projects: Mapped[list[dict[str, str]] | None] = mapped_column(JSON)
     experience: Mapped[str | None] = mapped_column(String(500))
-    availability: Mapped[str | None] = mapped_column(String(80))
-    preferred_role: Mapped[str | None] = mapped_column(String(80))
-    interests: Mapped[str | None] = mapped_column(String(80))
+    competition_intent: Mapped[str | None] = mapped_column(String(500))
     custom_skills: Mapped[list[str] | None] = mapped_column(JSON)
-    custom_fields: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON)
     show_college: Mapped[bool] = mapped_column(Boolean, default=True, server_default="1")
     show_major: Mapped[bool] = mapped_column(Boolean, default=False)
     show_grade: Mapped[bool] = mapped_column(Boolean, default=False)
     show_experience: Mapped[bool] = mapped_column(Boolean, default=False)
-    show_availability: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
-    show_preferred_role: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
-    show_interests: Mapped[bool] = mapped_column(Boolean, default=False, server_default="0")
+    show_competition_intent: Mapped[bool] = mapped_column(Boolean, default=False)
     user: Mapped[User] = relationship()
     skills: Mapped[list[Skill]] = relationship(secondary="profile_skills")
 
@@ -113,6 +163,7 @@ class Recruitment(Base):
     owner_id: Mapped[str] = mapped_column(uuid_type, ForeignKey("users.id"))
     competition: Mapped[str] = mapped_column(String(80))
     team_name: Mapped[str] = mapped_column(String(80))
+    is_published: Mapped[bool] = mapped_column(Boolean, server_default="1")
     team_number: Mapped[str] = mapped_column(CHAR(11, charset="ascii", collation="ascii_bin"))
     openings: Mapped[int] = mapped_column(Integer)
     background: Mapped[str] = mapped_column("task", String(1200))
@@ -162,4 +213,5 @@ class Intent(Base):
     )
     created_at: Mapped[datetime] = mapped_column(utc_type)
     responded_at: Mapped[datetime | None] = mapped_column(utc_type)
+    message: Mapped[str | None] = mapped_column(String(300))
     recruitment: Mapped[Recruitment] = relationship()

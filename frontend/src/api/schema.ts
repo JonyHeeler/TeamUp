@@ -4,6 +4,108 @@
  */
 
 export interface paths {
+    "/api/v1/auth/capabilities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Capabilities */
+        get: operations["capabilities_api_v1_auth_capabilities_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register */
+        post: operations["register_api_v1_auth_register_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Login */
+        post: operations["login_api_v1_auth_login_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password/reset/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset Password */
+        post: operations["reset_password_api_v1_auth_password_reset_confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout */
+        post: operations["logout_api_v1_auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/password/change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change Password */
+        post: operations["change_password_api_v1_auth_password_change_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/demo/session": {
         parameters: {
             query?: never;
@@ -168,12 +270,47 @@ export interface paths {
         };
         /** Recruitment */
         get: operations["recruitment_api_v1_recruitments__recruitment_id__get"];
+        /** Update Recruitment */
+        put: operations["update_recruitment_api_v1_recruitments__recruitment_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/recruitments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Own Recruitments */
+        get: operations["own_recruitments_api_v1_me_recruitments_get"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recruitments/{recruitment_id}/visibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Set Recruitment Visibility */
+        patch: operations["set_recruitment_visibility_api_v1_recruitments__recruitment_id__visibility_patch"];
         trace?: never;
     };
     "/api/v1/me/intents": {
@@ -248,6 +385,28 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AuthCapabilities */
+        AuthCapabilities: {
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "off" | "demo" | "student";
+        };
+        /** AuthCredentials */
+        AuthCredentials: {
+            /** Studentid */
+            studentId: string;
+            /** Password */
+            password: string;
+        };
+        /** ChangePassword */
+        ChangePassword: {
+            /** Currentpassword */
+            currentPassword: string;
+            /** Password */
+            password: string;
+        };
         /** Competition */
         Competition: {
             /** Id */
@@ -261,18 +420,6 @@ export interface components {
         CompetitionList: {
             /** Items */
             items: components["schemas"]["Competition"][];
-        };
-        /** CustomField */
-        CustomField: {
-            /** Label */
-            label: string;
-            /** Value */
-            value: string;
-            /**
-             * Ispublic
-             * @default false
-             */
-            isPublic: boolean;
         };
         /** Decision */
         Decision: {
@@ -326,6 +473,10 @@ export interface components {
             respondedAt?: string | null;
             /** Canrespond */
             canRespond: boolean;
+            /** Teamname */
+            teamName?: string | null;
+            /** Counterpartnickname */
+            counterpartNickname?: string | null;
         };
         /** IntentDetail */
         IntentDetail: {
@@ -356,6 +507,12 @@ export interface components {
             respondedAt?: string | null;
             /** Canrespond */
             canRespond: boolean;
+            /** Teamname */
+            teamName?: string | null;
+            /** Counterpartnickname */
+            counterpartNickname?: string | null;
+            /** Message */
+            message?: string | null;
             /** Counterpartqq */
             counterpartQq?: string | null;
         };
@@ -373,6 +530,8 @@ export interface components {
             recruitmentId: string;
             /** Candidateid */
             candidateId?: string | null;
+            /** Message */
+            message?: string | null;
         };
         /** IntentList */
         IntentList: {
@@ -384,7 +543,7 @@ export interface components {
             /** Nickname */
             nickname: string;
             /** Skills */
-            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management")[];
+            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting")[];
             /** Contribution */
             contribution: string;
             /** College */
@@ -395,16 +554,12 @@ export interface components {
             grade?: string | null;
             /** Experience */
             experience?: string | null;
-            /** Availability */
-            availability?: string | null;
-            /** Preferredrole */
-            preferredRole?: string | null;
-            /** Interests */
-            interests?: string | null;
+            /** Competitionintent */
+            competitionIntent?: string | null;
+            /** Projects */
+            projects?: components["schemas"]["ProfileProject"][];
             /** Customskills */
             customSkills?: string[];
-            /** Customfields */
-            customFields?: components["schemas"]["CustomField"][];
             publicFields?: components["schemas"]["PublicFields"];
             /** Userid */
             userId: string;
@@ -418,27 +573,23 @@ export interface components {
             /** Nickname */
             nickname?: string | null;
             /** Skills */
-            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management")[];
+            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting")[];
             /** Contribution */
             contribution: string;
             /** College */
             college: string;
             /** Major */
-            major?: string | null;
+            major: string;
             /** Grade */
-            grade?: string | null;
+            grade: string;
             /** Experience */
             experience?: string | null;
-            /** Availability */
-            availability?: string | null;
-            /** Preferredrole */
-            preferredRole?: string | null;
-            /** Interests */
-            interests?: string | null;
+            /** Competitionintent */
+            competitionIntent?: string | null;
+            /** Projects */
+            projects?: components["schemas"]["ProfileProject"][];
             /** Customskills */
             customSkills?: string[];
-            /** Customfields */
-            customFields?: components["schemas"]["CustomField"][];
             publicFields?: components["schemas"]["PublicFields"];
             /** Qq */
             qq: string;
@@ -450,12 +601,25 @@ export interface components {
             /** Items */
             items: components["schemas"]["PublicProfile"][];
         };
-        /** PublicCustomField */
-        PublicCustomField: {
-            /** Label */
-            label: string;
-            /** Value */
-            value: string;
+        /** ProfileProject */
+        ProfileProject: {
+            /** Competition */
+            competition: string;
+            /**
+             * Role
+             * @default
+             */
+            role: string;
+            /**
+             * Award
+             * @default
+             */
+            award: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
         };
         /** PublicFields */
         PublicFields: {
@@ -480,20 +644,10 @@ export interface components {
              */
             experience: boolean;
             /**
-             * Availability
+             * Competitionintent
              * @default false
              */
-            availability: boolean;
-            /**
-             * Preferredrole
-             * @default false
-             */
-            preferredRole: boolean;
-            /**
-             * Interests
-             * @default false
-             */
-            interests: boolean;
+            competitionIntent: boolean;
         };
         /** PublicProfile */
         PublicProfile: {
@@ -502,7 +656,7 @@ export interface components {
             /** Nickname */
             nickname: string;
             /** Skills */
-            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management")[];
+            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting")[];
             /** Contribution */
             contribution: string;
             /** College */
@@ -513,16 +667,12 @@ export interface components {
             grade?: string | null;
             /** Experience */
             experience?: string | null;
-            /** Availability */
-            availability?: string | null;
-            /** Preferredrole */
-            preferredRole?: string | null;
-            /** Interests */
-            interests?: string | null;
+            /** Competitionintent */
+            competitionIntent?: string | null;
+            /** Projects */
+            projects?: components["schemas"]["ProfileProject"][];
             /** Customskills */
             customSkills?: string[];
-            /** Customfields */
-            customFields?: components["schemas"]["PublicCustomField"][];
             /** Evidenceids */
             evidenceIds?: string[] | null;
         };
@@ -545,6 +695,8 @@ export interface components {
              * Format: date-time
              */
             createdAt: string;
+            /** Ispublished */
+            isPublished: boolean;
             /** Competition */
             competition: string;
             /** Teamname */
@@ -554,7 +706,7 @@ export interface components {
             /** Openings */
             openings: number;
             /** Skills */
-            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management")[];
+            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting")[];
             /** Requirements */
             requirements: components["schemas"]["RecruitmentRequirement"][];
             /** Background */
@@ -581,9 +733,32 @@ export interface components {
         /** RecruitmentRequirement */
         RecruitmentRequirement: {
             /** Skills */
-            skills?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management")[];
+            skills?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting")[];
             /** Expectation */
             expectation?: string | null;
+        };
+        /** RecruitmentVisibility */
+        RecruitmentVisibility: {
+            /** Ispublished */
+            isPublished: boolean;
+        };
+        /** Registration */
+        Registration: {
+            /** Studentid */
+            studentId: string;
+            /** Password */
+            password: string;
+            /** Activationtoken */
+            activationToken: string;
+        };
+        /** ResetPassword */
+        ResetPassword: {
+            /** Studentid */
+            studentId: string;
+            /** Password */
+            password: string;
+            /** Resettoken */
+            resetToken: string;
         };
         /** RetainEvidence */
         RetainEvidence: {
@@ -601,6 +776,31 @@ export interface components {
              */
             persona: "captain" | "candidate-a" | "candidate-b";
         };
+        /** SessionUser */
+        SessionUser: {
+            /** Userid */
+            userId: string;
+            /** Nickname */
+            nickname: string;
+            /**
+             * Persona
+             * @enum {string}
+             */
+            persona: "captain" | "candidate-a" | "candidate-b";
+        };
+        /** StudentSessionUser */
+        StudentSessionUser: {
+            /** Userid */
+            userId: string;
+            /** Nickname */
+            nickname: string;
+            /**
+             * Kind
+             * @default student
+             * @constant
+             */
+            kind: "student";
+        };
         /** UploadEvidence */
         UploadEvidence: {
             /**
@@ -608,13 +808,6 @@ export interface components {
              * @description Base64 image data
              */
             image: string;
-        };
-        /** User */
-        User: {
-            /** Userid */
-            userId: string;
-            /** Nickname */
-            nickname: string;
         };
     };
     responses: never;
@@ -625,6 +818,424 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    capabilities_api_v1_auth_capabilities_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthCapabilities"];
+                };
+            };
+        };
+    };
+    register_api_v1_auth_register_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Registration"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentSessionUser"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unsupported Media Type */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    login_api_v1_auth_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuthCredentials"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentSessionUser"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unsupported Media Type */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    reset_password_api_v1_auth_password_reset_confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPassword"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unsupported Media Type */
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    logout_api_v1_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    change_password_api_v1_auth_password_change_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePassword"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Too Many Requests */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     session_api_v1_demo_session_post: {
         parameters: {
             query?: never;
@@ -644,7 +1255,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["User"];
+                    "application/json": components["schemas"]["SessionUser"];
                 };
             };
             /** @description Forbidden */
@@ -700,7 +1311,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["User"];
+                    "application/json": components["schemas"]["SessionUser"] | components["schemas"]["StudentSessionUser"];
                 };
             };
             /** @description Unauthorized */
@@ -764,7 +1375,7 @@ export interface operations {
     profiles_api_v1_profiles_get: {
         parameters: {
             query?: {
-                skill?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management") | null;
+                skill?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting") | null;
             };
             header?: never;
             path?: never;
@@ -1039,7 +1650,7 @@ export interface operations {
     recruitments_api_v1_recruitments_get: {
         parameters: {
             query?: {
-                skill?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management") | null;
+                skill?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting") | null;
             };
             header?: never;
             path?: never;
@@ -1167,6 +1778,195 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    update_recruitment_api_v1_recruitments__recruitment_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recruitment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecruitmentInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Recruitment"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    own_recruitments_api_v1_me_recruitments_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecruitmentList"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    set_recruitment_visibility_api_v1_recruitments__recruitment_id__visibility_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recruitment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecruitmentVisibility"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Recruitment"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1341,6 +2141,15 @@ export interface operations {
             };
             /** @description Not Found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

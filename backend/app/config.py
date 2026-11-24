@@ -22,8 +22,23 @@ class Settings:
         )
 
     @property
+    def auth_mode(self) -> str:
+        explicit = os.getenv("TEAMUP_AUTH_MODE")
+        legacy = os.getenv("TEAMUP_DEMO_MODE")
+        if explicit is not None and explicit not in {"off", "demo", "student"}:
+            raise ValueError("Invalid TEAMUP_AUTH_MODE")
+        if legacy is not None and legacy.lower() not in {"true", "false"}:
+            raise ValueError("Invalid TEAMUP_DEMO_MODE")
+        if explicit and legacy and ((legacy.lower() == "true") != (explicit == "demo")):
+            raise ValueError("Conflicting authentication modes")
+        mode = explicit or ("demo" if legacy and legacy.lower() == "true" else "off")
+        if mode == "student" and os.getenv("TEAMUP_DB_NAME", "teamup") == "teamup":
+            raise ValueError("Student mode requires a separate database")
+        return mode
+
+    @property
     def demo_mode(self) -> bool:
-        return os.getenv("TEAMUP_DEMO_MODE", "false").lower() == "true"
+        return self.auth_mode == "demo"
 
     @property
     def session_secret(self) -> str:

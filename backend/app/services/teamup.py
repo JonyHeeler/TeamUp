@@ -5,10 +5,20 @@ from uuid import uuid4
 
 from sqlalchemy import delete, or_, select, update
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, contains_eager
 
 from app.competitions import OFFICIAL_COMPETITION_NAMES
-from app.db.models import Contact, Intent, Profile, ProfileEvidence, Recruitment, Skill, User
+from app.config import get_settings
+from app.db.models import (
+    Contact,
+    Intent,
+    Profile,
+    ProfileEvidence,
+    Recruitment,
+    Skill,
+    StudentAccount,
+    User,
+)
 from app.services.evidence import InvalidEvidence, prepare_image
 from app.services.team_numbers import TeamNumberExhausted, next_team_number
 
@@ -17,9 +27,7 @@ PROFILE_FIELDS = {
     "major": "major",
     "grade": "grade",
     "experience": "experience",
-    "availability": "availability",
-    "preferredRole": "preferred_role",
-    "interests": "interests",
+    "competitionIntent": "competition_intent",
 }
 
 
@@ -83,21 +91,18 @@ def profile_data(profile: Profile, private: bool = False) -> dict[str, Any]:
     }
     for field, attribute in PROFILE_FIELDS.items():
         value = getattr(profile, attribute)
-        if private or (value and getattr(profile, "show_" + attribute)):
+        if private or (
+            value
+            and (field in {"college", "major", "grade"} or getattr(profile, "show_" + attribute))
+        ):
             result[field] = value
-    custom_fields = profile.custom_fields or []
+    if private or (profile.show_experience and profile.projects):
+        result["projects"] = profile.projects or []
     if private:
         result["publicFields"] = {
             field: getattr(profile, "show_" + attribute)
             for field, attribute in PROFILE_FIELDS.items()
         }
-        result["customFields"] = custom_fields
-    else:
-        result["customFields"] = [
-            {"label": field["label"], "value": field["value"]}
-            for field in custom_fields
-            if field["isPublic"]
-        ]
     return result
 
 
@@ -108,8 +113,22 @@ def get_user(db: Session, user_id: str) -> dict[str, Any]:
     return {"userId": user.id, "nickname": user.nickname}
 
 
+def active_account(user_id):
+    return (
+        select(StudentAccount.user_id)
+        .where(StudentAccount.user_id == user_id, StudentAccount.status == "active")
+        .exists()
+    )
+
+
+def visible_member(db: Session, user_id: str) -> bool:
+    return get_settings().auth_mode != "student" or bool(db.scalar(select(active_account(user_id))))
+
+
 def list_profiles(db: Session, skill: str | None = None) -> list[dict[str, Any]]:
     query = select(Profile)
+    if get_settings().auth_mode == "student":
+        query = query.where(active_account(Profile.user_id))
     if skill:
         query = query.where(Profile.skills.any(Skill.code == skill))
     return [profile_data(p) for p in db.scalars(query.order_by(Profile.user_id))]
@@ -133,6 +152,8 @@ def get_evidence(db: Session, user_id: str, image_id: str, viewer_id: str | None
     )
     if viewer_id != user_id:
         query = query.where(Profile.show_experience.is_(True))
+    if get_settings().auth_mode == "student":
+        query = query.where(active_account(ProfileEvidence.user_id))
     image = db.scalar(query)
     if image is None:
         raise missing()
@@ -141,7 +162,7 @@ def get_evidence(db: Session, user_id: str, image_id: str, viewer_id: str | None
 
 def get_profile(db: Session, user_id: str, private: bool = False) -> dict[str, Any]:
     profile = db.get(Profile, user_id)
-    if not profile:
+    if not profile or (not private and not visible_member(db, user_id)):
         raise missing()
     result = profile_data(profile, private)
     if private:
@@ -197,18 +218,17 @@ def put_profile(db: Session, user_id: str, data: dict[str, Any]) -> dict[str, An
     if not user:
         raise missing()
     introduction = text(data.get("contribution"), 500)
-    college = text(data.get("college"), 80)
+    required = {field: text(data.get(field), 80) for field in ("college", "major", "grade")}
     skills = get_skills(db, data.get("skills"))
     custom_skills = list(dict.fromkeys(data.get("customSkills", [])))
     if not skills and not custom_skills:
         raise invalid_field("skills", "请至少选择或填写一项技能")
-    custom_fields = data.get("customFields", [])
-    if len({field["label"].casefold() for field in custom_fields}) != len(custom_fields):
-        raise invalid_field("customFields", "自定义字段名称不能重复")
     optional = {
-        field: optional_text(data.get(field), 500 if field == "experience" else 80)
+        field: optional_text(
+            data.get(field), 500 if field in {"experience", "competitionIntent"} else 80
+        )
         for field in PROFILE_FIELDS
-        if field != "college"
+        if field not in required
     }
     public = data.get("publicFields", {})
     nickname = text(data.get("nickname", user.nickname), 80)
@@ -228,11 +248,13 @@ def put_profile(db: Session, user_id: str, data: dict[str, Any]) -> dict[str, An
     profile.introduction = introduction
     profile.skills = skills
     profile.custom_skills = custom_skills
-    profile.custom_fields = custom_fields
-    values = {"college": college, **optional}
+    profile.projects = data["projects"]
+    values = {**required, **optional}
     for field, attribute in PROFILE_FIELDS.items():
         setattr(profile, attribute, values[field])
-        setattr(profile, "show_" + attribute, public.get(field, field == "college"))
+        setattr(
+            profile, "show_" + attribute, True if field in required else public.get(field, False)
+        )
     db.flush()
     result = profile_data(profile, True)
     result["qq"] = qq
@@ -249,6 +271,7 @@ def recruitment_data(recruitment: Recruitment) -> dict[str, Any]:
         "ownerId": recruitment.owner_id,
         "competition": recruitment.competition,
         "teamName": recruitment.team_name,
+        "isPublished": recruitment.is_published,
         "teamNumber": recruitment.team_number,
         "openings": recruitment.openings,
         "skills": sorted(s.code for s in recruitment.skills),
@@ -260,8 +283,11 @@ def recruitment_data(recruitment: Recruitment) -> dict[str, Any]:
 
 def list_recruitments(db: Session, skill: str | None = None) -> list[dict[str, Any]]:
     query = select(Recruitment).where(
-        Recruitment.competition.collate("utf8mb4_bin").in_(OFFICIAL_COMPETITION_NAMES)
+        Recruitment.is_published.is_(True),
+        Recruitment.competition.collate("utf8mb4_bin").in_(OFFICIAL_COMPETITION_NAMES),
     )
+    if get_settings().auth_mode == "student":
+        query = query.where(active_account(Recruitment.owner_id))
     if skill:
         query = query.where(Recruitment.skills.any(Skill.code == skill))
     return [recruitment_data(r) for r in db.scalars(query.order_by(Recruitment.created_at.desc()))]
@@ -269,12 +295,17 @@ def list_recruitments(db: Session, skill: str | None = None) -> list[dict[str, A
 
 def get_recruitment(db: Session, recruitment_id: str) -> dict[str, Any]:
     recruitment = db.get(Recruitment, recruitment_id)
-    if not recruitment or recruitment.competition not in OFFICIAL_COMPETITION_NAMES:
+    if (
+        not recruitment
+        or not recruitment.is_published
+        or recruitment.competition not in OFFICIAL_COMPETITION_NAMES
+        or not visible_member(db, recruitment.owner_id)
+    ):
         raise missing()
     return recruitment_data(recruitment)
 
 
-def create_recruitment(db: Session, user_id: str, data: dict[str, Any]) -> dict[str, Any]:
+def recruitment_fields(db: Session, data: dict[str, Any]) -> dict[str, Any]:
     competition = text(data.get("competition"), 80)
     if competition not in OFFICIAL_COMPETITION_NAMES:
         message = "请选择官方比赛"
@@ -292,31 +323,84 @@ def create_recruitment(db: Session, user_id: str, data: dict[str, Any]) -> dict[
             raise invalid_field(f"requirements.{index}", "请选择技能标签或填写期望")
         positions.append({"skills": skills, "expectation": expectation})
         codes.extend(skills)
-    all_skills = get_skills(db, codes)
-    background = text(data.get("background"), 1200)
+    return {
+        "competition": competition,
+        "openings": openings,
+        "requirements": positions,
+        "skills": get_skills(db, codes),
+        "background": text(data.get("background"), 1200),
+        "team_name": optional_text(data.get("teamName"), 80),
+    }
+
+
+def create_recruitment(db: Session, user_id: str, data: dict[str, Any]) -> dict[str, Any]:
+    if get_settings().auth_mode == "student":
+        account = db.get(StudentAccount, user_id, with_for_update=True)
+        if not account or account.status != "active":
+            raise ServiceError(403, "forbidden", "该账号无法发布招募")
+        if not db.get(Contact, user_id):
+            raise invalid("请先在个人名片中填写 QQ，再发布招募")
+    fields = recruitment_fields(db, data)
     created_at = now()
     try:
         number = next_team_number(db, created_at)
     except TeamNumberExhausted as exc:
         raise ServiceError(409, "team_number_exhausted", str(exc)) from exc
+    fields["team_name"] = fields["team_name"] or number
     recruitment = Recruitment(
         id=str(uuid4()),
         owner_id=user_id,
-        competition=competition,
-        team_name=optional_text(data.get("teamName"), 80) or number,
         team_number=number,
-        openings=openings,
-        background=background,
-        requirements=positions,
         created_at=created_at,
-        skills=all_skills,
+        **fields,
     )
     db.add(recruitment)
     db.commit()
     return recruitment_data(recruitment)
 
 
-def intent_data(intent: Intent, user_id: str) -> dict[str, Any]:
+def list_own_recruitments(db: Session, user_id: str) -> list[dict[str, Any]]:
+    query = select(Recruitment).where(Recruitment.owner_id == user_id)
+    return [
+        recruitment_data(row) for row in db.scalars(query.order_by(Recruitment.created_at.desc()))
+    ]
+
+
+def owned_recruitment(db: Session, user_id: str, recruitment_id: str) -> Recruitment:
+    recruitment = db.get(Recruitment, recruitment_id, with_for_update=True)
+    if not recruitment:
+        raise missing()
+    if recruitment.owner_id != user_id:
+        raise ServiceError(403, "forbidden", "只有队长可以管理队伍")
+    return recruitment
+
+
+def update_recruitment(
+    db: Session, user_id: str, recruitment_id: str, data: dict[str, Any]
+) -> dict[str, Any]:
+    recruitment = owned_recruitment(db, user_id, recruitment_id)
+    fields = recruitment_fields(db, data)
+    fields["team_name"] = fields["team_name"] or recruitment.team_number
+    for field, value in fields.items():
+        setattr(recruitment, field, value)
+    db.commit()
+    return recruitment_data(recruitment)
+
+
+def set_recruitment_visibility(
+    db: Session, user_id: str, recruitment_id: str, is_published: bool
+) -> dict[str, Any]:
+    recruitment = owned_recruitment(db, user_id, recruitment_id)
+    if is_published and recruitment.competition not in OFFICIAL_COMPETITION_NAMES:
+        raise ServiceError(409, "conflict", "请先编辑招募，选择当前赛事后再上架")
+    recruitment.is_published = is_published
+    db.commit()
+    return recruitment_data(recruitment)
+
+
+def intent_data(
+    db: Session, intent: Intent, user_id: str, nicknames: dict[str, str] | None = None
+) -> dict[str, Any]:
     recipient = intent.recruitment.owner_id if intent.kind == "apply" else intent.candidate_id
     result = {
         "id": intent.id,
@@ -328,6 +412,19 @@ def intent_data(intent: Intent, user_id: str) -> dict[str, Any]:
         "createdAt": timestamp(intent.created_at),
         "canRespond": intent.status == "pending" and user_id == recipient,
     }
+    other_id = (
+        intent.candidate_id
+        if user_id == intent.recruitment.owner_id
+        else intent.recruitment.owner_id
+    )
+    if nicknames is None:
+        counterpart = db.get(User, other_id)
+        nickname = counterpart.nickname if counterpart else None
+    else:
+        nickname = nicknames.get(other_id)
+    result["teamName"] = intent.recruitment.team_name
+    if nickname:
+        result["counterpartNickname"] = nickname
     if intent.responded_at:
         result["respondedAt"] = timestamp(intent.responded_at)
     return result
@@ -336,11 +433,20 @@ def intent_data(intent: Intent, user_id: str) -> dict[str, Any]:
 def list_intents(db: Session, user_id: str) -> list[dict[str, Any]]:
     query = (
         select(Intent)
-        .join(Recruitment)
+        .join(Intent.recruitment)
+        .options(contains_eager(Intent.recruitment))
         .where(or_(Intent.candidate_id == user_id, Recruitment.owner_id == user_id))
         .order_by(Intent.created_at.desc())
     )
-    return [intent_data(i, user_id) for i in db.scalars(query)]
+    intents = db.scalars(query).all()
+    other_ids = {
+        intent.candidate_id
+        if user_id == intent.recruitment.owner_id
+        else intent.recruitment.owner_id
+        for intent in intents
+    }
+    nicknames = dict(db.execute(select(User.id, User.nickname).where(User.id.in_(other_ids))).all())
+    return [intent_data(db, intent, user_id, nicknames) for intent in intents]
 
 
 def participant_intent(db: Session, user_id: str, intent_id: str) -> Intent:
@@ -352,14 +458,16 @@ def participant_intent(db: Session, user_id: str, intent_id: str) -> Intent:
 
 def get_intent(db: Session, user_id: str, intent_id: str) -> dict[str, Any]:
     intent = participant_intent(db, user_id, intent_id)
-    result = intent_data(intent, user_id)
+    result = intent_data(db, intent, user_id)
+    if intent.message:
+        result["message"] = intent.message
     if intent.status == "accepted":
         other = (
             intent.candidate_id
             if user_id == intent.recruitment.owner_id
             else intent.recruitment.owner_id
         )
-        contact = db.get(Contact, other)
+        contact = db.get(Contact, other) if visible_member(db, other) else None
         if contact:
             result["counterpartQq"] = contact.qq
     return result
@@ -369,13 +477,24 @@ def create_intent(db: Session, user_id: str, data: dict[str, Any]) -> tuple[dict
     kind = data.get("kind")
     if kind not in ("apply", "invite"):
         raise invalid("击掌申请类型无效")
-    recruitment = db.get(Recruitment, data.get("recruitmentId"))
-    if not recruitment or recruitment.competition not in OFFICIAL_COMPETITION_NAMES:
+    recruitment = db.get(Recruitment, data.get("recruitmentId"), with_for_update=True)
+    if (
+        not recruitment
+        or recruitment.competition not in OFFICIAL_COMPETITION_NAMES
+        or not visible_member(db, recruitment.owner_id)
+    ):
         raise missing()
     candidate = user_id if kind == "apply" else data.get("candidateId")
+    if not recruitment.is_published:
+        raise ServiceError(409, "conflict", "这支队伍的招募已下架")
     if kind == "invite" and recruitment.owner_id != user_id:
         raise ServiceError(403, "forbidden", "只有队长可以邀请")
-    if not candidate or candidate == recruitment.owner_id or not db.get(Profile, candidate):
+    if (
+        not candidate
+        or candidate == recruitment.owner_id
+        or not db.get(Profile, candidate)
+        or not visible_member(db, candidate)
+    ):
         raise invalid("候选人无效或尚未发布名片")
     if not db.scalar(select(Contact.user_id).where(Contact.user_id == candidate)) or not db.scalar(
         select(Contact.user_id).where(Contact.user_id == recruitment.owner_id)
@@ -386,6 +505,7 @@ def create_intent(db: Session, user_id: str, data: dict[str, Any]) -> tuple[dict
         recruitment_id=recruitment.id,
         candidate_id=candidate,
         kind=kind,
+        message=optional_text(data.get("message"), 300),
         status="pending",
         created_at=now(),
     )
@@ -407,8 +527,8 @@ def create_intent(db: Session, user_id: str, data: dict[str, Any]) -> tuple[dict
         )
         if not existing:
             raise
-        return intent_data(existing, user_id), False
-    return intent_data(intent, user_id), True
+        return intent_data(db, existing, user_id), False
+    return intent_data(db, intent, user_id), True
 
 
 def respond_intent(db: Session, user_id: str, intent_id: str, decision: str) -> dict[str, Any]:
@@ -429,4 +549,4 @@ def respond_intent(db: Session, user_id: str, intent_id: str, decision: str) -> 
     intent = db.get(Intent, intent_id)
     if result.rowcount == 0 and intent.status != decision:
         raise ServiceError(409, "conflict", "击掌申请已有不同回应")
-    return intent_data(intent, user_id)
+    return intent_data(db, intent, user_id)

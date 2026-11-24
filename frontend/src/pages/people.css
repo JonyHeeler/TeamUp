@@ -1,0 +1,28 @@
+.team-card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.intent-message {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.intent-message textarea {
+  width: 100%;
+}
+
+.intent-note {
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  padding: 0.875rem;
+}
+
+.intent-note p {
+  margin: 0.35rem 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

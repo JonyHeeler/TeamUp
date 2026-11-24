@@ -1,3 +1,5 @@
+import { CardFacts } from "./ui/SummaryCard";
+import { Button } from "./ui/Button";
 import type { ReactNode } from "react";
 import type { Profile, ProfileInput } from "./api/client";
 import { copy as t } from "./copy";
@@ -7,13 +9,18 @@ const fields = [
   "college",
   "major",
   "grade",
-  "preferredRole",
-  "availability",
-  "interests",
+  "competitionIntent",
   "experience",
 ] as const;
 
-type CustomField = NonNullable<ProfileInput["customFields"]>[number];
+type Project = NonNullable<ProfileInput["projects"]>[number];
+
+const projectFields = [
+  ["competition", t.projectCompetition],
+  ["role", t.projectRole],
+  ["award", t.projectAward],
+  ["description", t.projectDescription],
+] as const;
 
 export default function ProfileEditor({
   profile,
@@ -21,6 +28,7 @@ export default function ProfileEditor({
   fieldError,
   skillError,
   onSave,
+  saveLabel = t.save,
   busy,
   children,
 }: {
@@ -29,24 +37,20 @@ export default function ProfileEditor({
   fieldError: (field: string) => ReactNode;
   skillError?: string;
   onSave: () => void;
+  saveLabel?: string;
   busy: boolean;
   children: ReactNode;
 }) {
   const customSkills = profile.customSkills ?? [];
-  const customFields = profile.customFields ?? [];
-  const updateCustomField = (index: number, changes: Partial<CustomField>) =>
-    onChange({
-      ...profile,
-      customFields: customFields.map((item, position) =>
-        position === index ? { ...item, ...changes } : item,
-      ),
-    });
+  const projects = profile.projects ?? [];
+  const setProjects = (projects: Project[]) =>
+    onChange({ ...profile, projects });
 
   const profileSetting = (field: (typeof fields)[number]) => (
     <div className="profile-setting" key={field}>
       <label>
         {t[field]}
-        {field === "experience" ? (
+        {field === "experience" || field === "competitionIntent" ? (
           <textarea
             maxLength={500}
             value={profile[field] ?? ""}
@@ -57,10 +61,14 @@ export default function ProfileEditor({
           />
         ) : (
           <input
-            required={field === "college"}
+            required={["college", "major", "grade"].includes(field)}
             maxLength={80}
             value={profile[field] ?? ""}
-            placeholder={field === "college" ? undefined : t.optional}
+            placeholder={
+              ["college", "major", "grade"].includes(field)
+                ? "必填，公开展示"
+                : t.optional
+            }
             onChange={(event) =>
               onChange({ ...profile, [field]: event.target.value })
             }
@@ -68,16 +76,20 @@ export default function ProfileEditor({
         )}
         {fieldError(field)}
       </label>
-      <Visibility
-        label={t[field]}
-        checked={profile.publicFields[field] ?? field === "college"}
-        onChange={(checked) =>
-          onChange({
-            ...profile,
-            publicFields: { ...profile.publicFields, [field]: checked },
-          })
-        }
-      />
+      {["college", "major", "grade"].includes(field) ? (
+        <small className="consent">必填，所有人可见</small>
+      ) : (
+        <Visibility
+          label={t[field]}
+          checked={profile.publicFields[field] ?? field === "college"}
+          onChange={(checked) =>
+            onChange({
+              ...profile,
+              publicFields: { ...profile.publicFields, [field]: checked },
+            })
+          }
+        />
+      )}
     </div>
   );
 
@@ -140,6 +152,7 @@ export default function ProfileEditor({
 
       <div className="editor-section">
         <Skills
+          grouped
           value={profile.skills}
           onChange={(skills) => onChange({ ...profile, skills })}
           error={skillError}
@@ -161,9 +174,9 @@ export default function ProfileEditor({
                   })
                 }
               />
-              <button
+              <Button
                 type="button"
-                className="secondary"
+
                 aria-label={
                   t.removeImage + " " + t.customSkills + " " + (index + 1)
                 }
@@ -177,108 +190,102 @@ export default function ProfileEditor({
                 }
               >
                 {t.removeImage}
-              </button>
+              </Button>
             </div>
           ))}
           {customSkills.length < 12 && (
-            <button
+            <Button
               type="button"
-              className="secondary"
+
               onClick={() =>
                 onChange({ ...profile, customSkills: [...customSkills, ""] })
               }
             >
               {t.addSkill}
-            </button>
+            </Button>
           )}
           {fieldError("customSkills")}
         </fieldset>
       </div>
 
-      <div className="editor-section">
+      <section className="editor-section" aria-labelledby="experience-heading">
+        <h2 id="experience-heading">{t.experience}</h2>
         {profileSetting("experience")}
-        {children}
-      </div>
-
-      <fieldset className="custom-editor editor-section">
-        <legend>{t.customFields}</legend>
-        {customFields.map((item, index) => (
-          <div className="custom-profile-row" key={index}>
-            <label>
-              {t.customFieldName}
-              <input
-                required
-                maxLength={32}
-                value={item.label}
-                onChange={(event) =>
-                  updateCustomField(index, { label: event.target.value })
-                }
-              />
-            </label>
-            <label>
-              {t.customFieldValue}
-              <input
-                required
-                maxLength={200}
-                value={item.value}
-                onChange={(event) =>
-                  updateCustomField(index, { value: event.target.value })
-                }
-              />
-            </label>
-            <div className="custom-profile-actions">
-              <Visibility
-                label={item.label || t.customFields + " " + (index + 1)}
-                checked={item.isPublic ?? false}
-                onChange={(isPublic) => updateCustomField(index, { isPublic })}
-              />
-              <button
-                type="button"
-                className="secondary"
-                aria-label={
-                  t.removeImage +
-                  " " +
-                  (item.label || t.customFields + " " + (index + 1))
-                }
-                onClick={() =>
-                  onChange({
-                    ...profile,
-                    customFields: customFields.filter(
-                      (_, position) => position !== index,
+        <div className="custom-editor">
+          {projects.map((project, index) => (
+            <fieldset className="project-editor" key={index}>
+              <legend>
+                {t.project} {index + 1}
+              </legend>
+              {projectFields.map(([field, label]) => {
+                const props = {
+                  value: project[field] ?? "",
+                  onChange: (
+                    event: React.ChangeEvent<
+                      HTMLInputElement | HTMLTextAreaElement
+                    >,
+                  ) =>
+                    setProjects(
+                      projects.map((item, position) =>
+                        position === index
+                          ? { ...item, [field]: event.target.value }
+                          : item,
+                      ),
                     ),
-                  })
+                };
+                return (
+                  <label key={field}>
+                    {label}
+                    {field === "description" ? (
+                      <textarea {...props} maxLength={500} />
+                    ) : (
+                      <input
+                        {...props}
+                        required={field === "competition"}
+                        maxLength={80}
+                      />
+                    )}
+                    {fieldError(`projects.${index}.${field}`)}
+                  </label>
+                );
+              })}
+              <Button
+                type="button"
+
+                aria-label={t.removeProject + " " + (index + 1)}
+                onClick={() =>
+                  setProjects(
+                    projects.filter((_, position) => position !== index),
+                  )
                 }
               >
-                {t.removeImage}
-              </button>
-            </div>
-            {fieldError("customFields." + index)}
-          </div>
-        ))}
-        {fieldError("customFields")}
-        {customFields.length < 8 && (
-          <button
-            type="button"
-            className="secondary"
-            onClick={() =>
-              onChange({
-                ...profile,
-                customFields: [
-                  ...customFields,
-                  { label: "", value: "", isPublic: false },
-                ],
-              })
-            }
-          >
-            {t.addField}
-          </button>
-        )}
-      </fieldset>
+                {t.removeProject}
+              </Button>
+            </fieldset>
+          ))}
+          {projects.length < 20 && (
+            <Button
+              type="button"
+
+              onClick={() =>
+                setProjects([
+                  ...projects,
+                  { competition: "", role: "", award: "", description: "" },
+                ])
+              }
+            >
+              {t.addProject}
+            </Button>
+          )}
+          {fieldError("projects")}
+        </div>
+        {children}
+      </section>
 
       <div className="form-actions">
-        <button className="primary" disabled={busy}>
-          {t.save}
-        </button>
+        <Button tone="blue" disabled={busy}>
+          {saveLabel}
+        </Button>
       </div>
     </form>
   );
@@ -307,29 +314,75 @@ function Visibility({
   );
 }
 
-export function ProfileDetails({ profile }: { profile: Profile }) {
+export function ProfileDetails({
+  profile,
+  qq,
+}: {
+  profile: Profile;
+  qq?: string | null;
+}) {
   const visibleFields = fields.filter((field) => !!profile[field]);
-  const customFields = profile.customFields ?? [];
+  const projects = profile.projects ?? [];
   return (
     <>
       <Tags skills={profile.skills} custom={profile.customSkills} />
       <p className="body-text">{profile.contribution}</p>
-      {(visibleFields.length > 0 || customFields.length > 0) && (
+      {(visibleFields.length > 0 || qq) && (
         <dl className="details">
+          {qq && (
+            <div>
+              <dt>{t.qq}</dt>
+              <dd>{qq}</dd>
+            </div>
+          )}
           {visibleFields.map((field) => (
             <div key={field}>
               <dt>{t[field]}</dt>
               <dd>{profile[field]}</dd>
             </div>
           ))}
-          {customFields.map((field) => (
-            <div key={"custom-" + field.label}>
-              <dt>{field.label}</dt>
-              <dd>{field.value}</dd>
-            </div>
-          ))}
         </dl>
       )}
+      {projects.length > 0 && (
+        <div className="profile-projects">
+          <strong>{t.experience}</strong>
+          {projects.map((project, index) => (
+            <dl className="details" key={index}>
+              {projectFields.map(
+                ([field, label]) =>
+                  project[field] && (
+                    <div key={field}>
+                      <dt>{label}</dt>
+                      <dd>{project[field]}</dd>
+                    </div>
+                  ),
+              )}
+            </dl>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+export function ProfileSummary({ profile }: { profile: Profile }) {
+  return (
+    <>
+      <CardFacts
+        items={[
+          [t.college, profile.college || "未填写"],
+          [t.major, profile.major || "未填写"],
+          [t.grade, profile.grade || "未填写"],
+        ]}
+      />
+      <p className="profile-card-summary">{profile.contribution}</p>
+      <Tags
+        skills={profile.skills.slice(0, 4)}
+        custom={profile.customSkills?.slice(
+          0,
+          Math.max(0, 4 - profile.skills.length),
+        )}
+      />
     </>
   );
 }

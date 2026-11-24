@@ -1,3 +1,4 @@
+import { Button } from "./ui/Button";
 import type { ReactNode, Ref } from "react";
 import { copy } from "./copy";
 import HighFiveScene from "./HighFiveScene";
@@ -16,9 +17,11 @@ export function BrandMark() {
 
 export default function Welcome({
   heading,
+  onAbout,
   children,
 }: {
   heading: Ref<HTMLHeadingElement>;
+  onAbout: () => void;
   children: ReactNode;
 }) {
   return (
@@ -35,18 +38,25 @@ export default function Welcome({
               平台介绍
             </h1>
             <p>
-              {"这是西南财经大学 AI 智能体 + 协会开发的大学生竞赛组队平台。"}
-            </p>
-            <p>
               {
-                "如果你已经有了 idea，希望找到靠谱的队友，请你在“找队伍”页面发布队伍，介绍你的队伍还缺几人、需要哪些技能，以及入队后要做什么。"
+                "“一拍即合 TeamUP”是西南财经大学 AI 智能体 + 协会开发的竞赛组队平台。"
               }
             </p>
             <p>
               {
-                "如果你希望找到队伍，可以发布名片介绍自己，等待队长发出邀约或者主动联系队长。祝组队顺利。"
+                "如果你的队伍缺少优秀队员，可以发布招募，介绍你对同学的期望与加入后的具体分工。如果你想参赛，可以浏览招募，也可以发布名片，让队长了解你。你的名片可以被导出为一个简历。"
               }
             </p>
+            <p>
+              {
+                "遇到合适的队伍或队友，可以发一条击掌申请。对方同意后，双方可在申请详情里查看彼此的联系方式。祝组队顺利、顺利比赛。"
+              }
+            </p>
+            <div>
+              <Button type="button" onClick={onAbout}>
+                {copy.about}
+              </Button>
+            </div>
           </div>
           <HighFiveScene />
         </div>

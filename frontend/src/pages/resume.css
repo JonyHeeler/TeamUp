@@ -1,0 +1,113 @@
+.resume-controls {
+  max-width: 210mm;
+  margin: 0 auto 2rem;
+}
+.resume-settings {
+  max-width: none;
+}
+.resume-name {
+  max-width: 24rem;
+}
+.resume-settings fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.resume-settings legend {
+  margin-bottom: 0.625rem;
+}
+.resume-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 7.5rem), 1fr));
+  gap: 0.5rem;
+}
+.resume-settings .resume-options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  cursor: pointer;
+}
+.resume-options label:has(:checked) {
+  background: #eff6fe;
+  border-color: #bdd3ee;
+}
+.resume-options input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  accent-color: var(--action);
+}
+.resume-sheet {
+  box-sizing: border-box;
+  width: min(100%, 210mm);
+  min-height: 297mm;
+  margin: 0 auto;
+  padding: 20mm;
+  background: white;
+  color: #192333;
+  box-shadow: 0 8px 35px #18243a1a;
+  overflow-wrap: anywhere;
+}
+.resume-sheet header {
+  border-bottom: 3px solid #405fbd;
+  padding-bottom: 1rem;
+}
+.resume-sheet h1 {
+  font-size: 2rem;
+  margin: 0;
+}
+.resume-sheet h2 {
+  font-size: 1.1rem;
+  color: #405fbd;
+  border-bottom: 1px solid #dbe2f0;
+  padding-bottom: 0.4rem;
+}
+.resume-sheet h3 {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+.resume-sheet p {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  margin: 0.5rem 0;
+}
+.resume-sheet section {
+  margin-top: 1.25rem;
+}
+.resume-project {
+  break-inside: avoid;
+}
+.resume-evidence {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.resume-evidence .proof-preview {
+  width: 45mm;
+  height: auto;
+  max-height: 55mm;
+  object-fit: contain;
+}
+.resume-sheet footer {
+  color: #68758a;
+  margin-top: 2rem;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.resume-sheet footer img {
+  width: 6mm;
+  height: 6mm;
+  object-fit: contain;
+}
+@media screen and (max-width: 600px) {
+  .resume-sheet {
+    padding: 1.25rem;
+    min-height: 0;
+  }
+}

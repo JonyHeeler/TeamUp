@@ -33,6 +33,15 @@ Skill = Literal[
     "finance",
     "video-editing",
     "project-management",
+    "mobile-development",
+    "statistics",
+    "data-visualization",
+    "ui-ux",
+    "graphic-design",
+    "market-research",
+    "business-planning",
+    "slide-design",
+    "copywriting",
 ]
 Persona = Literal["captain", "candidate-a", "candidate-b"]
 
@@ -46,23 +55,49 @@ class User(DTO):
     nickname: str
 
 
+class SessionUser(User):
+    persona: Persona
+
+
+class StudentSessionUser(User):
+    kind: Literal["student"] = "student"
+
+
+class AuthCapabilities(DTO):
+    mode: Literal["off", "demo", "student"]
+
+
+class AuthCredentials(DTO):
+    studentId: str = Field(min_length=4, max_length=32)
+    password: str = Field(min_length=1, max_length=128)
+
+
+class Registration(AuthCredentials):
+    activationToken: str = Field(min_length=1, max_length=200)
+
+
+class ResetPassword(AuthCredentials):
+    resetToken: str = Field(min_length=1, max_length=200)
+
+
+class ChangePassword(DTO):
+    currentPassword: str = Field(min_length=1, max_length=128)
+    password: str = Field(min_length=1, max_length=128)
+
+
 class PublicFields(DTO):
     college: bool = True
     major: bool = False
     grade: bool = False
     experience: bool = False
-    availability: bool = False
-    preferredRole: bool = False
-    interests: bool = False
+    competitionIntent: bool = False
 
 
-class PublicCustomField(DTO):
-    label: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=32)]
-    value: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
-
-
-class CustomField(PublicCustomField):
-    isPublic: bool = False
+class ProfileProject(DTO):
+    competition: Text80
+    role: Annotated[str, StringConstraints(strip_whitespace=True, max_length=80)] = ""
+    award: Annotated[str, StringConstraints(strip_whitespace=True, max_length=80)] = ""
+    description: Annotated[str, StringConstraints(strip_whitespace=True, max_length=500)] = ""
 
 
 class ProfileFields(DTO):
@@ -73,13 +108,11 @@ class ProfileFields(DTO):
     major: str | None = Field(default=None, max_length=80)
     grade: str | None = Field(default=None, max_length=80)
     experience: str | None = Field(default=None, max_length=500)
-    availability: str | None = Field(default=None, max_length=80)
-    preferredRole: str | None = Field(default=None, max_length=80)
-    interests: str | None = Field(default=None, max_length=80)
+    competitionIntent: str | None = Field(default=None, max_length=500)
+    projects: list[ProfileProject] = Field(default_factory=list, max_length=20)
     customSkills: list[
         Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=32)]
     ] = Field(default_factory=list, max_length=12)
-    customFields: list[CustomField] = Field(default_factory=list, max_length=8)
     publicFields: PublicFields = Field(default_factory=PublicFields)
 
 
@@ -93,6 +126,8 @@ class UploadEvidence(DTO):
 
 class ProfileInput(ProfileFields):
     college: Text80
+    major: Text80
+    grade: Text80
     qq: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=64)]
     evidence: list[RetainEvidence | UploadEvidence] | None = Field(
         default=None, max_length=MAX_EVIDENCE
@@ -115,11 +150,9 @@ class PublicProfile(DTO):
     major: str | None = None
     grade: str | None = None
     experience: str | None = None
-    availability: str | None = None
-    preferredRole: str | None = None
-    interests: str | None = None
+    competitionIntent: str | None = None
+    projects: list[ProfileProject] = Field(default_factory=list, max_length=20)
     customSkills: list[str] = Field(default_factory=list)
-    customFields: list[PublicCustomField] = Field(default_factory=list)
     evidenceIds: list[UUID] | None = None
 
 
@@ -156,6 +189,7 @@ class Recruitment(DTO):
     id: str
     ownerId: str
     createdAt: datetime
+    isPublished: bool
     competition: Text80
     teamName: Text80
     teamNumber: str
@@ -163,6 +197,10 @@ class Recruitment(DTO):
     skills: list[Skill]
     requirements: list[RecruitmentRequirement]
     background: Text1200
+
+
+class RecruitmentVisibility(DTO):
+    isPublished: bool
 
 
 class RecruitmentList(DTO):
@@ -173,6 +211,7 @@ class IntentInput(DTO):
     kind: Literal["apply", "invite"]
     recruitmentId: UUID
     candidateId: UUID | None = None
+    message: Annotated[str, StringConstraints(strip_whitespace=True, max_length=300)] | None = None
 
     @model_validator(mode="after")
     def validate_candidate(self):
@@ -191,9 +230,12 @@ class Intent(DTO):
     createdAt: datetime
     respondedAt: datetime | None = None
     canRespond: bool
+    teamName: str | None = None
+    counterpartNickname: str | None = None
 
 
 class IntentDetail(Intent):
+    message: str | None = None
     counterpartQq: str | None = None
 
 

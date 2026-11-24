@@ -8,6 +8,7 @@ import {
   type Persona,
   type Profile,
   type Recruitment,
+  type RecruitmentInput,
   type Skill,
 } from "./client";
 const data = structuredClone(fixture) as {
@@ -15,9 +16,20 @@ const data = structuredClone(fixture) as {
   ownProfiles: Record<Persona, OwnProfile>;
   recruitments: { items: Recruitment[] };
 };
-let persona: Persona | null = null;
+const sessionKey = "teamup-mock-persona";
+const previous = sessionStorage.getItem(sessionKey);
+let persona: Persona | null =
+  previous && Object.hasOwn(data.personas, previous)
+    ? (previous as Persona)
+    : null;
 let intents: Intent[] = [];
+const intentMessages = new Map<string, string>();
 const pictures = new Map<string, Blob>();
+const examplePictures = import.meta.glob<string>("./demo-evidence/*.webp", {
+  eager: true,
+  query: "?url",
+  import: "default",
+});
 const current = () => {
   if (!persona) throw new ApiError("请先选择演示身份。");
   return data.personas[persona];
@@ -29,27 +41,36 @@ const publicProfile = (p: OwnProfile, withEvidence = false): Profile => {
     skills: p.skills,
     contribution: p.contribution,
     customSkills: p.customSkills,
-    customFields: p.customFields
-      ?.filter((item) => item.isPublic)
-      .map(({ label, value }) => ({ label, value })),
   };
   for (const field of [
     "college",
     "major",
     "grade",
     "experience",
-    "availability",
-    "preferredRole",
-    "interests",
+    "competitionIntent",
   ] as const) {
-    if (p.publicFields[field] && p[field]) result[field] = p[field];
+    if (
+      (["college", "major", "grade"].includes(field) ||
+        p.publicFields[field]) &&
+      p[field]
+    )
+      result[field] = p[field];
   }
+  if (p.publicFields.experience && p.projects?.length)
+    result.projects = p.projects;
   if (withEvidence && p.publicFields.experience && p.evidenceIds.length)
     result.evidenceIds = p.evidenceIds;
   return result;
 };
 const view = (i: Intent): Intent => ({
   ...i,
+  teamName: data.recruitments.items.find((team) => team.id === i.recruitmentId)
+    ?.teamName,
+  counterpartNickname: Object.values(data.personas).find(
+    (user) =>
+      user.userId ===
+      (current().userId === i.candidateId ? i.ownerId : i.candidateId),
+  )?.nickname,
   canRespond:
     i.status === "pending" &&
     (i.kind === "apply" ? i.ownerId : i.candidateId) === current().userId,
@@ -61,11 +82,49 @@ const lookup = (id: string) => {
   if (!i) throw new ApiError("未找到击掌申请。");
   return i;
 };
+function ownedTeam(id: string) {
+  const owner = current();
+  const team = data.recruitments.items.find((item) => item.id === id);
+  if (!team) throw new ApiError("未找到招募。");
+  if (team.ownerId !== owner.userId) throw new ApiError("只有队长可以管理队伍");
+  return team;
+}
+
+function recruitmentDraft(body: RecruitmentInput) {
+  if (
+    !fixture.competitions.items.some((c) => c.name === body.competition.trim())
+  )
+    throw new ApiError(
+      "请选择官方比赛",
+      { competition: "请选择官方比赛" },
+      "validation_error",
+    );
+  if (
+    body.requirements.length !== body.openings ||
+    body.requirements.some(
+      (item) => !item.skills?.length && !item.expectation?.trim(),
+    )
+  )
+    throw new ApiError(
+      "请填写每个招募名额的需求",
+      { requirements: "请填写每个招募名额的需求" },
+      "validation_error",
+    );
+  return {
+    ...body,
+    competition: body.competition.trim(),
+    skills: [
+      ...new Set(body.requirements.flatMap((item) => item.skills ?? [])),
+    ],
+  };
+}
+
 export const mockApi: Api = {
   competitions: async () => fixture.competitions,
   me: async () => current(),
   session: async (p) => {
     persona = p;
+    sessionStorage.setItem(sessionKey, p);
     return current();
   },
   profiles: async (skill = "") => ({
@@ -87,25 +146,35 @@ export const mockApi: Api = {
       (entry) => entry.userId === userId,
     );
     const image = pictures.get(id);
+    const example = examplePictures[`./demo-evidence/${id}.webp`];
     if (
-      !image ||
+      (!image && !example) ||
       !profile?.evidenceIds.includes(id) ||
       (!profile.publicFields.experience &&
         (!persona || current().userId !== userId))
     )
       throw new ApiError("未找到图片", undefined, "not_found");
-    return image;
+    if (image) return image;
+    const response = await fetch(example);
+    if (!response.ok) throw new ApiError("未找到图片", undefined, "not_found");
+    return response.blob();
   },
   saveProfile: async (body) => {
     const identity = current();
     const p = data.ownProfiles[persona!];
     const { evidence, ...details } = body;
-    if (!body.college.trim())
-      throw new ApiError(
-        "请填写学院",
-        { college: "请填写学院" },
-        "validation_error",
-      );
+    for (const [field, label] of [
+      ["college", "学院"],
+      ["major", "专业"],
+      ["grade", "年级"],
+    ] as const) {
+      if (!body[field]?.trim())
+        throw new ApiError(
+          `请填写${label}`,
+          { [field]: `请填写${label}` },
+          "validation_error",
+        );
+    }
     if (!/^[0-9]{5,12}$/.test(body.qq.trim()) && body.qq !== p.qq)
       throw new ApiError(
         "请输入 5 至 12 位数字的 QQ 号",
@@ -143,32 +212,30 @@ export const mockApi: Api = {
   },
   recruitments: async (skill = "") => ({
     items: data.recruitments.items.filter(
-      (t) => !skill || t.skills.includes(skill as Skill),
+      (t) => t.isPublished && (!skill || t.skills.includes(skill as Skill)),
     ),
   }),
+  ownRecruitments: async () => {
+    const ownerId = current().userId;
+    return {
+      items: data.recruitments.items.filter((team) => team.ownerId === ownerId),
+    };
+  },
+  updateRecruitment: async (id, body) => {
+    const team = ownedTeam(id);
+    Object.assign(team, recruitmentDraft(body), {
+      teamName: body.teamName?.trim() || team.teamNumber,
+    });
+    return { ...team };
+  },
+  setRecruitmentVisibility: async (id, isPublished) => {
+    const team = ownedTeam(id);
+    team.isPublished = isPublished;
+    return { ...team };
+  },
   createRecruitment: async (body) => {
-    if (
-      !fixture.competitions.items.some(
-        (c) => c.name === body.competition.trim(),
-      )
-    )
-      throw new ApiError(
-        "请选择官方比赛",
-        { competition: "请选择官方比赛" },
-        "validation_error",
-      );
     const owner = current();
-    if (
-      body.requirements.length !== body.openings ||
-      body.requirements.some(
-        (item) => !item.skills?.length && !item.expectation?.trim(),
-      )
-    )
-      throw new ApiError(
-        "请填写每个招募名额的需求",
-        { requirements: "请填写每个招募名额的需求" },
-        "validation_error",
-      );
+    const fields = recruitmentDraft(body);
     const timestamp = new Date();
     const day = new Date(timestamp.getTime() + 8 * 60 * 60 * 1000)
       .toISOString()
@@ -185,13 +252,10 @@ export const mockApi: Api = {
     const teamNumber =
       day + (lastIndex + 1).toString(36).toUpperCase().padStart(3, "0");
     const t: Recruitment = {
-      ...body,
-      competition: body.competition.trim(),
+      ...fields,
+      isPublished: true,
       teamName: body.teamName?.trim() || teamNumber,
       teamNumber,
-      skills: [
-        ...new Set(body.requirements.flatMap((item) => item.skills ?? [])),
-      ],
       id: crypto.randomUUID(),
       ownerId: owner.userId,
       createdAt: timestamp.toISOString(),
@@ -206,12 +270,14 @@ export const mockApi: Api = {
   }),
   intent: async (id) => {
     const i = lookup(id);
+    const message = intentMessages.get(i.id);
     const other = i.ownerId === current().userId ? i.candidateId : i.ownerId;
     const qq = Object.values(data.ownProfiles).find(
       (profile) => profile.userId === other,
     )?.qq;
     return {
       ...view(i),
+      ...(message ? { message } : {}),
       ...(i.status === "accepted" && qq ? { counterpartQq: qq } : {}),
     };
   },
@@ -219,6 +285,14 @@ export const mockApi: Api = {
     const user = current();
     const t = data.recruitments.items.find((x) => x.id === body.recruitmentId);
     if (!t) throw new ApiError("未找到招募。");
+    if (!t.isPublished) throw new ApiError("这支队伍的招募已下架");
+    const message = body.message?.trim();
+    if (message && Array.from(message).length > 300)
+      throw new ApiError(
+        "附言最多 300 字。",
+        { message: "附言最多 300 字。" },
+        "validation_error",
+      );
     const candidateId = body.kind === "apply" ? user.userId : body.candidateId;
     if (
       !candidateId ||
@@ -240,6 +314,7 @@ export const mockApi: Api = {
       createdAt: new Date().toISOString(),
       canRespond: false,
     };
+    if (message) intentMessages.set(i.id, message);
     intents.unshift(i);
     return view(i);
   },

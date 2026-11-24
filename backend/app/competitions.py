@@ -7,10 +7,8 @@ class CompetitionName(NamedTuple):
 
 
 OFFICIAL_COMPETITIONS = {
-    "math-modeling": CompetitionName("数学建模校赛", "Campus Mathematical Modeling Contest"),
-    "campus-innovation": CompetitionName(
-        "校园创新创业大赛", "Campus Innovation & Entrepreneurship Contest"
-    ),
+    "mcm-icm": CompetitionName("美赛", "MCM / ICM"),
+    "ai-agent-campus": CompetitionName("AI 智能体+ 大赛校赛", "AI Agent+ Campus Contest"),
 }
 OFFICIAL_COMPETITION_NAMES = tuple(
     competition.name for competition in OFFICIAL_COMPETITIONS.values()

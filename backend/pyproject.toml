@@ -11,6 +11,7 @@ dependencies = [
     "python-dotenv>=1,<2",
     "itsdangerous>=2.2,<3",
     "pillow>=12.2,<14",
+    "argon2-cffi>=23,<26",
 ]
 
 [dependency-groups]

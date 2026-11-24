@@ -1,0 +1,51 @@
+.center-teams {
+  margin-bottom: clamp(1.25rem, 3vw, 2rem);
+}
+.center-teams-heading,
+.managed-team-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+.center-teams-heading {
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.managed-teams {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.managed-teams li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.875rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+.managed-team-info {
+  display: grid;
+  justify-items: start;
+  gap: 0.3rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.managed-team-info h3 {
+  margin: 0;
+}
+.managed-team-info p {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.dialog .team-editor {
+  max-width: none;
+  padding: 0;
+  border: 0;
+}

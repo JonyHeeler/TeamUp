@@ -1,3 +1,4 @@
+import { Button } from "./ui/Button";
 import { useState, type ReactNode } from "react";
 import type {
   Competition,
@@ -17,22 +18,35 @@ const newRequirement = (): RequirementDraft => ({
 
 export default function RecruitmentEditor({
   competitions,
-  initialCompetition,
+  initialTeam,
   busy,
   fieldError,
   onPublish,
 }: {
   competitions: Competition[];
-  initialCompetition: string;
+  initialTeam?: Recruitment;
   busy: boolean;
   fieldError: (field: string) => ReactNode;
   onPublish: (team: RecruitmentInput) => void;
 }) {
-  const [competition, setCompetition] = useState(initialCompetition);
-  const [teamName, setTeamName] = useState("");
-  const [openings, setOpenings] = useState(1);
-  const [requirements, setRequirements] = useState([newRequirement()]);
-  const [background, setBackground] = useState("");
+  const [competition, setCompetition] = useState(
+    initialTeam?.competition ?? "",
+  );
+  const [teamName, setTeamName] = useState(initialTeam?.teamName ?? "");
+  const [openings, setOpenings] = useState(initialTeam?.openings ?? 1);
+  const [requirements, setRequirements] = useState<RequirementDraft[]>(() =>
+    Array.from(
+      { length: Math.min(initialTeam?.openings ?? 1, MAX_POSITIONS) },
+      (_, index) => {
+        const requirement = initialTeam?.requirements[index];
+        return {
+          skills: requirement?.skills ?? initialTeam?.skills ?? [],
+          expectation: requirement?.expectation ?? "",
+        };
+      },
+    ),
+  );
+  const [background, setBackground] = useState(initialTeam?.background ?? "");
   const [checked, setChecked] = useState(false);
 
   const validOpenings =
@@ -160,6 +174,7 @@ export default function RecruitmentEditor({
                 )}
               </summary>
               <Skills
+                grouped
                 value={item.skills}
                 onChange={(skills) =>
                   updateRequirement(index, { ...item, skills })
@@ -188,9 +203,9 @@ export default function RecruitmentEditor({
         ))}
       </section>
       <div className="form-actions">
-        <button className="primary" disabled={busy}>
-          {t.create}
-        </button>
+        <Button tone="blue" disabled={busy}>
+          {initialTeam ? "保存招募" : t.create}
+        </Button>
       </div>
     </form>
   );
@@ -210,11 +225,8 @@ export function RecruitmentDetails({
       )}
       <p className="body-text">{recruitment.background}</p>
       {recruitment.requirements.length ? (
-        <details className="recruitment-positions">
-          <summary>
-            {t.requirements}{" "}
-            <span className="badge">{recruitment.requirements.length}</span>
-          </summary>
+        <section className="recruitment-positions" aria-label={t.requirements}>
+          <h3>{t.requirements}</h3>
           <ol>
             {recruitment.requirements.map((item, index) => (
               <li key={index}>
@@ -226,7 +238,7 @@ export function RecruitmentDetails({
               </li>
             ))}
           </ol>
-        </details>
+        </section>
       ) : (
         <Tags skills={recruitment.skills} />
       )}

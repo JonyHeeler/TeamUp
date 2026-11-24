@@ -1,0 +1,63 @@
+[
+  {
+    "id": "10000000-0000-4000-8000-000000000001",
+    "ownerId": "00000000-0000-4000-8000-000000000001",
+    "competition": "美赛",
+    "teamName": "城市脉络建模队",
+    "teamNumber": "20261124001",
+    "openings": 1,
+    "skills": [
+      "data-analysis",
+      "data-visualization",
+      "statistics"
+    ],
+    "background": "我们组队参加美赛 MCM/ICM，目前有两名成员，分别负责问题拆解与论文统稿、约束建模与求解。赛前以晚高峰公交接驳为练习题，已整理公开时刻表、站点客流样例和一道可用的基线模型，准备进行一次周末限时模拟。现在缺一位数据与验证同学，和我们一起补齐数据审计、对照实验及图表。正式比赛按公开赛题重新选题。",
+    "requirements": [
+      {
+        "skills": [
+          "data-analysis",
+          "data-visualization",
+          "statistics"
+        ],
+        "expectation": "负责公开数据的清洗和变量字典，记录缺失值与异常值处理规则；用 Python 或 R 做基线对照和敏感性分析，交付可重跑的代码与论文图表。能在模拟赛开题前一起确认数据口径。"
+      }
+    ],
+    "createdAt": "2026-11-24T00:00:00Z"
+  },
+  {
+    "id": "10000000-0000-4000-8000-000000000002",
+    "ownerId": "00000000-0000-4000-8000-000000000001",
+    "competition": "AI 智能体+ 大赛校赛",
+    "teamName": "校园借用助手队",
+    "teamNumber": "20261124002",
+    "openings": 2,
+    "skills": [
+      "agent-development",
+      "backend",
+      "development",
+      "frontend",
+      "presentation",
+      "ui-ux"
+    ],
+    "background": "我们参加 AI 智能体+ 大赛校赛，做一个校园设备借用助手。输入「周五活动需要两套无线麦」，原型会调用模拟库存查询工具，核对预约规则，并在用户确认后生成借用申请；缺货或条件不明确时会给出替代设备或追问。队长已完成使用流程、六条演示用例和虚构设备台账，现招募一位智能体开发同学、一位交互与演示同学。",
+    "requirements": [
+      {
+        "skills": [
+          "agent-development",
+          "backend",
+          "development"
+        ],
+        "expectation": "搭建设备查询、借用资格核对和申请草稿三个工具；处理缺库存、缺参数与重复确认等情况，提供可复现的本地演示流程。"
+      },
+      {
+        "skills": [
+          "ui-ux",
+          "frontend",
+          "presentation"
+        ],
+        "expectation": "设计从需求输入、工具执行到人工确认的交互；实现能展示状态和错误恢复的网页原型，与队长一起完成五分钟演示脚本和备用录屏。"
+      }
+    ],
+    "createdAt": "2026-11-24T00:00:00Z"
+  }
+]

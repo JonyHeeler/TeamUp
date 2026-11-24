@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" fill="none">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="960" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff2dd"/><stop offset="1" stop-color="#f2d8bc"/>
+    </linearGradient>
+    <linearGradient id="medal" x1="375" y1="114" x2="590" y2="357" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff7e5"/><stop offset="1" stop-color="#ffc67e"/>
+    </linearGradient>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M30 0H0V30" stroke="#874a31" stroke-opacity=".13"/>
+    </pattern>
+  </defs>
+  <path fill="url(#paper)" d="M0 0h960v480H0z"/>
+  <path fill="url(#grid)" d="M30 30h900v420H30z"/>
+  <rect x="30.5" y="30.5" width="899" height="419" rx="22" stroke="#874a31" stroke-opacity=".25"/>
+  <g stroke="#a45a3c" stroke-opacity=".32">
+    <circle cx="480" cy="240" r="174" stroke-dasharray="2 8" stroke-width="2"/>
+    <path d="M126 240h708M480 53v374"/>
+    <ellipse cx="480" cy="240" rx="267" ry="94" transform="rotate(-16 480 240)"/>
+    <ellipse cx="480" cy="240" rx="267" ry="94" transform="rotate(16 480 240)"/>
+  </g>
+  <circle cx="480" cy="248" r="132" fill="#b2573a" fill-opacity=".15"/>
+  <circle cx="480" cy="236" r="132" fill="url(#medal)" stroke="#a45135" stroke-width="2"/>
+  <circle cx="480" cy="236" r="114" stroke="#a45135" stroke-opacity=".42"/>
+  <path d="M440 166h80v37c0 29-16 49-40 49s-40-20-40-49v-37Z" fill="#a34430"/>
+  <path d="M441 181h-27v12c0 21 13 33 34 34m71-46h27v12c0 21-13 33-34 34m-32 22v39m-33 8h66" stroke="#a34430" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m480 180 6 12 14 2-10 10 2 14-12-7-12 7 2-14-10-10 14-2 6-12Z" fill="#ffe8ad"/>
+  <path d="M445 310h70" stroke="#a34430" stroke-width="2" stroke-linecap="round"/>
+  <g fill="#a34430">
+    <circle cx="301" cy="186" r="5"/><circle cx="660" cy="294" r="5"/>
+    <path d="M238 139h-12v-12h-2v12h-12v2h12v12h2v-12h12zM746 333h-12v-12h-2v12h-12v2h12v12h2v-12h12z"/>
+  </g>
+  <g fill="#874a31" fill-opacity=".65" font-family="monospace" font-size="14" letter-spacing="3">
+    <text x="57" y="76">TEAMUP</text><text x="903" y="416" text-anchor="end">COMPETITION</text>
+  </g>
+</svg>

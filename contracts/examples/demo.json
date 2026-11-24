@@ -1,37 +1,135 @@
 {
   "competitions": {
     "items": [
-      { "id": "math-modeling", "name": "数学建模校赛", "nameEn": "Campus Mathematical Modeling Contest" },
-      { "id": "campus-innovation", "name": "校园创新创业大赛", "nameEn": "Campus Innovation & Entrepreneurship Contest" }
+      {
+        "id": "mcm-icm",
+        "name": "美赛",
+        "nameEn": "MCM / ICM"
+      },
+      {
+        "id": "ai-agent-campus",
+        "name": "AI 智能体+ 大赛校赛",
+        "nameEn": "AI Agent+ Campus Contest"
+      }
     ]
   },
   "personas": {
-    "captain": { "userId": "00000000-0000-4000-8000-000000000001", "nickname": "林舟" },
-    "candidate-a": { "userId": "00000000-0000-4000-8000-000000000002", "nickname": "许言" },
-    "candidate-b": { "userId": "00000000-0000-4000-8000-000000000003", "nickname": "周禾" }
+    "captain": {
+      "userId": "00000000-0000-4000-8000-000000000001",
+      "nickname": "林舟",
+      "persona": "captain"
+    },
+    "candidate-a": {
+      "userId": "00000000-0000-4000-8000-000000000002",
+      "nickname": "许言",
+      "persona": "candidate-a"
+    },
+    "candidate-b": {
+      "userId": "00000000-0000-4000-8000-000000000003",
+      "nickname": "周禾",
+      "persona": "candidate-b"
+    }
   },
   "profiles": {
     "items": [
       {
         "userId": "00000000-0000-4000-8000-000000000001",
         "nickname": "林舟",
+        "skills": [
+          "product-management",
+          "project-management",
+          "user-research",
+          "business-analysis",
+          "business-planning",
+          "academic-writing",
+          "slide-design",
+          "presentation"
+        ],
+        "contribution": "能把开放题拆成可验证的子问题，写清假设和指标，安排模型、论文、复核三条并行任务。拿到素材后可负责比较方案、撰写摘要、统一图表和术语，并组织交叉审稿。校赛项目里也能负责用户访谈、需求取舍和现场演示。",
+        "customSkills": [
+          "限时赛任务拆解",
+          "评估指标设计",
+          "模拟答辩"
+        ],
         "college": "工商管理学院",
-        "skills": ["presentation"],
-        "contribution": "组织团队并推进项目"
+        "major": "工商管理",
+        "grade": "大三",
+        "experience": "常用共享任务板、数据字典和版本记录协作。有过两次队长经历：一次带队做公共服务调度建模，一次把校园服务需求整理为可演示的智能体流程。其中负责问题拆解和答辩，模型参数由负责同学复核。",
+        "competitionIntent": "美赛优先。希望组一支三人队，练习周末限时赛，交卷前留两轮独立复核；目前缺能用公开数据建模、检验误差的队友。AI 智能体 + 校赛计划做校园设备借用助手，想找能实现工具调用与操作回退的同学。",
+        "projects": [
+          {
+            "competition": "校级数学建模训练赛",
+            "role": "队长 · 问题拆解与论文统稿",
+            "award": "优秀论文奖（演示）",
+            "description": "研究晚高峰校车调度。把题目拆成站点需求估计、车辆周转和班次约束三部分，用现行时刻表做基线。交付了假设清单、三套发车方案的对照表和可复查的论文附录；本人负责指标、进度和论文统稿。"
+          },
+          {
+            "competition": "AI 智能体 + 校赛 · 训练项目",
+            "role": "产品负责人 · 访谈、流程与路演",
+            "award": "最佳答辩奖（演示）",
+            "description": "为校园设备借用助手整理从查库存、核对资格到确认办理的流程。设计三组演示场景，包括查不到设备和信息不全时的回退路径。与开发同学一起完成交互稿和验收清单，负责五分钟答辩。"
+          }
+        ]
       },
       {
         "userId": "00000000-0000-4000-8000-000000000002",
         "nickname": "许言",
+        "skills": [
+          "data-collection",
+          "data-analysis",
+          "statistics",
+          "mathematical-modeling",
+          "machine-learning",
+          "data-visualization",
+          "academic-writing"
+        ],
+        "contribution": "可以用 Python、R 和 SQL 处理 CSV、公开数据和问卷，补齐字段字典，记录去重、缺失值处理和异常值规则。可为回归、聚类和公平性指标搭建基线，做分层验证与敏感性分析，交付可重跑的 Notebook、图表和论文方法段。",
+        "customSkills": [
+          "问卷信效度分析",
+          "可复现 Notebook",
+          "模型敏感性分析"
+        ],
         "college": "统计学院",
-        "skills": ["data-analysis"],
-        "contribution": "清洗数据并完成统计分析"
+        "major": "统计学",
+        "competitionIntent": "想加入美赛队做数据与建模，偏好交通、能源或校园公共服务题。希望开赛先约定变量命名与模型接口，首轮交付数据审计和基线，随后换不同假设复核结论。可以独立完成可视化和技术附录。",
+        "grade": "大二"
       },
       {
         "userId": "00000000-0000-4000-8000-000000000003",
         "nickname": "周禾",
+        "skills": [
+          "development",
+          "frontend",
+          "backend",
+          "agent-development",
+          "ui-ux",
+          "graphic-design",
+          "video-editing"
+        ],
+        "contribution": "可以用 React、TypeScript 和 FastAPI 把需求做成可操作的原型，负责 Figma 交互稿、接口联调、工具调用状态和失败回退。演示前会准备正常、空数据、超时三条路径，整理运行说明和备用录屏。",
+        "customSkills": [
+          "Figma 组件设计",
+          "工具调用状态设计",
+          "演示录屏与回退预案"
+        ],
         "college": "计算机与人工智能学院",
-        "skills": ["development"],
-        "contribution": "开发原型并制作展示页面"
+        "major": "计算机科学与技术",
+        "grade": "大二",
+        "experience": "熟悉从用户流程到原型和试用反馈的迭代。做过带流式结果、工具状态和引用来源的界面，习惯为错误态和移动端操作补交互。与产品同学协作时会提前确认接口字段和演示数据。",
+        "projects": [
+          {
+            "competition": "AI 智能体 + 校赛 · 训练项目",
+            "role": "全栈原型 · 检索工具与结果界面",
+            "award": "最佳展示奖（演示）",
+            "description": "实现课程资料检索助手原型。响应区显示当前工具状态、摘要与引用来源；查不到资料时提供关键词重试入口。录制了从提问到核验来源的演示，并给出模拟环境的启动说明。"
+          },
+          {
+            "competition": "校级校园应用设计训练赛",
+            "role": "前端开发 · 交互设计与可用性测试",
+            "award": "校赛一等奖（演示）",
+            "description": "实现校园失物招领网页的筛选、发布、认领三个流程。用小屏幕试用记录改进图片上传和位置填写，为缺省图片、离线与重复提交补齐反馈。交付可点击稿和可运行原型。"
+          }
+        ]
       }
     ]
   },
@@ -40,27 +138,63 @@
       {
         "id": "10000000-0000-4000-8000-000000000001",
         "ownerId": "00000000-0000-4000-8000-000000000001",
-        "competition": "数学建模校赛",
-        "teamName": "数学建模队",
+        "competition": "美赛",
+        "teamName": "城市脉络建模队",
+        "isPublished": true,
         "teamNumber": "20261124001",
         "openings": 1,
-        "skills": ["data-analysis"],
-        "background": "清洗问卷数据、汇总关键指标并参与建模",
-        "requirements": [{ "skills": ["data-analysis"], "expectation": null }],
+        "skills": [
+          "data-analysis",
+          "data-visualization",
+          "statistics"
+        ],
+        "background": "我们组队参加美赛 MCM/ICM，目前有两名成员，分别负责问题拆解与论文统稿、约束建模与求解。赛前以晚高峰公交接驳为练习题，已整理公开时刻表、站点客流样例和一道可用的基线模型，准备进行一次周末限时模拟。现在缺一位数据与验证同学，和我们一起补齐数据审计、对照实验及图表。正式比赛按公开赛题重新选题。",
+        "requirements": [
+          {
+            "skills": [
+              "data-analysis",
+              "data-visualization",
+              "statistics"
+            ],
+            "expectation": "负责公开数据的清洗和变量字典，记录缺失值与异常值处理规则；用 Python 或 R 做基线对照和敏感性分析，交付可重跑的代码与论文图表。能在模拟赛开题前一起确认数据口径。"
+          }
+        ],
         "createdAt": "2026-11-24T00:00:00Z"
       },
       {
         "id": "10000000-0000-4000-8000-000000000002",
         "ownerId": "00000000-0000-4000-8000-000000000001",
-        "competition": "校园创新创业大赛",
-        "teamName": "校园创新组",
+        "competition": "AI 智能体+ 大赛校赛",
+        "teamName": "校园借用助手队",
+        "isPublished": true,
         "teamNumber": "20261124002",
         "openings": 2,
-        "skills": ["design", "development"],
-        "background": "实现原型和设计展示页",
+        "skills": [
+          "agent-development",
+          "backend",
+          "development",
+          "frontend",
+          "presentation",
+          "ui-ux"
+        ],
+        "background": "我们参加 AI 智能体+ 大赛校赛，做一个校园设备借用助手。输入「周五活动需要两套无线麦」，原型会调用模拟库存查询工具，核对预约规则，并在用户确认后生成借用申请；缺货或条件不明确时会给出替代设备或追问。队长已完成使用流程、六条演示用例和虚构设备台账，现招募一位智能体开发同学、一位交互与演示同学。",
         "requirements": [
-          { "skills": ["development"], "expectation": "实现原型" },
-          { "skills": ["design"], "expectation": "设计展示页" }
+          {
+            "skills": [
+              "agent-development",
+              "backend",
+              "development"
+            ],
+            "expectation": "搭建设备查询、借用资格核对和申请草稿三个工具；处理缺库存、缺参数与重复确认等情况，提供可复现的本地演示流程。"
+          },
+          {
+            "skills": [
+              "ui-ux",
+              "frontend",
+              "presentation"
+            ],
+            "expectation": "设计从需求输入、工具执行到人工确认的交互；实现能展示状态和错误恢复的网页原型，与队长一起完成五分钟演示脚本和备用录屏。"
+          }
         ],
         "createdAt": "2026-11-24T00:00:00Z"
       }
@@ -72,39 +206,148 @@
       "nickname": "林舟",
       "college": "工商管理学院",
       "qq": "DEMO-QQ-001",
-      "skills": ["presentation"],
-      "contribution": "组织团队并推进项目",
-      "major": null,
-      "grade": null,
-      "experience": null,
-      "evidenceIds": [],
-      "publicFields": { "college": true, "major": false, "grade": false, "experience": false, "availability": false, "preferredRole": false, "interests": false }
+      "skills": [
+        "product-management",
+        "project-management",
+        "user-research",
+        "business-analysis",
+        "business-planning",
+        "academic-writing",
+        "slide-design",
+        "presentation"
+      ],
+      "contribution": "能把开放题拆成可验证的子问题，写清假设和指标，安排模型、论文、复核三条并行任务。拿到素材后可负责比较方案、撰写摘要、统一图表和术语，并组织交叉审稿。校赛项目里也能负责用户访谈、需求取舍和现场演示。",
+      "major": "工商管理",
+      "grade": "大三",
+      "experience": "常用共享任务板、数据字典和版本记录协作。有过两次队长经历：一次带队做公共服务调度建模，一次把校园服务需求整理为可演示的智能体流程。其中负责问题拆解和答辩，模型参数由负责同学复核。",
+      "evidenceIds": [
+        "20000000-0000-4000-8000-000000000001"
+      ],
+      "publicFields": {
+        "college": true,
+        "major": true,
+        "grade": true,
+        "experience": true,
+        "competitionIntent": true
+      },
+      "customSkills": [
+        "限时赛任务拆解",
+        "评估指标设计",
+        "模拟答辩"
+      ],
+      "competitionIntent": "美赛优先。希望组一支三人队，练习周末限时赛，交卷前留两轮独立复核；目前缺能用公开数据建模、检验误差的队友。AI 智能体 + 校赛计划做校园设备借用助手，想找能实现工具调用与操作回退的同学。",
+      "projects": [
+        {
+          "competition": "校级数学建模训练赛",
+          "role": "队长 · 问题拆解与论文统稿",
+          "award": "优秀论文奖（演示）",
+          "description": "研究晚高峰校车调度。把题目拆成站点需求估计、车辆周转和班次约束三部分，用现行时刻表做基线。交付了假设清单、三套发车方案的对照表和可复查的论文附录；本人负责指标、进度和论文统稿。"
+        },
+        {
+          "competition": "AI 智能体 + 校赛 · 训练项目",
+          "role": "产品负责人 · 访谈、流程与路演",
+          "award": "最佳答辩奖（演示）",
+          "description": "为校园设备借用助手整理从查库存、核对资格到确认办理的流程。设计三组演示场景，包括查不到设备和信息不全时的回退路径。与开发同学一起完成交互稿和验收清单，负责五分钟答辩。"
+        }
+      ]
     },
     "candidate-a": {
       "userId": "00000000-0000-4000-8000-000000000002",
       "nickname": "许言",
       "college": "统计学院",
       "qq": "DEMO-QQ-002",
-      "skills": ["data-analysis"],
-      "contribution": "清洗数据并完成统计分析",
-      "major": null,
-      "grade": null,
-      "experience": null,
-      "evidenceIds": [],
-      "publicFields": { "college": true, "major": false, "grade": false, "experience": false, "availability": false, "preferredRole": false, "interests": false }
+      "skills": [
+        "data-collection",
+        "data-analysis",
+        "statistics",
+        "mathematical-modeling",
+        "machine-learning",
+        "data-visualization",
+        "academic-writing"
+      ],
+      "contribution": "可以用 Python、R 和 SQL 处理 CSV、公开数据和问卷，补齐字段字典，记录去重、缺失值处理和异常值规则。可为回归、聚类和公平性指标搭建基线，做分层验证与敏感性分析，交付可重跑的 Notebook、图表和论文方法段。",
+      "major": "统计学",
+      "grade": "大二",
+      "experience": "参加过学院数据分析训练营，习惯先做缺失记录和样本分布诊断，再决定建模。曾把基线、随机种子、数据过滤条件和不同阈值下的结果整理进同一份报告。展示用图会注明样本量和分析口径。",
+      "evidenceIds": [
+        "20000000-0000-4000-8000-000000000002"
+      ],
+      "publicFields": {
+        "college": true,
+        "major": true,
+        "grade": false,
+        "experience": false,
+        "competitionIntent": true
+      },
+      "customSkills": [
+        "问卷信效度分析",
+        "可复现 Notebook",
+        "模型敏感性分析"
+      ],
+      "competitionIntent": "想加入美赛队做数据与建模，偏好交通、能源或校园公共服务题。希望开赛先约定变量命名与模型接口，首轮交付数据审计和基线，随后换不同假设复核结论。可以独立完成可视化和技术附录。",
+      "projects": [
+        {
+          "competition": "校级数学建模训练赛",
+          "role": "数据清洗 · 基线回归与验证",
+          "award": "校赛三等奖（演示）",
+          "description": "使用虚构食堂问卷研究满意度。统一分店和时段编码，区分缺答与无效填答，比较线性回归和树模型，并将验证集按分店留出。交付清洗日志、可运行 Notebook 和两版敏感性图。"
+        },
+        {
+          "competition": "校级统计调查训练赛",
+          "role": "问卷设计 · 抽样与统计推断",
+          "award": "优秀报告奖（演示）",
+          "description": "以校园自习空间使用为题，先做小样本预调查，再按年级与常用时段分层比较。报告展示样本量、置信区间和非响应偏差，附变量字典与完整绘图代码。"
+        }
+      ]
     },
     "candidate-b": {
       "userId": "00000000-0000-4000-8000-000000000003",
       "nickname": "周禾",
       "college": "计算机与人工智能学院",
       "qq": "DEMO-QQ-003",
-      "skills": ["development"],
-      "contribution": "开发原型并制作展示页面",
-      "major": null,
-      "grade": null,
-      "experience": null,
-      "evidenceIds": [],
-      "publicFields": { "college": true, "major": false, "grade": false, "experience": false, "availability": false, "preferredRole": false, "interests": false }
+      "skills": [
+        "development",
+        "frontend",
+        "backend",
+        "agent-development",
+        "ui-ux",
+        "graphic-design",
+        "video-editing"
+      ],
+      "contribution": "可以用 React、TypeScript 和 FastAPI 把需求做成可操作的原型，负责 Figma 交互稿、接口联调、工具调用状态和失败回退。演示前会准备正常、空数据、超时三条路径，整理运行说明和备用录屏。",
+      "major": "计算机科学与技术",
+      "grade": "大二",
+      "experience": "熟悉从用户流程到原型和试用反馈的迭代。做过带流式结果、工具状态和引用来源的界面，习惯为错误态和移动端操作补交互。与产品同学协作时会提前确认接口字段和演示数据。",
+      "evidenceIds": [
+        "20000000-0000-4000-8000-000000000003"
+      ],
+      "publicFields": {
+        "college": true,
+        "major": true,
+        "grade": true,
+        "experience": true,
+        "competitionIntent": false
+      },
+      "customSkills": [
+        "Figma 组件设计",
+        "工具调用状态设计",
+        "演示录屏与回退预案"
+      ],
+      "competitionIntent": "准备参加 AI 智能体 + 校赛，偏向校园物品流转、设备借用或课程资料检索。希望队里有人负责用户调研与评测指标，我负责前端原型、工具接入和现场演示。也可以协助美赛团队做可交互的结果展示。",
+      "projects": [
+        {
+          "competition": "AI 智能体 + 校赛 · 训练项目",
+          "role": "全栈原型 · 检索工具与结果界面",
+          "award": "最佳展示奖（演示）",
+          "description": "实现课程资料检索助手原型。响应区显示当前工具状态、摘要与引用来源；查不到资料时提供关键词重试入口。录制了从提问到核验来源的演示，并给出模拟环境的启动说明。"
+        },
+        {
+          "competition": "校级校园应用设计训练赛",
+          "role": "前端开发 · 交互设计与可用性测试",
+          "award": "校赛一等奖（演示）",
+          "description": "实现校园失物招领网页的筛选、发布、认领三个流程。用小屏幕试用记录改进图片上传和位置填写，为缺省图片、离线与重复提交补齐反馈。交付可点击稿和可运行原型。"
+        }
+      ]
     }
   }
 }

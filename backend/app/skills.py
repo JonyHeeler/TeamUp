@@ -16,4 +16,13 @@ SKILL_LABELS = {
     "finance": "财务分析",
     "video-editing": "视频制作",
     "project-management": "项目管理",
+    "mobile-development": "移动端开发",
+    "statistics": "统计分析",
+    "data-visualization": "数据可视化",
+    "ui-ux": "界面与交互设计",
+    "graphic-design": "平面设计",
+    "market-research": "市场调研",
+    "business-planning": "商业策划",
+    "slide-design": "演示文稿制作",
+    "copywriting": "文案写作",
 }

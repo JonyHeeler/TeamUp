@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" fill="none">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="960" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e9f3ff"/><stop offset="1" stop-color="#bcd3f5"/>
+    </linearGradient>
+    <linearGradient id="terrain" x1="300" y1="112" x2="650" y2="387" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#91c8ff"/><stop offset=".54" stop-color="#416ec3"/><stop offset="1" stop-color="#233970"/>
+    </linearGradient>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M30 0H0V30" stroke="#244478" stroke-opacity=".16"/>
+    </pattern>
+  </defs>
+  <path fill="url(#paper)" d="M0 0h960v480H0z"/>
+  <path fill="url(#grid)" d="M30 30h900v420H30z"/>
+  <rect x="30.5" y="30.5" width="899" height="419" rx="22" stroke="#244478" stroke-opacity=".28"/>
+  <circle cx="480" cy="224" r="151" fill="#f4f9ff" fill-opacity=".58" stroke="#284c89" stroke-opacity=".25"/>
+  <circle cx="480" cy="224" r="170" stroke="#284c89" stroke-opacity=".38" stroke-width="2" stroke-dasharray="2 8"/>
+  <path d="m202 294 278 105 278-105-278-105-278 105Z" fill="#294b84" fill-opacity=".09" stroke="#244478" stroke-opacity=".45"/>
+  <g stroke="#244478" stroke-opacity=".27">
+    <path d="m248 277 278 105m-232-122 278 105m-232-123 278 105m-232-122 278 105m-232-122 278 105m-462 0 278-105M294 329l278-105M340 347l278-105M386 364l278-105M432 381l278-105"/>
+    <path d="M480 399V81m0 318 294-111m-294 111L185 288" stroke-dasharray="4 5"/>
+  </g>
+  <path d="M215 272c68 21 124-12 187-80 64-70 107-97 160-62 52 35 91 99 183 142L480 366C375 367 314 307 215 272Z" fill="url(#terrain)" fill-opacity=".96" stroke="#294e91" stroke-width="2"/>
+  <g stroke="#eef6ff" stroke-opacity=".74" stroke-width="1.35">
+    <path d="M260 288c73 20 125-15 183-72 60-60 102-81 156-44 44 30 75 81 103 116M306 308c69 17 126-15 178-64 45-42 84-61 128-35 37 22 57 60 52 96M355 331c69 10 122-26 163-59 44-34 76-43 111-18 23 16 20 41-6 67M417 353c58-7 89-32 129-56 35-21 59-24 76-8 16 16-10 39-44 48"/>
+    <path d="M265 280c77 26 137 78 215 86M312 258c26 41 103 88 210 93M358 226c21 50 101 115 207 109M401 193c23 56 108 130 207 128M446 151c35 66 104 131 205 155M491 122c32 69 114 147 207 168M538 120c39 49 111 124 207 152"/>
+  </g>
+  <path d="M542 126v-32h118" stroke="#284c89" stroke-width="1.5"/>
+  <circle cx="542" cy="126" r="5" fill="#ff9258" stroke="#fff5de" stroke-width="2"/>
+  <g fill="#244478" font-family="monospace" font-size="14" letter-spacing="3">
+    <text x="57" y="76">TEAMUP</text><text x="903" y="416" text-anchor="end">MCM / ICM</text>
+    <text x="670" y="99" letter-spacing="1">f(x, y)</text>
+  </g>
+</svg>

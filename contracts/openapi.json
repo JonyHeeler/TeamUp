@@ -5,6 +5,453 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/v1/auth/capabilities": {
+      "get": {
+        "summary": "Capabilities",
+        "operationId": "capabilities_api_v1_auth_capabilities_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthCapabilities"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "summary": "Register",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Registration"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentSessionUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "summary": "Login",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthCredentials"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StudentSessionUser"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/password/reset/confirm": {
+      "post": {
+        "summary": "Reset Password",
+        "operationId": "reset_password_api_v1_auth_password_reset_confirm_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPassword"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported Media Type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "summary": "Logout",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/password/change": {
+      "post": {
+        "summary": "Change Password",
+        "operationId": "change_password_api_v1_auth_password_change_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePassword"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/demo/session": {
       "post": {
         "summary": "Session",
@@ -25,7 +472,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/SessionUser"
                 }
               }
             }
@@ -83,7 +530,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/SessionUser"
+                    },
+                    {
+                      "$ref": "#/components/schemas/StudentSessionUser"
+                    }
+                  ],
+                  "title": "Response Me Api V1 Me Get"
                 }
               }
             }
@@ -178,7 +633,16 @@
                     "business-analysis",
                     "finance",
                     "video-editing",
-                    "project-management"
+                    "project-management",
+                    "mobile-development",
+                    "statistics",
+                    "data-visualization",
+                    "ui-ux",
+                    "graphic-design",
+                    "market-research",
+                    "business-planning",
+                    "slide-design",
+                    "copywriting"
                   ],
                   "type": "string"
                 },
@@ -526,7 +990,16 @@
                     "business-analysis",
                     "finance",
                     "video-editing",
-                    "project-management"
+                    "project-management",
+                    "mobile-development",
+                    "statistics",
+                    "data-visualization",
+                    "ui-ux",
+                    "graphic-design",
+                    "market-research",
+                    "business-planning",
+                    "slide-design",
+                    "copywriting"
                   ],
                   "type": "string"
                 },
@@ -684,6 +1157,232 @@
               }
             },
             "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update Recruitment",
+        "operationId": "update_recruitment_api_v1_recruitments__recruitment_id__put",
+        "parameters": [
+          {
+            "name": "recruitment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Recruitment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecruitmentInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Recruitment"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/me/recruitments": {
+      "get": {
+        "summary": "Own Recruitments",
+        "operationId": "own_recruitments_api_v1_me_recruitments_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecruitmentList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recruitments/{recruitment_id}/visibility": {
+      "patch": {
+        "summary": "Set Recruitment Visibility",
+        "operationId": "set_recruitment_visibility_api_v1_recruitments__recruitment_id__visibility_patch",
+        "parameters": [
+          {
+            "name": "recruitment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Recruitment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecruitmentVisibility"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Recruitment"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
           },
           "422": {
             "content": {
@@ -881,6 +1580,16 @@
               }
             }
           },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Unprocessable Entity",
             "content": {
@@ -1006,6 +1715,71 @@
   },
   "components": {
     "schemas": {
+      "AuthCapabilities": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "off",
+              "demo",
+              "student"
+            ],
+            "title": "Mode"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "mode"
+        ],
+        "title": "AuthCapabilities"
+      },
+      "AuthCredentials": {
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 4,
+            "title": "Studentid"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "studentId",
+          "password"
+        ],
+        "title": "AuthCredentials"
+      },
+      "ChangePassword": {
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Currentpassword"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "currentPassword",
+          "password"
+        ],
+        "title": "ChangePassword"
+      },
       "Competition": {
         "properties": {
           "id": {
@@ -1046,34 +1820,6 @@
           "items"
         ],
         "title": "CompetitionList"
-      },
-      "CustomField": {
-        "properties": {
-          "label": {
-            "type": "string",
-            "maxLength": 32,
-            "minLength": 1,
-            "title": "Label"
-          },
-          "value": {
-            "type": "string",
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Value"
-          },
-          "isPublic": {
-            "type": "boolean",
-            "title": "Ispublic",
-            "default": false
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "label",
-          "value"
-        ],
-        "title": "CustomField"
       },
       "Decision": {
         "properties": {
@@ -1194,6 +1940,28 @@
           "canRespond": {
             "type": "boolean",
             "title": "Canrespond"
+          },
+          "teamName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teamname"
+          },
+          "counterpartNickname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counterpartnickname"
           }
         },
         "additionalProperties": false,
@@ -1266,6 +2034,39 @@
             "type": "boolean",
             "title": "Canrespond"
           },
+          "teamName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teamname"
+          },
+          "counterpartNickname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counterpartnickname"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
           "counterpartQq": {
             "anyOf": [
               {
@@ -1318,6 +2119,18 @@
               }
             ],
             "title": "Candidateid"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
           }
         },
         "additionalProperties": false,
@@ -1371,7 +2184,16 @@
                 "business-analysis",
                 "finance",
                 "video-editing",
-                "project-management"
+                "project-management",
+                "mobile-development",
+                "statistics",
+                "data-visualization",
+                "ui-ux",
+                "graphic-design",
+                "market-research",
+                "business-planning",
+                "slide-design",
+                "copywriting"
               ]
             },
             "type": "array",
@@ -1431,41 +2253,25 @@
             ],
             "title": "Experience"
           },
-          "availability": {
+          "competitionIntent": {
             "anyOf": [
               {
                 "type": "string",
-                "maxLength": 80
+                "maxLength": 500
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Availability"
+            "title": "Competitionintent"
           },
-          "preferredRole": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Preferredrole"
-          },
-          "interests": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Interests"
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/ProfileProject"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Projects"
           },
           "customSkills": {
             "items": {
@@ -1476,14 +2282,6 @@
             "type": "array",
             "maxItems": 12,
             "title": "Customskills"
-          },
-          "customFields": {
-            "items": {
-              "$ref": "#/components/schemas/CustomField"
-            },
-            "type": "array",
-            "maxItems": 8,
-            "title": "Customfields"
           },
           "publicFields": {
             "$ref": "#/components/schemas/PublicFields"
@@ -1559,7 +2357,16 @@
                 "business-analysis",
                 "finance",
                 "video-editing",
-                "project-management"
+                "project-management",
+                "mobile-development",
+                "statistics",
+                "data-visualization",
+                "ui-ux",
+                "graphic-design",
+                "market-research",
+                "business-planning",
+                "slide-design",
+                "copywriting"
               ]
             },
             "type": "array",
@@ -1578,27 +2385,15 @@
             "title": "College"
           },
           "major": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
             "title": "Major"
           },
           "grade": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
             "title": "Grade"
           },
           "experience": {
@@ -1613,41 +2408,25 @@
             ],
             "title": "Experience"
           },
-          "availability": {
+          "competitionIntent": {
             "anyOf": [
               {
                 "type": "string",
-                "maxLength": 80
+                "maxLength": 500
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Availability"
+            "title": "Competitionintent"
           },
-          "preferredRole": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Preferredrole"
-          },
-          "interests": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 80
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Interests"
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/ProfileProject"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Projects"
           },
           "customSkills": {
             "items": {
@@ -1658,14 +2437,6 @@
             "type": "array",
             "maxItems": 12,
             "title": "Customskills"
-          },
-          "customFields": {
-            "items": {
-              "$ref": "#/components/schemas/CustomField"
-            },
-            "type": "array",
-            "maxItems": 8,
-            "title": "Customfields"
           },
           "publicFields": {
             "$ref": "#/components/schemas/PublicFields"
@@ -1705,6 +2476,8 @@
           "skills",
           "contribution",
           "college",
+          "major",
+          "grade",
           "qq"
         ],
         "title": "ProfileInput"
@@ -1726,28 +2499,39 @@
         ],
         "title": "ProfileList"
       },
-      "PublicCustomField": {
+      "ProfileProject": {
         "properties": {
-          "label": {
+          "competition": {
             "type": "string",
-            "maxLength": 32,
+            "maxLength": 80,
             "minLength": 1,
-            "title": "Label"
+            "title": "Competition"
           },
-          "value": {
+          "role": {
             "type": "string",
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Value"
+            "maxLength": 80,
+            "title": "Role",
+            "default": ""
+          },
+          "award": {
+            "type": "string",
+            "maxLength": 80,
+            "title": "Award",
+            "default": ""
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Description",
+            "default": ""
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "label",
-          "value"
+          "competition"
         ],
-        "title": "PublicCustomField"
+        "title": "ProfileProject"
       },
       "PublicFields": {
         "properties": {
@@ -1771,19 +2555,9 @@
             "title": "Experience",
             "default": false
           },
-          "availability": {
+          "competitionIntent": {
             "type": "boolean",
-            "title": "Availability",
-            "default": false
-          },
-          "preferredRole": {
-            "type": "boolean",
-            "title": "Preferredrole",
-            "default": false
-          },
-          "interests": {
-            "type": "boolean",
-            "title": "Interests",
+            "title": "Competitionintent",
             "default": false
           }
         },
@@ -1821,7 +2595,16 @@
                 "business-analysis",
                 "finance",
                 "video-editing",
-                "project-management"
+                "project-management",
+                "mobile-development",
+                "statistics",
+                "data-visualization",
+                "ui-ux",
+                "graphic-design",
+                "market-research",
+                "business-planning",
+                "slide-design",
+                "copywriting"
               ]
             },
             "type": "array",
@@ -1875,7 +2658,7 @@
             ],
             "title": "Experience"
           },
-          "availability": {
+          "competitionIntent": {
             "anyOf": [
               {
                 "type": "string"
@@ -1884,29 +2667,15 @@
                 "type": "null"
               }
             ],
-            "title": "Availability"
+            "title": "Competitionintent"
           },
-          "preferredRole": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Preferredrole"
-          },
-          "interests": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Interests"
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/ProfileProject"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Projects"
           },
           "customSkills": {
             "items": {
@@ -1914,13 +2683,6 @@
             },
             "type": "array",
             "title": "Customskills"
-          },
-          "customFields": {
-            "items": {
-              "$ref": "#/components/schemas/PublicCustomField"
-            },
-            "type": "array",
-            "title": "Customfields"
           },
           "evidenceIds": {
             "anyOf": [
@@ -1978,6 +2740,10 @@
             "format": "date-time",
             "title": "Createdat"
           },
+          "isPublished": {
+            "type": "boolean",
+            "title": "Ispublished"
+          },
           "competition": {
             "type": "string",
             "maxLength": 80,
@@ -2018,7 +2784,16 @@
                 "business-analysis",
                 "finance",
                 "video-editing",
-                "project-management"
+                "project-management",
+                "mobile-development",
+                "statistics",
+                "data-visualization",
+                "ui-ux",
+                "graphic-design",
+                "market-research",
+                "business-planning",
+                "slide-design",
+                "copywriting"
               ]
             },
             "type": "array",
@@ -2044,6 +2819,7 @@
           "id",
           "ownerId",
           "createdAt",
+          "isPublished",
           "competition",
           "teamName",
           "teamNumber",
@@ -2145,7 +2921,16 @@
                 "business-analysis",
                 "finance",
                 "video-editing",
-                "project-management"
+                "project-management",
+                "mobile-development",
+                "statistics",
+                "data-visualization",
+                "ui-ux",
+                "graphic-design",
+                "market-research",
+                "business-planning",
+                "slide-design",
+                "copywriting"
               ]
             },
             "type": "array",
@@ -2167,6 +2952,80 @@
         "additionalProperties": false,
         "type": "object",
         "title": "RecruitmentRequirement"
+      },
+      "RecruitmentVisibility": {
+        "properties": {
+          "isPublished": {
+            "type": "boolean",
+            "title": "Ispublished"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "isPublished"
+        ],
+        "title": "RecruitmentVisibility"
+      },
+      "Registration": {
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 4,
+            "title": "Studentid"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
+          },
+          "activationToken": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Activationtoken"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "studentId",
+          "password",
+          "activationToken"
+        ],
+        "title": "Registration"
+      },
+      "ResetPassword": {
+        "properties": {
+          "studentId": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 4,
+            "title": "Studentid"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password"
+          },
+          "resetToken": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Resettoken"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "studentId",
+          "password",
+          "resetToken"
+        ],
+        "title": "ResetPassword"
       },
       "RetainEvidence": {
         "properties": {
@@ -2202,6 +3061,60 @@
         ],
         "title": "SessionInput"
       },
+      "SessionUser": {
+        "properties": {
+          "userId": {
+            "type": "string",
+            "title": "Userid"
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          },
+          "persona": {
+            "type": "string",
+            "enum": [
+              "captain",
+              "candidate-a",
+              "candidate-b"
+            ],
+            "title": "Persona"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "userId",
+          "nickname",
+          "persona"
+        ],
+        "title": "SessionUser"
+      },
+      "StudentSessionUser": {
+        "properties": {
+          "userId": {
+            "type": "string",
+            "title": "Userid"
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          },
+          "kind": {
+            "type": "string",
+            "const": "student",
+            "title": "Kind",
+            "default": "student"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "userId",
+          "nickname"
+        ],
+        "title": "StudentSessionUser"
+      },
       "UploadEvidence": {
         "properties": {
           "image": {
@@ -2218,25 +3131,6 @@
           "image"
         ],
         "title": "UploadEvidence"
-      },
-      "User": {
-        "properties": {
-          "userId": {
-            "type": "string",
-            "title": "Userid"
-          },
-          "nickname": {
-            "type": "string",
-            "title": "Nickname"
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "userId",
-          "nickname"
-        ],
-        "title": "User"
       }
     }
   }

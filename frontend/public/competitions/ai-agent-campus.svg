@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" fill="none">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="960" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f2e9ff"/><stop offset="1" stop-color="#d5d9ff"/>
+    </linearGradient>
+    <linearGradient id="core" x1="411" y1="164" x2="562" y2="303" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#664cca"/><stop offset="1" stop-color="#372a8a"/>
+    </linearGradient>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M30 0H0V30" stroke="#4e3895" stroke-opacity=".15"/>
+    </pattern>
+  </defs>
+  <path fill="url(#paper)" d="M0 0h960v480H0z"/>
+  <path fill="url(#grid)" d="M30 30h900v420H30z"/>
+  <rect x="30.5" y="30.5" width="899" height="419" rx="22" stroke="#4e3895" stroke-opacity=".28"/>
+  <circle cx="480" cy="240" r="151" fill="#f8f5ff" fill-opacity=".58" stroke="#5946a1" stroke-opacity=".28"/>
+  <circle cx="480" cy="240" r="173" stroke="#5946a1" stroke-opacity=".4" stroke-width="2" stroke-dasharray="2 8"/>
+  <g stroke="#6653aa" stroke-width="2">
+    <path d="M405 208h-51v-44h-74m125 107h-51v45h-74m275-108h51v-44h74M555 271h51v45h74"/>
+    <path d="M480 163v-40m0 194v40" stroke-dasharray="4 5"/>
+  </g>
+  <g fill="#fcf9ff" stroke="#6653aa" stroke-width="1.5">
+    <rect x="191" y="130" width="89" height="68" rx="13"/>
+    <rect x="191" y="282" width="89" height="68" rx="13"/>
+    <rect x="680" y="130" width="89" height="68" rx="13"/>
+    <rect x="680" y="282" width="89" height="68" rx="13"/>
+  </g>
+  <g stroke="#534299" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="236" cy="164" r="14"/><path d="m236 164 8-8m-8 8-6 6"/>
+    <path d="M222 311c0-8 28-8 28 0v12c0 8-28 8-28 0v-12Zm0 0c0 8 28 8 28 0"/>
+    <path d="M715 151h19v26h-19zm5 7h9m-9 6h9m-9 6h5"/>
+    <path d="m716 309-8 7 8 7m17-14 8 7-8 7m-5-18-7 22"/>
+  </g>
+  <g fill="#f59a77" stroke="#fbf5ff" stroke-width="2">
+    <circle cx="354" cy="208" r="5"/><circle cx="354" cy="271" r="5"/>
+    <circle cx="606" cy="208" r="5"/><circle cx="606" cy="271" r="5"/>
+  </g>
+  <rect x="405" y="170" width="150" height="150" rx="39" fill="#372a8a" fill-opacity=".16"/>
+  <rect x="405" y="163" width="150" height="150" rx="39" fill="url(#core)" stroke="#342878" stroke-width="2"/>
+  <rect x="418" y="176" width="124" height="124" rx="30" stroke="#c1b6ff" stroke-opacity=".52"/>
+  <path d="M480 198c7 25 14 32 39 40-25 8-32 15-39 40-7-25-14-32-39-40 25-8 32-15 39-40Z" fill="#f8ecff"/>
+  <path d="M511 200c2 8 4 11 12 13-8 2-10 5-12 13-3-8-5-11-13-13 8-2 10-5 13-13Z" fill="#ffc59d"/>
+  <g fill="#4e3895" font-family="monospace" font-size="14" letter-spacing="3">
+    <text x="57" y="76">TEAMUP</text><text x="903" y="416" text-anchor="end">AI AGENT +</text>
+  </g>
+</svg>
