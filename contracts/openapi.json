@@ -1407,6 +1407,206 @@
         }
       }
     },
+    "/api/v1/recruitments/{recruitment_id}/republish": {
+      "post": {
+        "summary": "Republish Recruitment Route",
+        "operationId": "republish_recruitment_route_api_v1_recruitments__recruitment_id__republish_post",
+        "parameters": [
+          {
+            "name": "recruitment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Recruitment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecruitmentRepublishInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Recruitment"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/recruitments/{recruitment_id}/renew": {
+      "post": {
+        "summary": "Renew Recruitment Route",
+        "operationId": "renew_recruitment_route_api_v1_recruitments__recruitment_id__renew_post",
+        "parameters": [
+          {
+            "name": "recruitment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Recruitment Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecruitmentRenewInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Recruitment"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
     "/api/v1/me/intents": {
       "get": {
         "summary": "Intents",
@@ -1441,6 +1641,1182 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/me/high-five-candidates": {
+      "get": {
+        "summary": "High Five Candidates",
+        "operationId": "high_five_candidates_api_v1_me_high_five_candidates_get",
+        "parameters": [
+          {
+            "name": "recruitmentId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Recruitmentid"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Teamid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HighFiveCandidateList"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/users/search": {
+      "get": {
+        "summary": "Search Users",
+        "operationId": "search_users_api_v1_users_search_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "teamId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Teamid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSearchList"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/me/teams": {
+      "get": {
+        "summary": "My Teams",
+        "operationId": "my_teams_api_v1_me_teams_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/teams": {
+      "post": {
+        "summary": "Create Team Route",
+        "operationId": "create_team_route_api_v1_teams_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTeamInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateTeamResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/teams/{team_id}": {
+      "put": {
+        "summary": "Update Team Route",
+        "operationId": "update_team_route_api_v1_teams__team_id__put",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Team Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTeamInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamSummary"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/teams/{team_id}/invitations": {
+      "get": {
+        "summary": "Team Invitations For Team Route",
+        "operationId": "team_invitations_for_team_route_api_v1_teams__team_id__invitations_get",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Team Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamInvitationList"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create Team Invitations Route",
+        "operationId": "create_team_invitations_route_api_v1_teams__team_id__invitations_post",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Team Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeamInvitationInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamInvitationList"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/teams/{team_id}/members/me": {
+      "delete": {
+        "summary": "Leave Team Route",
+        "operationId": "leave_team_route_api_v1_teams__team_id__members_me_delete",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Team Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/teams/{team_id}/members/{member_user_id}": {
+      "delete": {
+        "summary": "Remove Team Member Route",
+        "operationId": "remove_team_member_route_api_v1_teams__team_id__members__member_user_id__delete",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Team Id"
+            }
+          },
+          {
+            "name": "member_user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Member User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamSummary"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/teams/{team_id}/disband": {
+      "post": {
+        "summary": "Disband Team Route",
+        "operationId": "disband_team_route_api_v1_teams__team_id__disband_post",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Team Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamSummary"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/teams/{team_id}/recruitment": {
+      "put": {
+        "summary": "Upsert Team Recruitment Route",
+        "operationId": "upsert_team_recruitment_route_api_v1_teams__team_id__recruitment_put",
+        "parameters": [
+          {
+            "name": "team_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Team Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecruitmentInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Recruitment"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/me/team-invitations": {
+      "get": {
+        "summary": "My Team Invitations",
+        "operationId": "my_team_invitations_api_v1_me_team_invitations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamInvitationList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/team-invitations/{invitation_id}": {
+      "get": {
+        "summary": "Team Invitation Detail",
+        "operationId": "team_invitation_detail_api_v1_team_invitations__invitation_id__get",
+        "parameters": [
+          {
+            "name": "invitation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Invitation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamInvitation"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/team-invitations/{invitation_id}/response": {
+      "post": {
+        "summary": "Respond Team Invitation Route",
+        "operationId": "respond_team_invitation_route_api_v1_team_invitations__invitation_id__response_post",
+        "parameters": [
+          {
+            "name": "invitation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Invitation Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TeamInvitationDecision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamInvitation"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
           }
         }
       }
@@ -1711,6 +3087,106 @@
           }
         }
       }
+    },
+    "/api/v1/intents/{intent_id}/create-team-invite": {
+      "post": {
+        "summary": "Create Team Invite",
+        "operationId": "create_team_invite_api_v1_intents__intent_id__create_team_invite_post",
+        "parameters": [
+          {
+            "name": "intent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Intent Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTeamInviteInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamInviteResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1821,6 +3297,216 @@
         ],
         "title": "CompetitionList"
       },
+      "CreateTeamInput": {
+        "properties": {
+          "competition": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Competition"
+          },
+          "teamName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teamname"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1200,
+            "minLength": 1,
+            "title": "Description"
+          },
+          "publishRecruitment": {
+            "type": "boolean",
+            "title": "Publishrecruitment",
+            "default": false
+          },
+          "durationDays": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "enum": [
+                  7,
+                  14,
+                  30
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Durationdays"
+          },
+          "openings": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Openings"
+          },
+          "requirements": {
+            "items": {
+              "$ref": "#/components/schemas/RecruitmentRequirement"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Requirements"
+          },
+          "inviteeIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "title": "Inviteeids"
+          },
+          "inviteMessage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invitemessage"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "competition",
+          "description"
+        ],
+        "title": "CreateTeamInput"
+      },
+      "CreateTeamInviteInput": {
+        "properties": {
+          "competition": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Competition"
+          },
+          "teamName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teamname"
+          },
+          "openings": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Openings"
+          },
+          "requirements": {
+            "items": {
+              "$ref": "#/components/schemas/RecruitmentRequirement"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "title": "Requirements"
+          },
+          "background": {
+            "type": "string",
+            "maxLength": 1200,
+            "minLength": 1,
+            "title": "Background"
+          },
+          "durationDays": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "enum": [
+                  7,
+                  14,
+                  30
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Durationdays"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "competition",
+          "background"
+        ],
+        "title": "CreateTeamInviteInput"
+      },
+      "CreateTeamResult": {
+        "properties": {
+          "team": {
+            "$ref": "#/components/schemas/TeamSummary"
+          },
+          "recruitment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Recruitment"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "invitations": {
+            "items": {
+              "$ref": "#/components/schemas/TeamInvitation"
+            },
+            "type": "array",
+            "title": "Invitations"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "team"
+        ],
+        "title": "CreateTeamResult"
+      },
       "Decision": {
         "properties": {
           "decision": {
@@ -1830,6 +3516,18 @@
               "declined"
             ],
             "title": "Decision"
+          },
+          "responseMessage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsemessage"
           }
         },
         "additionalProperties": false,
@@ -1885,6 +3583,151 @@
         ],
         "title": "ErrorBody"
       },
+      "HighFiveCandidate": {
+        "properties": {
+          "userId": {
+            "type": "string",
+            "title": "Userid"
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          },
+          "skills": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "data-analysis",
+                "development",
+                "design",
+                "presentation",
+                "mathematical-modeling",
+                "machine-learning",
+                "agent-development",
+                "data-collection",
+                "frontend",
+                "backend",
+                "product-management",
+                "user-research",
+                "academic-writing",
+                "business-analysis",
+                "finance",
+                "video-editing",
+                "project-management",
+                "mobile-development",
+                "statistics",
+                "data-visualization",
+                "ui-ux",
+                "graphic-design",
+                "market-research",
+                "business-planning",
+                "slide-design",
+                "copywriting"
+              ]
+            },
+            "type": "array",
+            "title": "Skills"
+          },
+          "customSkills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Customskills"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expiresat"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/HighFiveCandidateSource"
+            },
+            "type": "array",
+            "title": "Sources"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "userId",
+          "nickname",
+          "skills",
+          "expiresAt",
+          "sources"
+        ],
+        "title": "HighFiveCandidate"
+      },
+      "HighFiveCandidateList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/HighFiveCandidate"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "HighFiveCandidateList"
+      },
+      "HighFiveCandidateSource": {
+        "properties": {
+          "intentId": {
+            "type": "string",
+            "title": "Intentid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "personal",
+              "invite",
+              "apply"
+            ],
+            "title": "Kind"
+          },
+          "recruitmentId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recruitmentid"
+          },
+          "teamName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teamname"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expiresat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "intentId",
+          "kind",
+          "expiresAt"
+        ],
+        "title": "HighFiveCandidateSource"
+      },
       "Intent": {
         "properties": {
           "id": {
@@ -1892,7 +3735,14 @@
             "title": "Id"
           },
           "recruitmentId": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Recruitmentid"
           },
           "candidateId": {
@@ -1900,14 +3750,30 @@
             "title": "Candidateid"
           },
           "ownerId": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Ownerid"
+          },
+          "senderId": {
+            "type": "string",
+            "title": "Senderid"
+          },
+          "recipientId": {
+            "type": "string",
+            "title": "Recipientid"
           },
           "kind": {
             "type": "string",
             "enum": [
               "apply",
-              "invite"
+              "invite",
+              "personal"
             ],
             "title": "Kind"
           },
@@ -1936,6 +3802,15 @@
               }
             ],
             "title": "Respondedat"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expiresat"
+          },
+          "isExpired": {
+            "type": "boolean",
+            "title": "Isexpired"
           },
           "canRespond": {
             "type": "boolean",
@@ -1968,12 +3843,14 @@
         "type": "object",
         "required": [
           "id",
-          "recruitmentId",
           "candidateId",
-          "ownerId",
+          "senderId",
+          "recipientId",
           "kind",
           "status",
           "createdAt",
+          "expiresAt",
+          "isExpired",
           "canRespond"
         ],
         "title": "Intent"
@@ -1985,7 +3862,14 @@
             "title": "Id"
           },
           "recruitmentId": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Recruitmentid"
           },
           "candidateId": {
@@ -1993,14 +3877,30 @@
             "title": "Candidateid"
           },
           "ownerId": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Ownerid"
+          },
+          "senderId": {
+            "type": "string",
+            "title": "Senderid"
+          },
+          "recipientId": {
+            "type": "string",
+            "title": "Recipientid"
           },
           "kind": {
             "type": "string",
             "enum": [
               "apply",
-              "invite"
+              "invite",
+              "personal"
             ],
             "title": "Kind"
           },
@@ -2029,6 +3929,15 @@
               }
             ],
             "title": "Respondedat"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expiresat"
+          },
+          "isExpired": {
+            "type": "boolean",
+            "title": "Isexpired"
           },
           "canRespond": {
             "type": "boolean",
@@ -2067,6 +3976,17 @@
             ],
             "title": "Message"
           },
+          "responseMessage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsemessage"
+          },
           "counterpartQq": {
             "anyOf": [
               {
@@ -2083,12 +4003,14 @@
         "type": "object",
         "required": [
           "id",
-          "recruitmentId",
           "candidateId",
-          "ownerId",
+          "senderId",
+          "recipientId",
           "kind",
           "status",
           "createdAt",
+          "expiresAt",
+          "isExpired",
           "canRespond"
         ],
         "title": "IntentDetail"
@@ -2099,13 +4021,21 @@
             "type": "string",
             "enum": [
               "apply",
-              "invite"
+              "invite",
+              "personal"
             ],
             "title": "Kind"
           },
           "recruitmentId": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Recruitmentid"
           },
           "candidateId": {
@@ -2131,13 +4061,24 @@
               }
             ],
             "title": "Message"
+          },
+          "sourcePersonalIntentId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourcepersonalintentid"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "kind",
-          "recruitmentId"
+          "kind"
         ],
         "title": "IntentInput"
       },
@@ -2731,6 +4672,10 @@
             "type": "string",
             "title": "Id"
           },
+          "teamId": {
+            "type": "string",
+            "title": "Teamid"
+          },
           "ownerId": {
             "type": "string",
             "title": "Ownerid"
@@ -2761,7 +4706,14 @@
             "title": "Teamnumber"
           },
           "openings": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Openings"
           },
           "skills": {
@@ -2811,19 +4763,86 @@
             "maxLength": 1200,
             "minLength": 1,
             "title": "Background"
+          },
+          "memberCount": {
+            "type": "integer",
+            "title": "Membercount",
+            "default": 1
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/TeamMemberInfo"
+            },
+            "type": "array",
+            "title": "Members"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "unpublished",
+              "expired"
+            ],
+            "title": "Status",
+            "default": "active"
+          },
+          "isPubliclyActive": {
+            "type": "boolean",
+            "title": "Ispubliclyactive",
+            "default": true
+          },
+          "publishedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publishedat"
+          },
+          "expiresAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expiresat"
+          },
+          "durationDays": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "enum": [
+                  7,
+                  14,
+                  30
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Durationdays"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "id",
+          "teamId",
           "ownerId",
           "createdAt",
           "isPublished",
           "competition",
           "teamName",
           "teamNumber",
-          "openings",
           "skills",
           "requirements",
           "background"
@@ -2851,9 +4870,15 @@
             "title": "Teamname"
           },
           "openings": {
-            "type": "integer",
-            "maximum": 100.0,
-            "exclusiveMinimum": 0.0,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Openings"
           },
           "requirements": {
@@ -2862,7 +4887,6 @@
             },
             "type": "array",
             "maxItems": 100,
-            "minItems": 1,
             "title": "Requirements"
           },
           "background": {
@@ -2870,14 +4894,28 @@
             "maxLength": 1200,
             "minLength": 1,
             "title": "Background"
+          },
+          "durationDays": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "enum": [
+                  7,
+                  14,
+                  30
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Durationdays"
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
           "competition",
-          "openings",
-          "requirements",
           "background"
         ],
         "title": "RecruitmentInput"
@@ -2898,6 +4936,52 @@
           "items"
         ],
         "title": "RecruitmentList"
+      },
+      "RecruitmentRenewInput": {
+        "properties": {
+          "durationDays": {
+            "type": "integer",
+            "enum": [
+              7,
+              14,
+              30
+            ],
+            "title": "Durationdays",
+            "default": 14
+          },
+          "expectedExpiresAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expectedexpiresat"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "RecruitmentRenewInput"
+      },
+      "RecruitmentRepublishInput": {
+        "properties": {
+          "durationDays": {
+            "type": "integer",
+            "enum": [
+              7,
+              14,
+              30
+            ],
+            "title": "Durationdays",
+            "default": 14
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "RecruitmentRepublishInput"
       },
       "RecruitmentRequirement": {
         "properties": {
@@ -2958,6 +5042,22 @@
           "isPublished": {
             "type": "boolean",
             "title": "Ispublished"
+          },
+          "durationDays": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "enum": [
+                  7,
+                  14,
+                  30
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Durationdays"
           }
         },
         "additionalProperties": false,
@@ -3115,6 +5215,454 @@
         ],
         "title": "StudentSessionUser"
       },
+      "TeamInvitation": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "teamId": {
+            "type": "string",
+            "title": "Teamid"
+          },
+          "teamName": {
+            "type": "string",
+            "title": "Teamname"
+          },
+          "competition": {
+            "type": "string",
+            "title": "Competition"
+          },
+          "inviterId": {
+            "type": "string",
+            "title": "Inviterid"
+          },
+          "inviterNickname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inviternickname"
+          },
+          "inviteeId": {
+            "type": "string",
+            "title": "Inviteeid"
+          },
+          "inviteeNickname": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inviteenickname"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "accepted",
+              "declined"
+            ],
+            "title": "Status"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "responseMessage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsemessage"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "respondedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Respondedat"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expiresat"
+          },
+          "isExpired": {
+            "type": "boolean",
+            "title": "Isexpired"
+          },
+          "canRespond": {
+            "type": "boolean",
+            "title": "Canrespond"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "teamId",
+          "teamName",
+          "competition",
+          "inviterId",
+          "inviteeId",
+          "status",
+          "createdAt",
+          "expiresAt",
+          "isExpired",
+          "canRespond"
+        ],
+        "title": "TeamInvitation"
+      },
+      "TeamInvitationDecision": {
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "declined"
+            ],
+            "title": "Decision"
+          },
+          "responseMessage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsemessage"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "decision"
+        ],
+        "title": "TeamInvitationDecision"
+      },
+      "TeamInvitationInput": {
+        "properties": {
+          "inviteeIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Inviteeids"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "inviteeIds"
+        ],
+        "title": "TeamInvitationInput"
+      },
+      "TeamInvitationList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TeamInvitation"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "TeamInvitationList"
+      },
+      "TeamInviteResult": {
+        "properties": {
+          "recruitment": {
+            "$ref": "#/components/schemas/Recruitment"
+          },
+          "intent": {
+            "$ref": "#/components/schemas/Intent"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "recruitment",
+          "intent"
+        ],
+        "title": "TeamInviteResult"
+      },
+      "TeamList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/TeamSummary"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "TeamList"
+      },
+      "TeamMemberInfo": {
+        "properties": {
+          "userId": {
+            "type": "string",
+            "title": "Userid"
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "captain",
+              "member"
+            ],
+            "title": "Role"
+          },
+          "joinedAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Joinedat"
+          },
+          "skills": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "data-analysis",
+                "development",
+                "design",
+                "presentation",
+                "mathematical-modeling",
+                "machine-learning",
+                "agent-development",
+                "data-collection",
+                "frontend",
+                "backend",
+                "product-management",
+                "user-research",
+                "academic-writing",
+                "business-analysis",
+                "finance",
+                "video-editing",
+                "project-management",
+                "mobile-development",
+                "statistics",
+                "data-visualization",
+                "ui-ux",
+                "graphic-design",
+                "market-research",
+                "business-planning",
+                "slide-design",
+                "copywriting"
+              ]
+            },
+            "type": "array",
+            "title": "Skills"
+          },
+          "customSkills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Customskills"
+          },
+          "hasProfile": {
+            "type": "boolean",
+            "title": "Hasprofile",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "userId",
+          "nickname",
+          "role",
+          "joinedAt"
+        ],
+        "title": "TeamMemberInfo"
+      },
+      "TeamSummary": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "captainId": {
+            "type": "string",
+            "title": "Captainid"
+          },
+          "competition": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Competition"
+          },
+          "teamName": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Teamname"
+          },
+          "teamNumber": {
+            "type": "string",
+            "title": "Teamnumber"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1200,
+            "minLength": 1,
+            "title": "Description"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "disbanded"
+            ],
+            "title": "Status"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createdat"
+          },
+          "myRole": {
+            "type": "string",
+            "enum": [
+              "captain",
+              "member"
+            ],
+            "title": "Myrole"
+          },
+          "memberCount": {
+            "type": "integer",
+            "title": "Membercount"
+          },
+          "members": {
+            "items": {
+              "$ref": "#/components/schemas/TeamMemberInfo"
+            },
+            "type": "array",
+            "title": "Members"
+          },
+          "recruitment": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Recruitment"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "captainId",
+          "competition",
+          "teamName",
+          "teamNumber",
+          "description",
+          "status",
+          "createdAt",
+          "myRole",
+          "memberCount",
+          "members"
+        ],
+        "title": "TeamSummary"
+      },
+      "UpdateTeamInput": {
+        "properties": {
+          "competition": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Competition"
+          },
+          "teamName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teamname"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1200,
+            "minLength": 1,
+            "title": "Description"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "competition",
+          "description"
+        ],
+        "title": "UpdateTeamInput"
+      },
       "UploadEvidence": {
         "properties": {
           "image": {
@@ -3131,6 +5679,85 @@
           "image"
         ],
         "title": "UploadEvidence"
+      },
+      "UserSearchItem": {
+        "properties": {
+          "userId": {
+            "type": "string",
+            "title": "Userid"
+          },
+          "nickname": {
+            "type": "string",
+            "title": "Nickname"
+          },
+          "skills": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "data-analysis",
+                "development",
+                "design",
+                "presentation",
+                "mathematical-modeling",
+                "machine-learning",
+                "agent-development",
+                "data-collection",
+                "frontend",
+                "backend",
+                "product-management",
+                "user-research",
+                "academic-writing",
+                "business-analysis",
+                "finance",
+                "video-editing",
+                "project-management",
+                "mobile-development",
+                "statistics",
+                "data-visualization",
+                "ui-ux",
+                "graphic-design",
+                "market-research",
+                "business-planning",
+                "slide-design",
+                "copywriting"
+              ]
+            },
+            "type": "array",
+            "title": "Skills"
+          },
+          "customSkills": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Customskills"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "userId",
+          "nickname",
+          "skills"
+        ],
+        "title": "UserSearchItem"
+      },
+      "UserSearchList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/UserSearchItem"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "UserSearchList"
       }
     }
   }

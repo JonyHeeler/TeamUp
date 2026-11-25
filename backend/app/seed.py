@@ -1,6 +1,6 @@
 import argparse
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from uuid import UUID
 
@@ -8,11 +8,20 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
-from app.db.models import Contact, Profile, ProfileEvidence, Recruitment, Skill, User
+from app.db.models import (
+    Contact,
+    Profile,
+    ProfileEvidence,
+    Recruitment,
+    Skill,
+    Team,
+    TeamMember,
+    User,
+)
 from app.db.session import SessionLocal
 from app.demo import PERSONAS
+from app.services import teamup
 from app.services.team_numbers import next_team_number
-from app.services.teamup import PROFILE_FIELDS
 from app.skills import SKILL_LABELS
 
 DEMO_DATA = Path(__file__).with_name("demo_data")
@@ -54,7 +63,7 @@ def seed_profiles(db: Session, fill_profiles: bool) -> None:
             profile.introduction = record["contribution"]
             codes = set(record["skills"]) | {skill.code for skill in profile.skills}
             profile.skills = [db.get(Skill, code) for code in sorted(codes)]
-        for field, attribute in PROFILE_FIELDS.items():
+        for field, attribute in teamup.PROFILE_FIELDS.items():
             if not getattr(profile, attribute):
                 setattr(profile, attribute, record[field])
                 if use_demo_defaults:
@@ -102,24 +111,63 @@ def seed(
             ("校园创新组", "实现校园服务智能体原型，设计操作界面并准备现场展示"),
         }
         for row in rows:
-            team = db.get(Recruitment, row["id"])
-            if team is None:
-                created_at = datetime(2026, 11, 24)
-                team = Recruitment(
+            created_at = datetime(2026, 11, 24)
+            team_entity = db.get(Team, row["id"])
+            recruitment = db.get(Recruitment, row["id"])
+            if team_entity is None:
+                number = (
+                    recruitment.team_number
+                    if recruitment is not None
+                    else next_team_number(db, created_at)
+                )
+                team_entity = Team(
                     id=row["id"],
-                    owner_id=row["ownerId"],
-                    team_number=next_team_number(db, created_at),
+                    captain_id=row["ownerId"],
+                    competition=row["competition"],
+                    team_name=row["teamName"],
+                    team_number=number,
+                    description=row["background"],
+                    status="active",
                     created_at=created_at,
                 )
-                db.add(team)
-            elif not refresh_recruitments or (team.team_name, team.background) not in old_names:
+                db.add(team_entity)
+                db.flush()
+            if db.get(TeamMember, (team_entity.id, row["ownerId"])) is None:
+                db.add(
+                    TeamMember(
+                        team_id=team_entity.id,
+                        user_id=row["ownerId"],
+                        role="captain",
+                        joined_at=team_entity.created_at,
+                    )
+                )
+            if recruitment is None:
+                published_at = teamup.now()
+                recruitment = Recruitment(
+                    id=row["id"],
+                    team_id=team_entity.id,
+                    owner_id=row["ownerId"],
+                    team_number=team_entity.team_number,
+                    published_at=published_at,
+                    expires_at=published_at + timedelta(days=14),
+                    duration_days=14,
+                    created_at=created_at,
+                )
+                db.add(recruitment)
+            elif (
+                not refresh_recruitments
+                or (recruitment.team_name, recruitment.background) not in old_names
+            ):
                 continue
-            team.competition = row["competition"]
-            team.team_name = row["teamName"]
-            team.openings = row["openings"]
-            team.background = row["background"]
-            team.requirements = row["requirements"]
-            team.skills = [db.get(Skill, code) for code in row["skills"]]
+            team_entity.competition = row["competition"]
+            team_entity.team_name = row["teamName"]
+            team_entity.description = row["background"]
+            recruitment.competition = row["competition"]
+            recruitment.team_name = row["teamName"]
+            recruitment.openings = row["openings"]
+            recruitment.background = row["background"]
+            recruitment.requirements = row["requirements"]
+            recruitment.skills = [db.get(Skill, code) for code in row["skills"]]
         db.commit()
 
 

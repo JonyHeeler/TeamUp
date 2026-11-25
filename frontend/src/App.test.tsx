@@ -44,7 +44,13 @@ describe("TeamUP", () => {
       };
     }
     let ownProfile = { ...fixture.ownProfiles["candidate-a"] };
-    const teams = structuredClone(fixture.recruitments.items);
+    const futureRecExpiry = new Date(
+      Date.now() + 14 * 24 * 60 * 60 * 1000,
+    ).toISOString();
+    const teams = structuredClone(fixture.recruitments.items).map((item) => ({
+      ...item,
+      expiresAt: futureRecExpiry,
+    }));
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string, init?: RequestInit) => {
@@ -61,6 +67,49 @@ describe("TeamUP", () => {
             .persona as keyof typeof fixture.personas;
           ownProfile = { ...fixture.ownProfiles[activePersona] };
           return Response.json(fixture.personas[activePersona]);
+        }
+        if (path.endsWith("/me/teams")) {
+          const owner = activePersona
+            ? fixture.personas[activePersona].userId
+            : null;
+          return Response.json({
+            items: teams
+              .filter((team) => team.ownerId === owner)
+              .map((team) => ({
+                id: team.id,
+                teamNumber: team.teamNumber,
+                competition: team.competition,
+                teamName: team.teamName,
+                description: team.background,
+                captainId: team.ownerId,
+                status: "active",
+                myRole: "captain",
+                memberCount: 1,
+                members: [
+                  {
+                    userId: team.ownerId,
+                    nickname: activePersona
+                      ? fixture.personas[activePersona].nickname
+                      : "队长",
+                    role: "captain",
+                    joinedAt: team.createdAt,
+                    skills: [],
+                    customSkills: [],
+                    hasProfile: fixture.profiles.items.some(
+                      (item) => item.userId === team.ownerId,
+                    ),
+                  },
+                ],
+                recruitment: team,
+                createdAt: team.createdAt,
+              })),
+          });
+        }
+        if (
+          path.endsWith("/me/team-invitations") ||
+          (path.includes("/teams/") && path.endsWith("/invitations"))
+        ) {
+          return Response.json({ items: [] });
         }
         if (path.endsWith("/me/recruitments")) {
           const owner = activePersona
@@ -160,9 +209,11 @@ describe("TeamUP", () => {
     ).toBeInTheDocument();
     const row = () => within(screen.getByText("城市脉络建模队").closest("li")!);
     await userEvent.click(
-      (await screen.findAllByRole("button", { name: "编辑招募" }))[0],
+      (await screen.findAllByRole("button", { name: "管理队伍" }))[0],
     );
-    const editor = await screen.findByRole("dialog", { name: "编辑招募" });
+    const editor = await screen.findByRole("dialog", {
+      name: /管理队伍.*城市脉络建模队/,
+    });
     expect(
       await within(editor).findByRole("textbox", { name: "队伍名称" }),
     ).toHaveValue("城市脉络建模队");
@@ -173,7 +224,7 @@ describe("TeamUP", () => {
       within(confirmation).getByRole("button", { name: "确认下架" }),
     );
     expect(await row().findByText("已下架")).toBeInTheDocument();
-    expect(row().getByRole("button", { name: "重新上架" })).toBeInTheDocument();
+    expect(row().getByRole("button", { name: "重新发布" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "找队伍" }));
     expect(await screen.findByText("校园借用助手队")).toBeInTheDocument();
     expect(screen.queryByText("城市脉络建模队")).not.toBeInTheDocument();
@@ -298,14 +349,18 @@ describe("TeamUP", () => {
     );
     expect(details.getByText("招募需求")).toBeInTheDocument();
     expect(
-      details.getByText(/同意后，双方可在击掌申请详情/),
+      details.getByText(/同意后，双方可在 7 天内查看彼此的 QQ/),
     ).toBeInTheDocument();
-    await userEvent.click(details.getByRole("button", { name: "申请加入" }));
+    await userEvent.click(
+      details.getByRole("button", { name: "向队伍发起击掌" }),
+    );
     await userEvent.type(
       details.getByRole("textbox", { name: /附言/ }),
       "我可以清洗问卷并验证模型。",
     );
-    await userEvent.click(details.getByRole("button", { name: "发送申请" }));
+    await userEvent.click(
+      details.getByRole("button", { name: "发送击掌申请" }),
+    );
     expect(await screen.findByText("待回应")).toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     const request = vi

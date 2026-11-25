@@ -303,7 +303,39 @@ def set_recruitment_visibility(
     user: str = Depends(current_user),
     db: Session = DB_DEP,
 ):
-    return teamup.set_recruitment_visibility(db, user, str(recruitment_id), data.isPublished)
+    return teamup.set_recruitment_visibility(
+        db, user, str(recruitment_id), data.isPublished, data.durationDays
+    )
+
+
+@router.post(
+    "/recruitments/{recruitment_id}/republish",
+    response_model=s.Recruitment,
+    responses=errors(401, 403, 404, 409, 422, 503),
+)
+def republish_recruitment_route(
+    recruitment_id: UUID,
+    data: s.RecruitmentRepublishInput,
+    user: str = Depends(current_user),
+    db: Session = DB_DEP,
+):
+    return teamup.republish_recruitment(db, user, str(recruitment_id), data.durationDays)
+
+
+@router.post(
+    "/recruitments/{recruitment_id}/renew",
+    response_model=s.Recruitment,
+    responses=errors(401, 403, 404, 409, 422, 503),
+)
+def renew_recruitment_route(
+    recruitment_id: UUID,
+    data: s.RecruitmentRenewInput,
+    user: str = Depends(current_user),
+    db: Session = DB_DEP,
+):
+    return teamup.renew_recruitment(
+        db, user, str(recruitment_id), data.durationDays, data.expectedExpiresAt
+    )
 
 
 @router.get(
@@ -314,6 +346,208 @@ def set_recruitment_visibility(
 )
 def intents(user: str = Depends(current_user), db: Session = DB_DEP):
     return {"items": teamup.list_intents(db, user)}
+
+
+@router.get(
+    "/me/high-five-candidates",
+    response_model=s.HighFiveCandidateList,
+    response_model_exclude_none=True,
+    responses=errors(401, 403, 404, 422, 503),
+)
+def high_five_candidates(
+    recruitmentId: UUID | None = None,
+    teamId: UUID | None = None,
+    user: str = Depends(current_user),
+    db: Session = DB_DEP,
+):
+    return {
+        "items": teamup.list_valid_candidates(
+            db,
+            user,
+            str(recruitmentId) if recruitmentId is not None else None,
+            str(teamId) if teamId is not None else None,
+        )
+    }
+
+
+@router.get(
+    "/users/search",
+    response_model=s.UserSearchList,
+    responses=errors(401, 403, 404, 422, 503),
+)
+def search_users(
+    q: str = "",
+    teamId: UUID | None = None,
+    user: str = Depends(current_user),
+    db: Session = DB_DEP,
+):
+    return {
+        "items": teamup.search_public_users(
+            db, user, q, str(teamId) if teamId is not None else None
+        )
+    }
+
+
+@router.get(
+    "/me/teams",
+    response_model=s.TeamList,
+    response_model_exclude_none=True,
+    responses=errors(401, 503),
+)
+def my_teams(user: str = Depends(current_user), db: Session = DB_DEP):
+    return {"items": teamup.list_my_teams(db, user)}
+
+
+@router.post(
+    "/teams",
+    status_code=201,
+    response_model=s.CreateTeamResult,
+    response_model_exclude_none=True,
+    responses=errors(401, 403, 409, 422, 503),
+)
+def create_team_route(
+    data: s.CreateTeamInput, user: str = Depends(current_user), db: Session = DB_DEP
+):
+    return teamup.create_team(db, user, data.model_dump(mode="json", exclude_none=True))
+
+
+@router.put(
+    "/teams/{team_id}",
+    response_model=s.TeamSummary,
+    response_model_exclude_none=True,
+    responses=errors(401, 403, 404, 409, 422, 503),
+)
+def update_team_route(
+    team_id: UUID,
+    data: s.UpdateTeamInput,
+    user: str = Depends(current_user),
+    db: Session = DB_DEP,
+):
+    return teamup.update_team(db, user, str(team_id), data.model_dump())
+
+
+@router.get(
+    "/teams/{team_id}/invitations",
+    response_model=s.TeamInvitationList,
+    response_model_exclude_none=True,
+    responses=errors(401, 403, 404, 422, 503),
+)
+def team_invitations_for_team_route(
+    team_id: UUID, user: str = Depends(current_user), db: Session = DB_DEP
+):
+    return {"items": teamup.list_team_invitations_for_team(db, user, str(team_id))}
+
+
+@router.delete(
+    "/teams/{team_id}/members/me",
+    status_code=204,
+    responses=errors(401, 403, 404, 409, 422, 503),
+)
+def leave_team_route(
+    team_id: UUID, user: str = Depends(current_user), db: Session = DB_DEP
+):
+    teamup.leave_team(db, user, str(team_id))
+    return Response(status_code=204)
+
+
+@router.delete(
+    "/teams/{team_id}/members/{member_user_id}",
+    response_model=s.TeamSummary,
+    response_model_exclude_none=True,
+    responses=errors(401, 403, 404, 409, 422, 503),
+)
+def remove_team_member_route(
+    team_id: UUID,
+    member_user_id: UUID,
+    user: str = Depends(current_user),
+    db: Session = DB_DEP,
+):
+    return teamup.remove_team_member(db, user, str(team_id), str(member_user_id))
+
+
+@router.post(
+    "/teams/{team_id}/disband",
+    response_model=s.TeamSummary,
+    response_model_exclude_none=True,
+    responses=errors(401, 403, 404, 409, 422, 503),
+)
+def disband_team_route(
+    team_id: UUID, user: str = Depends(current_user), db: Session = DB_DEP
+):
+    return teamup.disband_team(db, user, str(team_id))
+
+
+@router.put(
+    "/teams/{team_id}/recruitment",
+    response_model=s.Recruitment,
+    responses=errors(401, 403, 404, 409, 422, 503),
+)
+def upsert_team_recruitment_route(
+    team_id: UUID,
+    data: s.RecruitmentInput,
+    user: str = Depends(current_user),
+    db: Session = DB_DEP,
+):
+    return teamup.upsert_team_recruitment(db, user, str(team_id), data.model_dump())
+
+
+@router.post(
+    "/teams/{team_id}/invitations",
+    status_code=201,
+    response_model=s.TeamInvitationList,
+    response_model_exclude_none=True,
+    responses=errors(401, 403, 404, 409, 422, 503),
+)
+def create_team_invitations_route(
+    team_id: UUID,
+    data: s.TeamInvitationInput,
+    user: str = Depends(current_user),
+    db: Session = DB_DEP,
+):
+    return {
+        "items": teamup.create_team_invitations(
+            db, user, str(team_id), [str(item) for item in data.inviteeIds], data.message
+        )
+    }
+
+
+@router.get(
+    "/me/team-invitations",
+    response_model=s.TeamInvitationList,
+    response_model_exclude_none=True,
+    responses=errors(401, 503),
+)
+def my_team_invitations(user: str = Depends(current_user), db: Session = DB_DEP):
+    return {"items": teamup.list_team_invitations(db, user)}
+
+
+@router.get(
+    "/team-invitations/{invitation_id}",
+    response_model=s.TeamInvitation,
+    response_model_exclude_none=True,
+    responses=errors(401, 404, 422, 503),
+)
+def team_invitation_detail(
+    invitation_id: UUID, user: str = Depends(current_user), db: Session = DB_DEP
+):
+    return teamup.get_team_invitation(db, user, str(invitation_id))
+
+
+@router.post(
+    "/team-invitations/{invitation_id}/response",
+    response_model=s.TeamInvitation,
+    response_model_exclude_none=True,
+    responses=errors(401, 403, 404, 409, 422, 503),
+)
+def respond_team_invitation_route(
+    invitation_id: UUID,
+    data: s.TeamInvitationDecision,
+    user: str = Depends(current_user),
+    db: Session = DB_DEP,
+):
+    return teamup.respond_team_invitation(
+        db, user, str(invitation_id), data.decision, data.responseMessage
+    )
 
 
 @router.get(
@@ -352,4 +586,22 @@ def create_intent(
 def respond(
     intent_id: str, data: s.Decision, user: str = Depends(current_user), db: Session = DB_DEP
 ):
-    return teamup.respond_intent(db, user, str(intent_id), data.decision)
+    return teamup.respond_intent(db, user, str(intent_id), data.decision, data.responseMessage)
+
+
+@router.post(
+    "/intents/{intent_id}/create-team-invite",
+    status_code=201,
+    response_model=s.TeamInviteResult,
+    response_model_exclude_none=True,
+    responses=errors(401, 403, 404, 409, 422, 503),
+)
+def create_team_invite(
+    intent_id: UUID,
+    data: s.CreateTeamInviteInput,
+    user: str = Depends(current_user),
+    db: Session = DB_DEP,
+):
+    return teamup.create_team_and_invite(
+        db, user, str(intent_id), data.model_dump(mode="json", exclude_none=True)
+    )

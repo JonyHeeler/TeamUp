@@ -65,3 +65,78 @@
     opacity: 1;
   }
 }
+
+.intent-message {
+  display: grid;
+  gap: 0.375rem;
+}
+
+.intent-message textarea {
+  width: 100%;
+}
+
+.intent-note {
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  padding: 0.875rem;
+}
+
+.intent-note p {
+  margin: 0.35rem 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.follow-up-section strong {
+  font-size: 0.9375rem;
+}
+
+.follow-up-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.invite-target-box {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: #f8f9fb;
+}
+
+.invite-target-box small {
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+
+.recent-declined {
+  margin-top: clamp(1rem, 2.5vw, 1.5rem);
+}
+
+.recent-declined summary {
+  width: fit-content;
+  margin-bottom: 0.65rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.formal-invitations-section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.formal-invitations-section > h2 {
+  margin: 0;
+  font-size: 1.0625rem;
+}
+
+.formal-invitations-section h3 {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+}

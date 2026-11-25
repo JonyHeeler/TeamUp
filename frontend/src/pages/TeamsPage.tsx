@@ -2,7 +2,8 @@ import { CardFacts, SummaryCard } from "../ui/SummaryCard";
 import { FilterSelect } from "../ui/FilterSelect";
 import { Button } from "../ui/Button";
 import { useState } from "react";
-import { api, type Recruitment } from "../api/client";
+import { api, type Profile, type Recruitment } from "../api/client";
+import { ProfileDetails } from "../ProfileEditor";
 import { Tags } from "../SkillFields";
 import "./people.css";
 import { copy as t } from "../copy";
@@ -13,6 +14,8 @@ import {
   IntentMessage,
   Feedback,
   Heading,
+  describeError,
+  formatRemainingTime,
   teamsHref,
   useAction,
   useResource,
@@ -34,18 +37,39 @@ export default function TeamsPage({
   const [team, setTeam] = useState<Recruitment | null>(null);
   const [applying, setApplying] = useState(false);
   const [message, setMessage] = useState("");
+  const [memberCard, setMemberCard] = useState<Profile | null>(null);
+  const [memberCardLoading, setMemberCardLoading] = useState(false);
+  const [memberCardError, setMemberCardError] = useState("");
 
   function openTeam(entry: Recruitment) {
     clear();
     setMessage("");
     setApplying(false);
+    setMemberCard(null);
+    setMemberCardError("");
     setTeam(entry);
   }
 
   function closeTeam() {
     clear();
+    setMemberCard(null);
+    setMemberCardError("");
     setTeam(null);
   }
+
+  function openMemberProfile(userId: string) {
+    setMemberCard(null);
+    setMemberCardError("");
+    setMemberCardLoading(true);
+    void api
+      .profile(userId)
+      .then(
+        (profile) => setMemberCard(profile),
+        (err: unknown) => setMemberCardError(describeError(err)),
+      )
+      .finally(() => setMemberCardLoading(false));
+  }
+
   const competitions = catalog.data?.items ?? [];
   const competition =
     competitions.find((item) => item.id === competitionId)?.name ?? "";
@@ -87,29 +111,44 @@ export default function TeamsPage({
         />
       )}
       <div className="results">
-        {matchingTeams.map((entry) => (
-          <SummaryCard
-            key={entry.id}
-            title={entry.teamName}
-            badge={
-              entry.ownerId === me?.userId && (
-                <span className="badge">{t.yourTeam}</span>
-              )
-            }
-            actions={
-              <Button onClick={() => openTeam(entry)}>{t.viewTeam}</Button>
-            }
-          >
-            <CardFacts
-              items={[
-                [t.catalogCompetition, entry.competition],
-                [t.openings, t.openCount(entry.openings)],
-              ]}
-            />
-            <p className="profile-card-summary">{entry.background}</p>
-            <Tags skills={entry.skills.slice(0, 4)} />
-          </SummaryCard>
-        ))}
+        {matchingTeams.map((entry) => {
+          const memberCount = entry.memberCount ?? entry.members?.length ?? 1;
+          return (
+            <SummaryCard
+              key={entry.id}
+              title={entry.teamName}
+              badge={
+                entry.ownerId === me?.userId && (
+                  <span className="badge">{t.yourTeam}</span>
+                )
+              }
+              actions={
+                <Button onClick={() => openTeam(entry)}>{t.viewTeam}</Button>
+              }
+            >
+              <CardFacts
+                items={[
+                  [t.catalogCompetition, entry.competition],
+                  [t.currentMembersLabel, `${memberCount}人`],
+                  ...(entry.openings?.trim()
+                    ? ([[t.openings, entry.openings.trim()]] as [
+                        string,
+                        string,
+                      ][])
+                    : []),
+                  ...(entry.expiresAt && formatRemainingTime(entry.expiresAt)
+                    ? ([[
+                        t.recruitmentRemainingLabel,
+                        formatRemainingTime(entry.expiresAt) ?? "",
+                      ]] as [string, string][])
+                    : []),
+                ]}
+              />
+              <p className="profile-card-summary">{entry.background}</p>
+              <Tags skills={entry.skills.slice(0, 4)} />
+            </SummaryCard>
+          );
+        })}
         {!matchingTeams.length && !list.error && (
           <p className="empty">
             {list.data
@@ -129,10 +168,83 @@ export default function TeamsPage({
         >
           <div className="team-card-meta">
             <span>{team.competition}</span>
-            <span className="badge">{t.openCount(team.openings)}</span>
+            <span className="badge">
+              {t.currentMembersCount(
+                team.memberCount ?? team.members?.length ?? 1,
+              )}
+            </span>
+            {team.openings?.trim() && (
+              <span className="badge">{t.openCount(team.openings)}</span>
+            )}
+            {team.expiresAt && formatRemainingTime(team.expiresAt) && (
+              <span className="badge">
+                {t.recruitmentRemaining(
+                  formatRemainingTime(team.expiresAt) ?? "",
+                )}
+              </span>
+            )}
           </div>
           <Alert message={error} />
           <RecruitmentDetails recruitment={team} />
+          {(team.members?.length ?? 0) > 0 && (
+            <section className="dialog-section" aria-label={t.currentMembersLabel}>
+              <strong>
+                {t.existingMembersTitle(team.members?.length ?? 0)}
+              </strong>
+              <ul className="team-members-list">
+                {(team.members ?? []).map((member) => (
+                  <li className="team-member-row" key={member.userId}>
+                    <div className="team-member-main">
+                      <div className="candidate-title">
+                        <strong>{member.nickname}</strong>
+                        <span
+                          className={`role-badge${member.role === "captain" ? " captain" : ""}`}
+                        >
+                          {member.role === "captain"
+                            ? t.roleCaptain
+                            : t.roleMember}
+                        </span>
+                      </div>
+                      <Tags
+                        skills={(member.skills ?? []).slice(0, 4)}
+                        custom={(member.customSkills ?? []).slice(0, 2)}
+                      />
+                    </div>
+                    {member.hasProfile && (
+                      <div className="team-member-actions">
+                        <Button
+                          type="button"
+                          onClick={() => openMemberProfile(member.userId)}
+                        >
+                          {t.card}
+                        </Button>
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {memberCardLoading && (
+                <small className="consent" role="status">
+                  {t.loading}
+                </small>
+              )}
+              {memberCardError && <Alert message={memberCardError} />}
+              {memberCard && (
+                <div className="inline-member-card">
+                  <div className="inline-member-card-header">
+                    <strong>{memberCard.nickname}</strong>
+                    <Button
+                      type="button"
+                      onClick={() => setMemberCard(null)}
+                    >
+                      {t.close}
+                    </Button>
+                  </div>
+                  <ProfileDetails profile={memberCard} />
+                </div>
+              )}
+            </section>
+          )}
           {team.ownerId === me?.userId ? (
             <span className="owned">{t.yourTeam}</span>
           ) : applying ? (

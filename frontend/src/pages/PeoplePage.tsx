@@ -3,11 +3,15 @@ import { FilterSelect } from "../ui/FilterSelect";
 import { Button } from "../ui/Button";
 import { useState } from "react";
 import "./people.css";
-import { api, type Profile, type Recruitment, type Skill } from "../api/client";
+import { api, type Profile, type Recruitment } from "../api/client";
 import { copy as t } from "../copy";
 import EvidenceImage from "../EvidenceImage";
 import { ProfileDetails, ProfileSummary } from "../ProfileEditor";
-import { skillGroups } from "../SkillFields";
+import {
+  buildSkillFilterGroups,
+  filterPeople,
+  type SkillFilterValue,
+} from "./peopleFilter";
 import {
   Alert,
   Dialog,
@@ -20,17 +24,24 @@ import {
   type PageProps,
 } from "./shared";
 
+const skillFilterGroups = buildSkillFilterGroups();
+type InviteMode = "team" | "personal";
+type TeamsLoadState = "idle" | "loading" | "ready" | "error";
+
 export default function PeoplePage({ me }: Pick<PageProps, "me">) {
   const list = useResource(api.profiles);
   const { busy, run, clear, error, fieldError } = useAction();
   const [notice, setNotice] = useState<Notice>();
-  const [skill, setSkill] = useState<Skill | "">("");
+  const [skill, setSkill] = useState<SkillFilterValue>("");
+  const [skillKeyword, setSkillKeyword] = useState("");
   const [collegeFilter, setCollegeFilter] = useState("");
   const [gradeFilter, setGradeFilter] = useState("");
   const [person, setPerson] = useState<Profile | null>(null);
+  const [inviteMode, setInviteMode] = useState<InviteMode>("personal");
   const [inviteTeam, setInviteTeam] = useState("");
   const [message, setMessage] = useState("");
   const [ownTeams, setOwnTeams] = useState<Recruitment[]>([]);
+  const [teamsState, setTeamsState] = useState<TeamsLoadState>("idle");
   const [inviteError, setInviteError] = useState("");
   const people = list.data?.items ?? [];
   const colleges = [
@@ -41,37 +52,72 @@ export default function PeoplePage({ me }: Pick<PageProps, "me">) {
   const grades = [
     ...new Set(people.flatMap((entry) => (entry.grade ? [entry.grade] : []))),
   ].sort((a, b) => a.localeCompare(b, "zh"));
-  const matchingPeople = people.filter(
-    (entry) =>
-      entry.userId !== me?.userId &&
-      (!gradeFilter || entry.grade === gradeFilter) &&
-      (!skill || entry.skills.includes(skill)) &&
-      (!collegeFilter || entry.college === collegeFilter),
+  const matchingPeople = filterPeople(people, {
+    skillFilter: skill,
+    skillKeyword,
+    collegeFilter,
+    gradeFilter,
+    currentUserId: me?.userId,
+  });
+  const hasActiveFilters = Boolean(
+    skill || skillKeyword || collegeFilter || gradeFilter,
   );
+  const publishedOwnTeams = ownTeams.filter((team) => team.isPublished);
+  const hasArchivedOnly =
+    teamsState === "ready" &&
+    ownTeams.length > 0 &&
+    publishedOwnTeams.length === 0;
+  const hasNoTeams = teamsState === "ready" && ownTeams.length === 0;
+  const canUseTeamMode =
+    teamsState === "ready" && publishedOwnTeams.length > 0;
+
+  function clearFilters() {
+    setSkill("");
+    setSkillKeyword("");
+    setCollegeFilter("");
+    setGradeFilter("");
+  }
 
   function closeDetail() {
     clear();
     setPerson(null);
+    setTeamsState("idle");
+    setInviteError("");
   }
 
   function openProfile(userId: string) {
     setNotice(undefined);
+    setInviteError("");
+    setTeamsState(me ? "loading" : "idle");
     void run(
       async () => {
         const [profile, teams] = await Promise.allSettled([
           api.profile(userId),
-          me ? api.recruitments() : Promise.resolve({ items: [] }),
+          me ? api.ownRecruitments() : Promise.resolve({ items: [] }),
         ]);
         if (profile.status === "rejected") throw profile.reason;
         return { profile: profile.value, teams };
       },
       ({ profile, teams }) => {
-        setOwnTeams(
-          teams.status === "fulfilled"
-            ? teams.value.items.filter((team) => team.ownerId === me?.userId)
-            : [],
-        );
-        setInviteError(teams.status === "rejected" ? t.failed : "");
+        if (!me) {
+          setOwnTeams([]);
+          setTeamsState("idle");
+          setInviteError("");
+        } else if (teams.status === "fulfilled") {
+          const mine = teams.value.items.filter(
+            (team) => team.ownerId === me.userId,
+          );
+          const active = mine.filter((team) => team.isPublished);
+          setOwnTeams(mine);
+          setTeamsState("ready");
+          setInviteError("");
+          setInviteMode(active.length > 0 ? "team" : "personal");
+        } else {
+          setOwnTeams([]);
+          setTeamsState("error");
+          setInviteError(t.failed);
+          setInviteMode("personal");
+        }
         setInviteTeam("");
         setMessage("");
         setPerson(profile);
@@ -88,15 +134,9 @@ export default function PeoplePage({ me }: Pick<PageProps, "me">) {
           label={t.filter}
           category={t.skills}
           value={skill}
-          onChange={(value) => setSkill(value as Skill | "")}
+          onChange={(value) => setSkill(value as SkillFilterValue)}
           all={t.allSkills}
-          groups={skillGroups.map(({ label, skills }) => ({
-            label,
-            options: skills.map((value) => ({
-              value,
-              label: t.skillNames[value],
-            })),
-          }))}
+          groups={skillFilterGroups}
         />
         <FilterSelect
           label={t.filterCollege}
@@ -107,13 +147,36 @@ export default function PeoplePage({ me }: Pick<PageProps, "me">) {
           options={colleges.map((value) => ({ value, label: value }))}
         />
         <FilterSelect
-          label="按年级筛选"
+          label={t.filterGrade}
           category={t.grade}
           value={gradeFilter}
           onChange={setGradeFilter}
-          all="全部年级"
+          all={t.allGrades}
           options={grades.map((value) => ({ value, label: value }))}
         />
+        <label
+          className="filter-search"
+          data-filtered={skillKeyword.trim() ? "" : undefined}
+        >
+          <span className="filter-category" aria-hidden="true">
+            {t.skillKeyword}
+          </span>
+          <input
+            type="search"
+            aria-label={t.searchSkill}
+            value={skillKeyword}
+            onChange={(event) => setSkillKeyword(event.target.value)}
+          />
+        </label>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            className="filter-clear"
+            onClick={clearFilters}
+          >
+            {t.clearFilters}
+          </button>
+        )}
       </div>
       {!person && (
         <Feedback
@@ -164,38 +227,87 @@ export default function PeoplePage({ me }: Pick<PageProps, "me">) {
               ))}
             </div>
           )}
-          {ownTeams.length ? (
+          {me && (
             <div className="dialog-section">
-              <select
-                aria-label={t.inviteTeam}
-                value={inviteTeam}
-                onChange={(event) => setInviteTeam(event.target.value)}
-              >
-                <option value="">{t.inviteTeam}</option>
-                {ownTeams.map((entry) => (
-                  <option key={entry.id} value={entry.id}>
-                    {entry.teamName} · {entry.competition}
-                  </option>
-                ))}
-              </select>
+              {teamsState === "error" && inviteError && (
+                <Alert message={inviteError} />
+              )}
+              {teamsState === "loading" && (
+                <small className="consent" role="status">
+                  {t.loading}
+                </small>
+              )}
+              <div className="invite-controls">
+                {inviteMode === "team" && (
+                  <select
+                    aria-label={t.inviteTeam}
+                    value={inviteTeam}
+                    disabled={busy || !canUseTeamMode}
+                    onChange={(event) => setInviteTeam(event.target.value)}
+                  >
+                    <option value="">{t.inviteTeam}</option>
+                    {publishedOwnTeams.map((entry) => (
+                      <option key={entry.id} value={entry.id}>
+                        {entry.teamName} · {entry.competition}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                <div
+                  className="invite-mode-switch"
+                  role="group"
+                  aria-label={t.inviteMode}
+                >
+                  <button
+                    type="button"
+                    aria-pressed={inviteMode === "team"}
+                    disabled={busy || !canUseTeamMode}
+                    onClick={() => setInviteMode("team")}
+                  >
+                    {t.inviteModeTeam}
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={inviteMode === "personal"}
+                    disabled={busy}
+                    onClick={() => setInviteMode("personal")}
+                  >
+                    {t.inviteModePersonal}
+                  </button>
+                </div>
+              </div>
+              {hasArchivedOnly && (
+                <small className="consent">{t.allTeamsArchivedForInvite}</small>
+              )}
+              {hasNoTeams && (
+                <small className="consent">{t.noActiveTeamsForInvite}</small>
+              )}
               <IntentMessage
                 value={message}
                 onChange={setMessage}
-                kind="invite"
+                kind={inviteMode === "team" ? "invite" : "personal"}
                 error={fieldError("message")}
               />
               <Button
                 tone="blue"
-                disabled={!inviteTeam || busy}
+                disabled={busy || (inviteMode === "team" && !inviteTeam)}
                 onClick={() =>
                   void run(
                     () =>
-                      api.createIntent({
-                        kind: "invite",
-                        recruitmentId: inviteTeam,
-                        candidateId: person.userId,
-                        message,
-                      }),
+                      api.createIntent(
+                        inviteMode === "team"
+                          ? {
+                              kind: "invite",
+                              recruitmentId: inviteTeam,
+                              candidateId: person.userId,
+                              message,
+                            }
+                          : {
+                              kind: "personal",
+                              candidateId: person.userId,
+                              message,
+                            },
+                      ),
                     (result) => {
                       setPerson(null);
                       setNotice(result.status);
@@ -207,10 +319,6 @@ export default function PeoplePage({ me }: Pick<PageProps, "me">) {
               </Button>
               <small className="consent">{t.share}</small>
             </div>
-          ) : inviteError ? (
-            <Alert message={inviteError} />
-          ) : (
-            me && <p className="consent">{t.needTeam}</p>
           )}
         </Dialog>
       )}

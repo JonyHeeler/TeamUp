@@ -11,9 +11,22 @@ export type OwnProfile = Schemas["Profile"] & {
 };
 export type Recruitment = Schemas["Recruitment"];
 export type RecruitmentRequirement = Schemas["RecruitmentRequirement"];
+export type RecruitmentDuration = 7 | 14 | 30;
 export type Competition = Schemas["Competition"];
 export type Intent = Schemas["IntentDetail"];
 export type RecruitmentInput = Schemas["RecruitmentInput"];
+export type CreateTeamInviteInput = Schemas["CreateTeamInviteInput"];
+export type TeamInviteResult = Schemas["TeamInviteResult"];
+export type HighFiveCandidate = Schemas["HighFiveCandidate"];
+export type HighFiveCandidateSource = Schemas["HighFiveCandidateSource"];
+export type TeamSummary = Schemas["TeamSummary"];
+export type TeamMemberInfo = Schemas["TeamMemberInfo"];
+export type CreateTeamInput = Schemas["CreateTeamInput"];
+export type CreateTeamResult = Schemas["CreateTeamResult"];
+export type UpdateTeamInput = Schemas["UpdateTeamInput"];
+export type TeamInvitation = Schemas["TeamInvitation"];
+export type TeamInvitationInput = Schemas["TeamInvitationInput"];
+export type UserSearchItem = Schemas["UserSearchItem"];
 export type ProfileInput = Schemas["ProfileInput"] & {
   publicFields: Schemas["PublicFields"];
 };
@@ -92,23 +105,125 @@ export const httpApi = {
   ownRecruitments: () => request<{ items: Recruitment[] }>("/me/recruitments"),
   updateRecruitment: (id: string, body: RecruitmentInput) =>
     request<Recruitment>(`/recruitments/${id}`, write("PUT", body)),
-  setRecruitmentVisibility: (id: string, isPublished: boolean) =>
+  setRecruitmentVisibility: (
+    id: string,
+    isPublished: boolean,
+    durationDays?: RecruitmentDuration,
+  ) =>
     request<Recruitment>(
       `/recruitments/${id}/visibility`,
-      write("PATCH", { isPublished }),
+      write("PATCH", {
+        isPublished,
+        ...(durationDays !== undefined ? { durationDays } : {}),
+      }),
+    ),
+  republishRecruitment: (id: string, durationDays: RecruitmentDuration = 14) =>
+    request<Recruitment>(
+      `/recruitments/${id}/republish`,
+      write("POST", { durationDays }),
+    ),
+  renewRecruitment: (
+    id: string,
+    durationDays: RecruitmentDuration = 14,
+    expectedExpiresAt?: string,
+  ) =>
+    request<Recruitment>(
+      `/recruitments/${id}/renew`,
+      write("POST", {
+        durationDays,
+        ...(expectedExpiresAt ? { expectedExpiresAt } : {}),
+      }),
     ),
   createRecruitment: (body: RecruitmentInput) =>
     request<Recruitment>("/recruitments", write("POST", body)),
   intents: () => request<{ items: Intent[] }>("/me/intents"),
+  validCandidates: (
+    scope?: string | { recruitmentId?: string; teamId?: string },
+  ) => {
+    const params = new URLSearchParams();
+    if (typeof scope === "string" && scope) {
+      params.set("recruitmentId", scope);
+    } else if (scope && typeof scope === "object") {
+      if (scope.recruitmentId) params.set("recruitmentId", scope.recruitmentId);
+      if (scope.teamId) params.set("teamId", scope.teamId);
+    }
+    const qs = params.toString();
+    return request<{ items: HighFiveCandidate[] }>(
+      `/me/high-five-candidates${qs ? `?${qs}` : ""}`,
+    );
+  },
+  searchUsers: (q: string, teamId?: string) => {
+    const params = new URLSearchParams({ q });
+    if (teamId) params.set("teamId", teamId);
+    return request<{ items: UserSearchItem[] }>(
+      `/users/search?${params.toString()}`,
+    );
+  },
+  myTeams: () => request<{ items: TeamSummary[] }>("/me/teams"),
+  createTeam: (body: CreateTeamInput) =>
+    request<CreateTeamResult>("/teams", write("POST", body)),
+  updateTeam: (teamId: string, body: UpdateTeamInput) =>
+    request<TeamSummary>(`/teams/${teamId}`, write("PUT", body)),
+  upsertTeamRecruitment: (teamId: string, body: RecruitmentInput) =>
+    request<Recruitment>(`/teams/${teamId}/recruitment`, write("PUT", body)),
+  teamInvitationsForTeam: (teamId: string) =>
+    request<{ items: TeamInvitation[] }>(`/teams/${teamId}/invitations`),
+  createTeamInvitations: (teamId: string, body: TeamInvitationInput) =>
+    request<{ items: TeamInvitation[] }>(
+      `/teams/${teamId}/invitations`,
+      write("POST", body),
+    ),
+  leaveTeam: async (teamId: string) => {
+    await send(`/teams/${teamId}/members/me`, { method: "DELETE" });
+  },
+  removeTeamMember: (teamId: string, memberUserId: string) =>
+    request<TeamSummary>(
+      `/teams/${teamId}/members/${memberUserId}`,
+      { method: "DELETE" },
+    ),
+  disbandTeam: (teamId: string) =>
+    request<TeamSummary>(`/teams/${teamId}/disband`, { method: "POST" }),
+  teamInvitations: () =>
+    request<{ items: TeamInvitation[] }>("/me/team-invitations"),
+  teamInvitation: (id: string) =>
+    request<TeamInvitation>(`/team-invitations/${id}`),
+  respondTeamInvitation: (
+    id: string,
+    decision: "accepted" | "declined",
+    responseMessage?: string,
+  ) =>
+    request<TeamInvitation>(
+      `/team-invitations/${id}/response`,
+      write("POST", {
+        decision,
+        ...(responseMessage !== undefined ? { responseMessage } : {}),
+      }),
+    ),
   intent: (id: string) => request<Intent>(`/intents/${id}`),
   createIntent: (body: {
-    kind: "apply" | "invite";
-    recruitmentId: string;
+    kind: "apply" | "invite" | "personal";
+    recruitmentId?: string;
     candidateId?: string;
     message?: string;
+    sourcePersonalIntentId?: string;
   }) => request<Intent>("/intents", write("POST", body)),
-  respond: (id: string, decision: "accepted" | "declined") =>
-    request<Intent>(`/intents/${id}/response`, write("POST", { decision })),
+  createTeamAndInvite: (intentId: string, body: CreateTeamInviteInput) =>
+    request<TeamInviteResult>(
+      `/intents/${intentId}/create-team-invite`,
+      write("POST", body),
+    ),
+  respond: (
+    id: string,
+    decision: "accepted" | "declined",
+    responseMessage?: string,
+  ) =>
+    request<Intent>(
+      `/intents/${id}/response`,
+      write("POST", {
+        decision,
+        ...(responseMessage !== undefined ? { responseMessage } : {}),
+      }),
+    ),
 };
 export type Api = typeof httpApi;
 

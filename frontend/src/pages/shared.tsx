@@ -9,6 +9,19 @@ export type Notice =
   | "teamSaved"
   | "teamArchived"
   | "teamRestored"
+  | "teamInviteSent"
+  | "teamCreatedOnly"
+  | "formalInviteSent"
+  | "formalInviteAccepted"
+  | "formalInviteDeclined"
+  | "teamUpdated"
+  | "memberRemoved"
+  | "leftTeam"
+  | "teamDisbanded"
+  | "recruitmentRepublished"
+  | "recruitmentRenewed"
+  | "existingTeamInviteNotice"
+  | "declinedNotice"
   | Intent["status"];
 export type Navigate = (
   href: string,
@@ -16,6 +29,20 @@ export type Navigate = (
   replace?: boolean,
 ) => void;
 export type PageProps = { me: Me | null; navigate: Navigate };
+
+export function formatRemainingTime(
+  expiresAt: string,
+  nowMs = Date.now(),
+): string | null {
+  const diffMs = Date.parse(expiresAt) - nowMs;
+  if (!Number.isFinite(diffMs) || diffMs <= 0) return null;
+  const hourMs = 60 * 60 * 1000;
+  const dayMs = 24 * hourMs;
+  if (diffMs < dayMs) {
+    return `${Math.max(1, Math.ceil(diffMs / hourMs))} 小时`;
+  }
+  return `${Math.ceil(diffMs / dayMs)} 天`;
+}
 
 export function describeError(error: unknown): string {
   if (!(error instanceof ApiError)) return t.failed;
@@ -176,25 +203,70 @@ export function IntentMessage({
 }: {
   value: string;
   onChange: (value: string) => void;
-  kind: "apply" | "invite";
+  kind: "apply" | "invite" | "personal" | "formal-invite";
   error?: ReactNode;
 }) {
+  const inputId = useId();
+  const hintId = useId();
   return (
-    <label className="intent-message">
-      <span>{t.intentMessage}</span>
+    <div className="intent-message">
+      <label htmlFor={inputId}>{t.intentMessage}</label>
       <textarea
+        id={inputId}
         rows={3}
         maxLength={300}
         value={value}
-        placeholder={kind === "apply" ? t.applyHint : t.inviteHint}
-        aria-describedby="intent-message-hint"
+        placeholder={
+          kind === "apply"
+            ? t.applyHint
+            : kind === "personal"
+              ? t.personalInviteHint
+              : kind === "formal-invite"
+                ? t.formalInviteHint
+                : t.inviteHint
+        }
+        aria-describedby={hintId}
         onChange={(event) => onChange(event.target.value)}
       />
-      <small id="intent-message-hint" className="consent">
+      <small id={hintId} className="consent">
         {t.optionalMessage}
       </small>
       {error}
-    </label>
+    </div>
+  );
+}
+
+export function IntentResponse({
+  value,
+  onChange,
+  disabled = false,
+  error,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  error?: ReactNode;
+}) {
+  const inputId = useId();
+  const hintId = useId();
+  return (
+    <div className="intent-message">
+      <label htmlFor={inputId}>{t.intentResponse}</label>
+      <textarea
+        id={inputId}
+        rows={3}
+        maxLength={300}
+        disabled={disabled}
+        value={value}
+        placeholder={t.responseHint}
+        aria-describedby={hintId}
+        onChange={(event) => onChange(event.target.value)}
+      />
+      <small id={hintId} className="consent">
+        {t.optionalResponse}
+      </small>
+      {error}
+    </div>
   );
 }
 

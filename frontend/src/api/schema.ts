@@ -313,6 +313,40 @@ export interface paths {
         patch: operations["set_recruitment_visibility_api_v1_recruitments__recruitment_id__visibility_patch"];
         trace?: never;
     };
+    "/api/v1/recruitments/{recruitment_id}/republish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Republish Recruitment Route */
+        post: operations["republish_recruitment_route_api_v1_recruitments__recruitment_id__republish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/recruitments/{recruitment_id}/renew": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Renew Recruitment Route */
+        post: operations["renew_recruitment_route_api_v1_recruitments__recruitment_id__renew_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/intents": {
         parameters: {
             query?: never;
@@ -324,6 +358,228 @@ export interface paths {
         get: operations["intents_api_v1_me_intents_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/high-five-candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** High Five Candidates */
+        get: operations["high_five_candidates_api_v1_me_high_five_candidates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search Users */
+        get: operations["search_users_api_v1_users_search_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/teams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Teams */
+        get: operations["my_teams_api_v1_me_teams_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teams": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Team Route */
+        post: operations["create_team_route_api_v1_teams_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teams/{team_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Team Route */
+        put: operations["update_team_route_api_v1_teams__team_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teams/{team_id}/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Team Invitations For Team Route */
+        get: operations["team_invitations_for_team_route_api_v1_teams__team_id__invitations_get"];
+        put?: never;
+        /** Create Team Invitations Route */
+        post: operations["create_team_invitations_route_api_v1_teams__team_id__invitations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teams/{team_id}/members/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Leave Team Route */
+        delete: operations["leave_team_route_api_v1_teams__team_id__members_me_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teams/{team_id}/members/{member_user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove Team Member Route */
+        delete: operations["remove_team_member_route_api_v1_teams__team_id__members__member_user_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teams/{team_id}/disband": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Disband Team Route */
+        post: operations["disband_team_route_api_v1_teams__team_id__disband_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teams/{team_id}/recruitment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Upsert Team Recruitment Route */
+        put: operations["upsert_team_recruitment_route_api_v1_teams__team_id__recruitment_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/team-invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Team Invitations */
+        get: operations["my_team_invitations_api_v1_me_team_invitations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/team-invitations/{invitation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Team Invitation Detail */
+        get: operations["team_invitation_detail_api_v1_team_invitations__invitation_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/team-invitations/{invitation_id}/response": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Respond Team Invitation Route */
+        post: operations["respond_team_invitation_route_api_v1_team_invitations__invitation_id__response_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -381,6 +637,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/intents/{intent_id}/create-team-invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Team Invite */
+        post: operations["create_team_invite_api_v1_intents__intent_id__create_team_invite_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -421,6 +694,54 @@ export interface components {
             /** Items */
             items: components["schemas"]["Competition"][];
         };
+        /** CreateTeamInput */
+        CreateTeamInput: {
+            /** Competition */
+            competition: string;
+            /** Teamname */
+            teamName?: string | null;
+            /** Description */
+            description: string;
+            /**
+             * Publishrecruitment
+             * @default false
+             */
+            publishRecruitment: boolean;
+            /** Durationdays */
+            durationDays?: (7 | 14 | 30) | null;
+            /** Openings */
+            openings?: string | null;
+            /** Requirements */
+            requirements?: components["schemas"]["RecruitmentRequirement"][];
+            /** Inviteeids */
+            inviteeIds?: string[];
+            /** Invitemessage */
+            inviteMessage?: string | null;
+        };
+        /** CreateTeamInviteInput */
+        CreateTeamInviteInput: {
+            /** Competition */
+            competition: string;
+            /** Teamname */
+            teamName?: string | null;
+            /** Openings */
+            openings?: string | null;
+            /** Requirements */
+            requirements?: components["schemas"]["RecruitmentRequirement"][];
+            /** Background */
+            background: string;
+            /** Durationdays */
+            durationDays?: (7 | 14 | 30) | null;
+            /** Message */
+            message?: string | null;
+        };
+        /** CreateTeamResult */
+        CreateTeamResult: {
+            team: components["schemas"]["TeamSummary"];
+            recruitment?: components["schemas"]["Recruitment"] | null;
+            /** Invitations */
+            invitations?: components["schemas"]["TeamInvitation"][];
+        };
         /** Decision */
         Decision: {
             /**
@@ -428,6 +749,8 @@ export interface components {
              * @enum {string}
              */
             decision: "accepted" | "declined";
+            /** Responsemessage */
+            responseMessage?: string | null;
         };
         /** Error */
         Error: {
@@ -444,21 +767,67 @@ export interface components {
                 [key: string]: string;
             } | null;
         };
+        /** HighFiveCandidate */
+        HighFiveCandidate: {
+            /** Userid */
+            userId: string;
+            /** Nickname */
+            nickname: string;
+            /** Skills */
+            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting")[];
+            /** Customskills */
+            customSkills?: string[];
+            /**
+             * Expiresat
+             * Format: date-time
+             */
+            expiresAt: string;
+            /** Sources */
+            sources: components["schemas"]["HighFiveCandidateSource"][];
+        };
+        /** HighFiveCandidateList */
+        HighFiveCandidateList: {
+            /** Items */
+            items: components["schemas"]["HighFiveCandidate"][];
+        };
+        /** HighFiveCandidateSource */
+        HighFiveCandidateSource: {
+            /** Intentid */
+            intentId: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "personal" | "invite" | "apply";
+            /** Recruitmentid */
+            recruitmentId?: string | null;
+            /** Teamname */
+            teamName?: string | null;
+            /**
+             * Expiresat
+             * Format: date-time
+             */
+            expiresAt: string;
+        };
         /** Intent */
         Intent: {
             /** Id */
             id: string;
             /** Recruitmentid */
-            recruitmentId: string;
+            recruitmentId?: string | null;
             /** Candidateid */
             candidateId: string;
             /** Ownerid */
-            ownerId: string;
+            ownerId?: string | null;
+            /** Senderid */
+            senderId: string;
+            /** Recipientid */
+            recipientId: string;
             /**
              * Kind
              * @enum {string}
              */
-            kind: "apply" | "invite";
+            kind: "apply" | "invite" | "personal";
             /**
              * Status
              * @enum {string}
@@ -471,6 +840,13 @@ export interface components {
             createdAt: string;
             /** Respondedat */
             respondedAt?: string | null;
+            /**
+             * Expiresat
+             * Format: date-time
+             */
+            expiresAt: string;
+            /** Isexpired */
+            isExpired: boolean;
             /** Canrespond */
             canRespond: boolean;
             /** Teamname */
@@ -483,16 +859,20 @@ export interface components {
             /** Id */
             id: string;
             /** Recruitmentid */
-            recruitmentId: string;
+            recruitmentId?: string | null;
             /** Candidateid */
             candidateId: string;
             /** Ownerid */
-            ownerId: string;
+            ownerId?: string | null;
+            /** Senderid */
+            senderId: string;
+            /** Recipientid */
+            recipientId: string;
             /**
              * Kind
              * @enum {string}
              */
-            kind: "apply" | "invite";
+            kind: "apply" | "invite" | "personal";
             /**
              * Status
              * @enum {string}
@@ -505,6 +885,13 @@ export interface components {
             createdAt: string;
             /** Respondedat */
             respondedAt?: string | null;
+            /**
+             * Expiresat
+             * Format: date-time
+             */
+            expiresAt: string;
+            /** Isexpired */
+            isExpired: boolean;
             /** Canrespond */
             canRespond: boolean;
             /** Teamname */
@@ -513,6 +900,8 @@ export interface components {
             counterpartNickname?: string | null;
             /** Message */
             message?: string | null;
+            /** Responsemessage */
+            responseMessage?: string | null;
             /** Counterpartqq */
             counterpartQq?: string | null;
         };
@@ -522,16 +911,15 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "apply" | "invite";
-            /**
-             * Recruitmentid
-             * Format: uuid
-             */
-            recruitmentId: string;
+            kind: "apply" | "invite" | "personal";
+            /** Recruitmentid */
+            recruitmentId?: string | null;
             /** Candidateid */
             candidateId?: string | null;
             /** Message */
             message?: string | null;
+            /** Sourcepersonalintentid */
+            sourcePersonalIntentId?: string | null;
         };
         /** IntentList */
         IntentList: {
@@ -688,6 +1076,8 @@ export interface components {
         Recruitment: {
             /** Id */
             id: string;
+            /** Teamid */
+            teamId: string;
             /** Ownerid */
             ownerId: string;
             /**
@@ -704,13 +1094,37 @@ export interface components {
             /** Teamnumber */
             teamNumber: string;
             /** Openings */
-            openings: number;
+            openings?: string | null;
             /** Skills */
             skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting")[];
             /** Requirements */
             requirements: components["schemas"]["RecruitmentRequirement"][];
             /** Background */
             background: string;
+            /**
+             * Membercount
+             * @default 1
+             */
+            memberCount: number;
+            /** Members */
+            members?: components["schemas"]["TeamMemberInfo"][];
+            /**
+             * Status
+             * @default active
+             * @enum {string}
+             */
+            status: "active" | "unpublished" | "expired";
+            /**
+             * Ispubliclyactive
+             * @default true
+             */
+            isPubliclyActive: boolean;
+            /** Publishedat */
+            publishedAt?: string | null;
+            /** Expiresat */
+            expiresAt?: string | null;
+            /** Durationdays */
+            durationDays?: (7 | 14 | 30) | null;
         };
         /** RecruitmentInput */
         RecruitmentInput: {
@@ -719,16 +1133,38 @@ export interface components {
             /** Teamname */
             teamName?: string | null;
             /** Openings */
-            openings: number;
+            openings?: string | null;
             /** Requirements */
-            requirements: components["schemas"]["RecruitmentRequirement"][];
+            requirements?: components["schemas"]["RecruitmentRequirement"][];
             /** Background */
             background: string;
+            /** Durationdays */
+            durationDays?: (7 | 14 | 30) | null;
         };
         /** RecruitmentList */
         RecruitmentList: {
             /** Items */
             items: components["schemas"]["Recruitment"][];
+        };
+        /** RecruitmentRenewInput */
+        RecruitmentRenewInput: {
+            /**
+             * Durationdays
+             * @default 14
+             * @enum {integer}
+             */
+            durationDays: 7 | 14 | 30;
+            /** Expectedexpiresat */
+            expectedExpiresAt?: string | null;
+        };
+        /** RecruitmentRepublishInput */
+        RecruitmentRepublishInput: {
+            /**
+             * Durationdays
+             * @default 14
+             * @enum {integer}
+             */
+            durationDays: 7 | 14 | 30;
         };
         /** RecruitmentRequirement */
         RecruitmentRequirement: {
@@ -741,6 +1177,8 @@ export interface components {
         RecruitmentVisibility: {
             /** Ispublished */
             isPublished: boolean;
+            /** Durationdays */
+            durationDays?: (7 | 14 | 30) | null;
         };
         /** Registration */
         Registration: {
@@ -801,6 +1239,152 @@ export interface components {
              */
             kind: "student";
         };
+        /** TeamInvitation */
+        TeamInvitation: {
+            /** Id */
+            id: string;
+            /** Teamid */
+            teamId: string;
+            /** Teamname */
+            teamName: string;
+            /** Competition */
+            competition: string;
+            /** Inviterid */
+            inviterId: string;
+            /** Inviternickname */
+            inviterNickname?: string | null;
+            /** Inviteeid */
+            inviteeId: string;
+            /** Inviteenickname */
+            inviteeNickname?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "accepted" | "declined";
+            /** Message */
+            message?: string | null;
+            /** Responsemessage */
+            responseMessage?: string | null;
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /** Respondedat */
+            respondedAt?: string | null;
+            /**
+             * Expiresat
+             * Format: date-time
+             */
+            expiresAt: string;
+            /** Isexpired */
+            isExpired: boolean;
+            /** Canrespond */
+            canRespond: boolean;
+        };
+        /** TeamInvitationDecision */
+        TeamInvitationDecision: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "accepted" | "declined";
+            /** Responsemessage */
+            responseMessage?: string | null;
+        };
+        /** TeamInvitationInput */
+        TeamInvitationInput: {
+            /** Inviteeids */
+            inviteeIds: string[];
+            /** Message */
+            message?: string | null;
+        };
+        /** TeamInvitationList */
+        TeamInvitationList: {
+            /** Items */
+            items: components["schemas"]["TeamInvitation"][];
+        };
+        /** TeamInviteResult */
+        TeamInviteResult: {
+            recruitment: components["schemas"]["Recruitment"];
+            intent: components["schemas"]["Intent"];
+        };
+        /** TeamList */
+        TeamList: {
+            /** Items */
+            items: components["schemas"]["TeamSummary"][];
+        };
+        /** TeamMemberInfo */
+        TeamMemberInfo: {
+            /** Userid */
+            userId: string;
+            /** Nickname */
+            nickname: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "captain" | "member";
+            /**
+             * Joinedat
+             * Format: date-time
+             */
+            joinedAt: string;
+            /** Skills */
+            skills?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting")[];
+            /** Customskills */
+            customSkills?: string[];
+            /**
+             * Hasprofile
+             * @default false
+             */
+            hasProfile: boolean;
+        };
+        /** TeamSummary */
+        TeamSummary: {
+            /** Id */
+            id: string;
+            /** Captainid */
+            captainId: string;
+            /** Competition */
+            competition: string;
+            /** Teamname */
+            teamName: string;
+            /** Teamnumber */
+            teamNumber: string;
+            /** Description */
+            description: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "disbanded";
+            /**
+             * Createdat
+             * Format: date-time
+             */
+            createdAt: string;
+            /**
+             * Myrole
+             * @enum {string}
+             */
+            myRole: "captain" | "member";
+            /** Membercount */
+            memberCount: number;
+            /** Members */
+            members: components["schemas"]["TeamMemberInfo"][];
+            recruitment?: components["schemas"]["Recruitment"] | null;
+        };
+        /** UpdateTeamInput */
+        UpdateTeamInput: {
+            /** Competition */
+            competition: string;
+            /** Teamname */
+            teamName?: string | null;
+            /** Description */
+            description: string;
+        };
         /** UploadEvidence */
         UploadEvidence: {
             /**
@@ -808,6 +1392,22 @@ export interface components {
              * @description Base64 image data
              */
             image: string;
+        };
+        /** UserSearchItem */
+        UserSearchItem: {
+            /** Userid */
+            userId: string;
+            /** Nickname */
+            nickname: string;
+            /** Skills */
+            skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting")[];
+            /** Customskills */
+            customSkills?: string[];
+        };
+        /** UserSearchList */
+        UserSearchList: {
+            /** Items */
+            items: components["schemas"]["UserSearchItem"][];
         };
     };
     responses: never;
@@ -1994,6 +2594,166 @@ export interface operations {
             };
         };
     };
+    republish_recruitment_route_api_v1_recruitments__recruitment_id__republish_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recruitment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecruitmentRepublishInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Recruitment"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    renew_recruitment_route_api_v1_recruitments__recruitment_id__renew_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                recruitment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecruitmentRenewInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Recruitment"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
     intents_api_v1_me_intents_get: {
         parameters: {
             query?: never;
@@ -2014,6 +2774,959 @@ export interface operations {
             };
             /** @description Unauthorized */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    high_five_candidates_api_v1_me_high_five_candidates_get: {
+        parameters: {
+            query?: {
+                recruitmentId?: string | null;
+                teamId?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HighFiveCandidateList"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    search_users_api_v1_users_search_get: {
+        parameters: {
+            query?: {
+                q?: string;
+                teamId?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserSearchList"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    my_teams_api_v1_me_teams_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamList"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    create_team_route_api_v1_teams_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTeamInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateTeamResult"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    update_team_route_api_v1_teams__team_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTeamInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamSummary"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    team_invitations_for_team_route_api_v1_teams__team_id__invitations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamInvitationList"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    create_team_invitations_route_api_v1_teams__team_id__invitations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamInvitationInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamInvitationList"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    leave_team_route_api_v1_teams__team_id__members_me_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    remove_team_member_route_api_v1_teams__team_id__members__member_user_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+                member_user_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamSummary"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    disband_team_route_api_v1_teams__team_id__disband_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamSummary"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    upsert_team_recruitment_route_api_v1_teams__team_id__recruitment_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                team_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecruitmentInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Recruitment"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    my_team_invitations_api_v1_me_team_invitations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamInvitationList"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    team_invitation_detail_api_v1_team_invitations__invitation_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamInvitation"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    respond_team_invitation_route_api_v1_team_invitations__invitation_id__response_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamInvitationDecision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamInvitation"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2199,6 +3912,86 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Intent"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Conflict */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    create_team_invite_api_v1_intents__intent_id__create_team_invite_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                intent_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTeamInviteInput"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamInviteResult"];
                 };
             };
             /** @description Unauthorized */
