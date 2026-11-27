@@ -9,6 +9,7 @@ const competitionCovers = new Map([
   ["ai-agent-campus", "ai-agent-campus.svg"],
 ]);
 
+/** 为比赛卡片选择封面图。 */
 function CompetitionArt({ id }: { id: string }) {
   const filename = competitionCovers.get(id) ?? "default.svg";
   return (
@@ -21,6 +22,7 @@ function CompetitionArt({ id }: { id: string }) {
     />
   );
 }
+/** 加载官方比赛目录并呈现欢迎页。 */
 export default function WelcomePage({ navigate }: { navigate: Navigate }) {
   const heading = useRef<HTMLHeadingElement>(null);
   const catalog = useResource(api.competitions);

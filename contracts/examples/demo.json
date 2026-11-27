@@ -28,12 +28,18 @@
       "userId": "00000000-0000-4000-8000-000000000003",
       "nickname": "周禾",
       "persona": "candidate-b"
+    },
+    "candidate-c": {
+      "userId": "00000000-0000-4000-8000-000000000004",
+      "nickname": "同学丙",
+      "persona": "candidate-c"
     }
   },
   "profiles": {
     "items": [
       {
         "userId": "00000000-0000-4000-8000-000000000001",
+        "qq": "DEMO-QQ-001",
         "nickname": "林舟",
         "skills": [
           "product-management",
@@ -73,6 +79,7 @@
       },
       {
         "userId": "00000000-0000-4000-8000-000000000002",
+        "qq": "DEMO-QQ-002",
         "nickname": "许言",
         "skills": [
           "data-collection",
@@ -91,11 +98,11 @@
         ],
         "college": "统计学院",
         "major": "统计学",
-        "competitionIntent": "想加入美赛队做数据与建模，偏好交通、能源或校园公共服务题。希望开赛先约定变量命名与模型接口，首轮交付数据审计和基线，随后换不同假设复核结论。可以独立完成可视化和技术附录。",
-        "grade": "大二"
+        "competitionIntent": "想加入美赛队做数据与建模，偏好交通、能源或校园公共服务题。希望开赛先约定变量命名与模型接口，首轮交付数据审计和基线，随后换不同假设复核结论。可以独立完成可视化和技术附录。"
       },
       {
         "userId": "00000000-0000-4000-8000-000000000003",
+        "qq": "DEMO-QQ-003",
         "nickname": "周禾",
         "skills": [
           "development",
@@ -142,7 +149,7 @@
         "teamName": "城市脉络建模队",
         "isPublished": true,
         "teamNumber": "20261124001",
-        "openings": 1,
+        "openings": "1",
         "skills": [
           "data-analysis",
           "data-visualization",
@@ -159,7 +166,8 @@
             "expectation": "负责公开数据的清洗和变量字典，记录缺失值与异常值处理规则；用 Python 或 R 做基线对照和敏感性分析，交付可重跑的代码与论文图表。能在模拟赛开题前一起确认数据口径。"
           }
         ],
-        "createdAt": "2026-11-24T00:00:00Z"
+        "createdAt": "2026-11-24T00:00:00Z",
+        "ownerNickname": "林舟"
       },
       {
         "id": "10000000-0000-4000-8000-000000000002",
@@ -168,7 +176,7 @@
         "teamName": "校园借用助手队",
         "isPublished": true,
         "teamNumber": "20261124002",
-        "openings": 2,
+        "openings": "2",
         "skills": [
           "agent-development",
           "backend",
@@ -196,7 +204,8 @@
             "expectation": "设计从需求输入、工具执行到人工确认的交互；实现能展示状态和错误恢复的网页原型，与队长一起完成五分钟演示脚本和备用录屏。"
           }
         ],
-        "createdAt": "2026-11-24T00:00:00Z"
+        "createdAt": "2026-11-24T00:00:00Z",
+        "ownerNickname": "林舟"
       }
     ]
   },
@@ -228,7 +237,8 @@
         "major": true,
         "grade": true,
         "experience": true,
-        "competitionIntent": true
+        "competitionIntent": true,
+        "qq": true
       },
       "customSkills": [
         "限时赛任务拆解",
@@ -249,7 +259,8 @@
           "award": "最佳答辩奖（演示）",
           "description": "为校园设备借用助手整理从查库存、核对资格到确认办理的流程。设计三组演示场景，包括查不到设备和信息不全时的回退路径。与开发同学一起完成交互稿和验收清单，负责五分钟答辩。"
         }
-      ]
+      ],
+      "listed": true
     },
     "candidate-a": {
       "userId": "00000000-0000-4000-8000-000000000002",
@@ -277,7 +288,8 @@
         "major": true,
         "grade": false,
         "experience": false,
-        "competitionIntent": true
+        "competitionIntent": true,
+        "qq": true
       },
       "customSkills": [
         "问卷信效度分析",
@@ -298,7 +310,8 @@
           "award": "优秀报告奖（演示）",
           "description": "以校园自习空间使用为题，先做小样本预调查，再按年级与常用时段分层比较。报告展示样本量、置信区间和非响应偏差，附变量字典与完整绘图代码。"
         }
-      ]
+      ],
+      "listed": true
     },
     "candidate-b": {
       "userId": "00000000-0000-4000-8000-000000000003",
@@ -326,7 +339,8 @@
         "major": true,
         "grade": true,
         "experience": true,
-        "competitionIntent": false
+        "competitionIntent": false,
+        "qq": true
       },
       "customSkills": [
         "Figma 组件设计",
@@ -347,7 +361,32 @@
           "award": "校赛一等奖（演示）",
           "description": "实现校园失物招领网页的筛选、发布、认领三个流程。用小屏幕试用记录改进图片上传和位置填写，为缺省图片、离线与重复提交补齐反馈。交付可点击稿和可运行原型。"
         }
-      ]
+      ],
+      "listed": true
+    },
+    "candidate-c": {
+      "userId": "00000000-0000-4000-8000-000000000004",
+      "nickname": "同学丙",
+      "college": "",
+      "qq": "",
+      "skills": [],
+      "contribution": "",
+      "major": "",
+      "grade": "",
+      "experience": "",
+      "evidenceIds": [],
+      "publicFields": {
+        "college": true,
+        "major": true,
+        "grade": false,
+        "experience": false,
+        "competitionIntent": true,
+        "qq": true
+      },
+      "customSkills": [],
+      "competitionIntent": "",
+      "projects": [],
+      "listed": false
     }
   }
 }

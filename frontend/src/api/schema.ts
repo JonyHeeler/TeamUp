@@ -164,7 +164,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Profiles */
+        /**
+         * Profiles
+         * @description List public profiles, with an optional skill filter.
+         */
         get: operations["profiles_api_v1_profiles_get"];
         put?: never;
         post?: never;
@@ -181,7 +184,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Profile */
+        /**
+         * Profile
+         * @description Return the public projection of one profile.
+         */
         get: operations["profile_api_v1_profiles__user_id__get"];
         put?: never;
         post?: never;
@@ -198,7 +204,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Profile Evidence */
+        /**
+         * Profile Evidence
+         * @description Return one evidence image if the viewer can access it.
+         */
         get: operations["profile_evidence_api_v1_profiles__user_id__evidence__image_id__get"];
         put?: never;
         post?: never;
@@ -215,15 +224,41 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** My Profile */
+        /**
+         * My Profile
+         * @description Read the signed-in user's private editable profile.
+         */
         get: operations["my_profile_api_v1_me_profile_get"];
-        /** Put Profile */
+        /**
+         * Put Profile
+         * @description Validate and save the signed-in user's profile.
+         */
         put: operations["put_profile_api_v1_me_profile_put"];
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/profile/visibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Profile Visibility
+         * @description Publish or unpublish the signed-in user's profile.
+         */
+        patch: operations["profile_visibility_api_v1_me_profile_visibility_patch"];
         trace?: never;
     };
     "/api/v1/competitions": {
@@ -233,7 +268,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Competitions */
+        /**
+         * Competitions
+         * @description List officially supported competitions.
+         */
         get: operations["competitions_api_v1_competitions_get"];
         put?: never;
         post?: never;
@@ -250,10 +288,16 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Recruitments */
+        /**
+         * Recruitments
+         * @description List published recruitments, with an optional skill filter.
+         */
         get: operations["recruitments_api_v1_recruitments_get"];
         put?: never;
-        /** Create Recruitment */
+        /**
+         * Create Recruitment
+         * @description Create a recruitment owned by the signed-in user.
+         */
         post: operations["create_recruitment_api_v1_recruitments_post"];
         delete?: never;
         options?: never;
@@ -268,9 +312,15 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Recruitment */
+        /**
+         * Recruitment
+         * @description Return a single published recruitment.
+         */
         get: operations["recruitment_api_v1_recruitments__recruitment_id__get"];
-        /** Update Recruitment */
+        /**
+         * Update Recruitment
+         * @description Save edits to a recruitment when requested by its owner.
+         */
         put: operations["update_recruitment_api_v1_recruitments__recruitment_id__put"];
         post?: never;
         delete?: never;
@@ -286,7 +336,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Own Recruitments */
+        /**
+         * Own Recruitments
+         * @description List recruitments owned by the signed-in user.
+         */
         get: operations["own_recruitments_api_v1_me_recruitments_get"];
         put?: never;
         post?: never;
@@ -309,7 +362,10 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        /** Set Recruitment Visibility */
+        /**
+         * Set Recruitment Visibility
+         * @description Publish or unpublish a recruitment when requested by its owner.
+         */
         patch: operations["set_recruitment_visibility_api_v1_recruitments__recruitment_id__visibility_patch"];
         trace?: never;
     };
@@ -320,7 +376,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Intents */
+        /**
+         * Intents
+         * @description Return summaries of all intents involving the signed-in user.
+         */
         get: operations["intents_api_v1_me_intents_get"];
         put?: never;
         post?: never;
@@ -337,7 +396,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Intent */
+        /**
+         * Intent
+         * @description Return the detail visible to this participant.
+         */
         get: operations["intent_api_v1_intents__intent_id__get"];
         put?: never;
         post?: never;
@@ -356,7 +418,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Create Intent */
+        /**
+         * Create Intent
+         * @description Create an intent or return the original on duplicate submission.
+         */
         post: operations["create_intent_api_v1_intents_post"];
         delete?: never;
         options?: never;
@@ -373,7 +438,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Respond */
+        /**
+         * Respond
+         * @description Record the recipient's decision and optional response note.
+         */
         post: operations["respond_api_v1_intents__intent_id__response_post"];
         delete?: never;
         options?: never;
@@ -407,7 +475,10 @@ export interface components {
             /** Password */
             password: string;
         };
-        /** Competition */
+        /**
+         * Competition
+         * @description Describe an entry in the official competition catalog.
+         */
         Competition: {
             /** Id */
             id: string;
@@ -416,18 +487,26 @@ export interface components {
             /** Nameen */
             nameEn: string;
         };
-        /** CompetitionList */
+        /**
+         * CompetitionList
+         * @description Wrap the official competition catalog in a list response.
+         */
         CompetitionList: {
             /** Items */
             items: components["schemas"]["Competition"][];
         };
-        /** Decision */
+        /**
+         * Decision
+         * @description Allow the recipient to accept or decline with an optional note.
+         */
         Decision: {
             /**
              * Decision
              * @enum {string}
              */
             decision: "accepted" | "declined";
+            /** Message */
+            message?: string | null;
         };
         /** Error */
         Error: {
@@ -444,21 +523,28 @@ export interface components {
                 [key: string]: string;
             } | null;
         };
-        /** Intent */
+        /**
+         * Intent
+         * @description Expose workflow state and the current viewer's available action.
+         */
         Intent: {
             /** Id */
             id: string;
             /** Recruitmentid */
-            recruitmentId: string;
+            recruitmentId?: string | null;
             /** Candidateid */
             candidateId: string;
             /** Ownerid */
-            ownerId: string;
+            ownerId?: string | null;
+            /** Senderid */
+            senderId: string;
+            /** Recipientid */
+            recipientId: string;
             /**
              * Kind
              * @enum {string}
              */
-            kind: "apply" | "invite";
+            kind: "apply" | "invite" | "personal";
             /**
              * Status
              * @enum {string}
@@ -478,21 +564,28 @@ export interface components {
             /** Counterpartnickname */
             counterpartNickname?: string | null;
         };
-        /** IntentDetail */
+        /**
+         * IntentDetail
+         * @description Include the stored notes and the contact allowed for this viewer.
+         */
         IntentDetail: {
             /** Id */
             id: string;
             /** Recruitmentid */
-            recruitmentId: string;
+            recruitmentId?: string | null;
             /** Candidateid */
             candidateId: string;
             /** Ownerid */
-            ownerId: string;
+            ownerId?: string | null;
+            /** Senderid */
+            senderId: string;
+            /** Recipientid */
+            recipientId: string;
             /**
              * Kind
              * @enum {string}
              */
-            kind: "apply" | "invite";
+            kind: "apply" | "invite" | "personal";
             /**
              * Status
              * @enum {string}
@@ -513,32 +606,40 @@ export interface components {
             counterpartNickname?: string | null;
             /** Message */
             message?: string | null;
+            /** Responsemessage */
+            responseMessage?: string | null;
             /** Counterpartqq */
             counterpartQq?: string | null;
         };
-        /** IntentInput */
+        /**
+         * IntentInput
+         * @description Validate a team or personal intent before it enters the workflow.
+         */
         IntentInput: {
             /**
              * Kind
              * @enum {string}
              */
-            kind: "apply" | "invite";
-            /**
-             * Recruitmentid
-             * Format: uuid
-             */
-            recruitmentId: string;
+            kind: "apply" | "invite" | "personal";
+            /** Recruitmentid */
+            recruitmentId?: string | null;
             /** Candidateid */
             candidateId?: string | null;
             /** Message */
             message?: string | null;
         };
-        /** IntentList */
+        /**
+         * IntentList
+         * @description Wrap the current participant's intent summaries.
+         */
         IntentList: {
             /** Items */
             items: components["schemas"]["Intent"][];
         };
-        /** Profile */
+        /**
+         * Profile
+         * @description Return the owner's full editable profile and saved image IDs.
+         */
         Profile: {
             /** Nickname */
             nickname: string;
@@ -561,6 +662,8 @@ export interface components {
             /** Customskills */
             customSkills?: string[];
             publicFields?: components["schemas"]["PublicFields"];
+            /** Listed */
+            listed: boolean;
             /** Userid */
             userId: string;
             /** Qq */
@@ -568,7 +671,10 @@ export interface components {
             /** Evidenceids */
             evidenceIds: string[];
         };
-        /** ProfileInput */
+        /**
+         * ProfileInput
+         * @description Validate a profile update and its private contact information.
+         */
         ProfileInput: {
             /** Nickname */
             nickname?: string | null;
@@ -596,12 +702,18 @@ export interface components {
             /** Evidence */
             evidence?: (components["schemas"]["RetainEvidence"] | components["schemas"]["UploadEvidence"])[] | null;
         };
-        /** ProfileList */
+        /**
+         * ProfileList
+         * @description Wrap public profiles in the standard list response.
+         */
         ProfileList: {
             /** Items */
             items: components["schemas"]["PublicProfile"][];
         };
-        /** ProfileProject */
+        /**
+         * ProfileProject
+         * @description Describe a competition project and the owner's contribution.
+         */
         ProfileProject: {
             /** Competition */
             competition: string;
@@ -621,8 +733,24 @@ export interface components {
              */
             description: string;
         };
-        /** PublicFields */
+        /**
+         * ProfileVisibility
+         * @description Change whether a profile appears in public discovery.
+         */
+        ProfileVisibility: {
+            /** Listed */
+            listed: boolean;
+        };
+        /**
+         * PublicFields
+         * @description Record which optional profile fields the owner has made public.
+         */
         PublicFields: {
+            /**
+             * Qq
+             * @default true
+             */
+            qq: boolean;
             /**
              * College
              * @default true
@@ -649,8 +777,13 @@ export interface components {
              */
             competitionIntent: boolean;
         };
-        /** PublicProfile */
+        /**
+         * PublicProfile
+         * @description Expose the public projection of a profile.
+         */
         PublicProfile: {
+            /** Qq */
+            qq?: string | null;
             /** Userid */
             userId: string;
             /** Nickname */
@@ -684,12 +817,17 @@ export interface components {
              */
             status: "ready";
         };
-        /** Recruitment */
+        /**
+         * Recruitment
+         * @description Expose a saved recruitment and its generated team number.
+         */
         Recruitment: {
             /** Id */
             id: string;
             /** Ownerid */
             ownerId: string;
+            /** Ownernickname */
+            ownerNickname: string;
             /**
              * Createdat
              * Format: date-time
@@ -704,7 +842,7 @@ export interface components {
             /** Teamnumber */
             teamNumber: string;
             /** Openings */
-            openings: number;
+            openings: string | null;
             /** Skills */
             skills: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting")[];
             /** Requirements */
@@ -712,32 +850,44 @@ export interface components {
             /** Background */
             background: string;
         };
-        /** RecruitmentInput */
+        /**
+         * RecruitmentInput
+         * @description Validate the fields supplied when creating or editing a recruitment.
+         */
         RecruitmentInput: {
             /** Competition */
             competition: string;
             /** Teamname */
             teamName?: string | null;
             /** Openings */
-            openings: number;
+            openings?: string | null;
             /** Requirements */
             requirements: components["schemas"]["RecruitmentRequirement"][];
             /** Background */
             background: string;
         };
-        /** RecruitmentList */
+        /**
+         * RecruitmentList
+         * @description Wrap recruitment records in the standard list response.
+         */
         RecruitmentList: {
             /** Items */
             items: components["schemas"]["Recruitment"][];
         };
-        /** RecruitmentRequirement */
+        /**
+         * RecruitmentRequirement
+         * @description Describe the expectations for one recruitment slot.
+         */
         RecruitmentRequirement: {
             /** Skills */
             skills?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting")[];
             /** Expectation */
             expectation?: string | null;
         };
-        /** RecruitmentVisibility */
+        /**
+         * RecruitmentVisibility
+         * @description Request a change to a recruitment's published status.
+         */
         RecruitmentVisibility: {
             /** Ispublished */
             isPublished: boolean;
@@ -760,7 +910,10 @@ export interface components {
             /** Resettoken */
             resetToken: string;
         };
-        /** RetainEvidence */
+        /**
+         * RetainEvidence
+         * @description Reference an existing evidence image to keep on save.
+         */
         RetainEvidence: {
             /**
              * Id
@@ -774,7 +927,7 @@ export interface components {
              * Persona
              * @enum {string}
              */
-            persona: "captain" | "candidate-a" | "candidate-b";
+            persona: "captain" | "candidate-a" | "candidate-b" | "candidate-c";
         };
         /** SessionUser */
         SessionUser: {
@@ -786,7 +939,7 @@ export interface components {
              * Persona
              * @enum {string}
              */
-            persona: "captain" | "candidate-a" | "candidate-b";
+            persona: "captain" | "candidate-a" | "candidate-b" | "candidate-c";
         };
         /** StudentSessionUser */
         StudentSessionUser: {
@@ -801,7 +954,10 @@ export interface components {
              */
             kind: "student";
         };
-        /** UploadEvidence */
+        /**
+         * UploadEvidence
+         * @description Carry a new image encoded as base64.
+         */
         UploadEvidence: {
             /**
              * Image
@@ -1375,7 +1531,7 @@ export interface operations {
     profiles_api_v1_profiles_get: {
         parameters: {
             query?: {
-                skill?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting") | null;
+                skill?: string | null;
             };
             header?: never;
             path?: never;
@@ -1578,6 +1734,75 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Profile"];
+                };
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Unprocessable Entity */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+            /** @description Service Unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Error"];
+                };
+            };
+        };
+    };
+    profile_visibility_api_v1_me_profile_visibility_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileVisibility"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileVisibility"];
                 };
             };
             /** @description Unauthorized */

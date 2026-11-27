@@ -1,6 +1,6 @@
-import { Toaster } from "sonner";
+import { ActionToaster, showToast } from "./ui/ActionToast";
 import { usePageNavigation } from "./ui/usePageNavigation";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   api,
   authApi,
@@ -9,7 +9,7 @@ import {
   type Persona,
 } from "./api/client";
 import { copy as t } from "./copy";
-import { BrandMark } from "./Welcome";
+import AppHeader from "./ui/AppHeader";
 import WelcomePage from "./pages/WelcomePage";
 import AboutPage from "./pages/AboutPage";
 import TeamsPage from "./pages/TeamsPage";
@@ -28,6 +28,8 @@ import {
 import "./style.css";
 import "./ui/motion.css";
 
+const RhythmGame = lazy(() => import("./rhythm/RhythmGame"));
+
 const pages = new Map([
   ["/about", "about"],
   ["/teams", "teams"],
@@ -45,6 +47,7 @@ const accountPages = new Map<string, AuthPage>([
   ["/onboarding", "onboarding"],
 ]);
 
+/** 管理会话、路由以及页面切换。 */
 export default function App() {
   const { location, setLocation, move, focusHeading } = usePageNavigation();
   const [me, setMe] = useState<Me | null>(null);
@@ -104,9 +107,11 @@ export default function App() {
     }
   }, [path, switching]);
 
+  /** 切换页面，按需替换当前历史记录。 */
   const navigate: Navigate = (href, notice, replace = false) =>
     move(href, notice, replace ? "replace" : "push");
 
+  /** 切换演示身份并清理上一个身份的提示。 */
   async function switchPersona(next: Persona) {
     if (switchingRef.current || next === me?.persona) return;
     switchingRef.current = true;
@@ -115,6 +120,7 @@ export default function App() {
     try {
       setMe(await api.session(next));
       setLocation((current) => ({ ...current, notice: undefined }));
+      showToast("已切换演示身份", "success");
     } catch (error) {
       setSessionError(describeError(error));
     } finally {
@@ -123,16 +129,6 @@ export default function App() {
     }
   }
 
-  const activeTab =
-    page === "teams"
-      ? 1
-      : page === "people"
-        ? 2
-        : ["center", "profile", "resume", "security", "onboarding"].includes(
-              page,
-            )
-          ? 3
-          : 0;
   const props = { me, navigate };
   const sessionPage =
     ["people", "profile", "resume", "center"].includes(page) ||
@@ -142,111 +138,31 @@ export default function App() {
     ((restoring || mode === null) && (sessionPage || Boolean(accountPage)));
   const requiresLogin = mode === "student" && sessionPage && !me;
 
+  if (path === "/rhythm") {
+    return (
+      <Suspense
+        fallback={
+          <main className="workspace" aria-busy="true">
+            {t.loading}
+          </main>
+        }
+      >
+        <RhythmGame exit={() => move("/", undefined, "push", false)} />
+      </Suspense>
+    );
+  }
+
   return (
     <>
-      <header className="topbar">
-        <div className="toolbar">
-          <button
-            className="brand"
-            aria-label={t.brand + " · " + t.brandEnglish}
-            onClick={(event) =>
-              move("/", undefined, "push", event.detail !== 0)
-            }
-          >
-            <span className="brand-mark" aria-hidden="true">
-              <BrandMark />
-            </span>
-            <span className="brand-wordmark">
-              {t.brand}
-              <span lang="en">{t.brandEnglish}</span>
-            </span>
-          </button>
-          <nav aria-label={t.navigation} data-tab={activeTab}>
-            <span className="nav-indicator" aria-hidden="true" />
-            <button
-              aria-current={
-                ["welcome", "competition", "about"].includes(page)
-                  ? "page"
-                  : undefined
-              }
-              onClick={(event) =>
-                move("/", undefined, "push", event.detail !== 0)
-              }
-            >
-              {t.welcome}
-            </button>
-            <button
-              aria-current={page === "teams" ? "page" : undefined}
-              onClick={(event) =>
-                move("/teams", undefined, "push", event.detail !== 0)
-              }
-            >
-              {t.teams}
-            </button>
-            <button
-              aria-current={page === "people" ? "page" : undefined}
-              onClick={(event) =>
-                move("/people", undefined, "push", event.detail !== 0)
-              }
-            >
-              {t.people}
-            </button>
-            <button
-              aria-current={
-                [
-                  "center",
-                  "profile",
-                  "resume",
-                  "security",
-                  "onboarding",
-                ].includes(page)
-                  ? "page"
-                  : undefined
-              }
-              onClick={(event) =>
-                move("/center", undefined, "push", event.detail !== 0)
-              }
-            >
-              {t.center}
-            </button>
-          </nav>
-          <div className="toolbar-actions">
-            {mode === "demo" ? (
-              <select
-                aria-label={t.persona}
-                className="persona"
-                value={me?.persona ?? ""}
-                disabled={restoring || switching}
-                onChange={(event) =>
-                  void switchPersona(event.target.value as Persona)
-                }
-              >
-                <option value="" disabled>
-                  {t.choosePersona}
-                </option>
-                <option value="captain">
-                  {t.captain}
-                  {me?.persona === "captain" && me ? " · " + me.nickname : ""}
-                </option>
-                <option value="candidate-a">
-                  {t.candidateA}
-                  {me?.persona === "candidate-a" && me
-                    ? " · " + me.nickname
-                    : ""}
-                </option>
-                <option value="candidate-b">
-                  {t.candidateB}
-                  {me?.persona === "candidate-b" && me
-                    ? " · " + me.nickname
-                    : ""}
-                </option>
-              </select>
-            ) : me && "kind" in me && me.kind === "student" ? (
-              <span>{me.nickname}</span>
-            ) : null}
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        page={page}
+        mode={mode}
+        me={me}
+        restoring={restoring}
+        switching={switching}
+        move={move}
+        switchPersona={switchPersona}
+      />
       <div className="page-viewport">
         <main
           className={page === "welcome" ? "welcome-page" : "workspace"}
@@ -309,14 +225,7 @@ export default function App() {
           )}
         </main>
       </div>
-      <Toaster
-        position="bottom-center"
-        containerAriaLabel="操作提醒"
-        className="app-toaster"
-        duration={3300}
-        closeButton
-        toastOptions={{ closeButtonAriaLabel: t.close }}
-      />
+      <ActionToaster />
     </>
   );
 }

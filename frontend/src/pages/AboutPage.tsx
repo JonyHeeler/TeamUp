@@ -1,6 +1,7 @@
 import { copy as t } from "../copy";
 import { Back, Heading, type Navigate } from "./shared";
 
+/** 介绍组队流程和联系方式的公开时机。 */
 export default function AboutPage({ navigate }: { navigate: Navigate }) {
   return (
     <>

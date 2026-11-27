@@ -1,0 +1,87 @@
+.dialog {
+  width: min(49rem, calc(100% - 1.5rem));
+  max-height: calc(100dvh - 1.5rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 0;
+  border-radius: var(--radius);
+  padding: 0;
+  color: var(--ink);
+  background: var(--paper);
+  box-shadow: 0 1.5rem 4rem #1d1d1f38;
+}
+.dialog::backdrop {
+  background: #17192362;
+}
+.dialog-heading {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem clamp(1rem, 4vw, 1.75rem);
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+}
+.dialog-heading h2 {
+  overflow-wrap: anywhere;
+}
+.dialog-heading .icon-button {
+  flex: none;
+}
+.dialog-content {
+  padding: clamp(1rem, 4vw, 1.75rem);
+  display: grid;
+  gap: 0.875rem;
+}
+.icon-button {
+  border: 0;
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.icon-button:hover {
+  background: #e8e9ed;
+}
+.dialog-section {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+.dialog-section select {
+  min-width: 0;
+  width: 100%;
+}
+.dialog-section > button {
+  justify-self: end;
+}
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 0.65rem;
+}
+.request-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.625rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.contact {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.9rem 1rem;
+  border-radius: 0.75rem;
+  background: #edf3fb;
+}
+.contact small {
+  color: #435a76;
+}
+.contact strong {
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+}

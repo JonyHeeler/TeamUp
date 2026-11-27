@@ -4,10 +4,11 @@ from urllib.parse import urlencode
 from app.config import get_settings
 from app.db.session import SessionLocal
 from app.services.accounts import issue_ticket, set_account_status
-from app.services.teamup import ServiceError
+from app.services.common import ServiceError
 
 
 def main() -> None:
+    """Issue account tickets or change account status from the operator CLI."""
     parser = argparse.ArgumentParser(description="TeamUP 学号账号管理")
     parser.add_argument("action", choices=("activate", "reset", "suspend", "restore"))
     args = parser.parse_args()

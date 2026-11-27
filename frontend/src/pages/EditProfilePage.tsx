@@ -11,8 +11,10 @@ import {
   type EvidenceDraft,
   type ImageProblem,
 } from "../evidence";
-import { Back, Feedback, Heading, useAction, type PageProps } from "./shared";
+import { showToast } from "../ui/ActionToast";
+import { Alert, Back, Heading, useAction, type PageProps } from "./shared";
 
+/** 加载并保存当前用户的名片草稿。 */
 export default function EditProfilePage({
   me,
   navigate,
@@ -37,6 +39,7 @@ export default function EditProfilePage({
           try {
             const {
               userId: _userId,
+              listed: _listed,
               evidenceIds,
               ...details
             } = await api.ownProfile();
@@ -64,6 +67,7 @@ export default function EditProfilePage({
                 contribution: "",
                 skills: [],
                 publicFields: {
+                  qq: true,
                   college: true,
                   major: false,
                   grade: false,
@@ -89,6 +93,7 @@ export default function EditProfilePage({
     // The session shell remounts this page when its active identity changes.
   }, [me]);
 
+  /** 准备新增证明图片并更新草稿。 */
   async function addImages(files: File[]) {
     if (!files.length) return;
     if (files.length + proofs.length > EVIDENCE_COUNT) {
@@ -115,7 +120,7 @@ export default function EditProfilePage({
     <>
       <Back label={t.center} onClick={() => navigate("/center")} />
       <Heading title={creating ? "创建个人名片" : t.profile} />
-      <Feedback error={error} />
+      <Alert message={error} />
       {!me ? (
         <p className="empty">{t.needPersona}</p>
       ) : profile ? (
@@ -133,6 +138,7 @@ export default function EditProfilePage({
               .filter(Boolean);
             if (!profile.skills.length && !customSkills.length) {
               setFieldErrors({ skills: t.pickSkill });
+              showToast(t.pickSkill, "error");
               return;
             }
             void run(

@@ -30,8 +30,10 @@ export const copy = {
   openings: "招募人数",
   background: "队伍 BG 介绍",
   backgroundHint: "介绍队伍主要做什么、已有成员的背景与分工，以及目前的进展。",
-  defaultTeamNumber: "留空，发布时自动使用平台编号",
+  defaultTeamNumber:
+    "如果你还没想好可以先不写。留空的话此处会展示平台为你建立的编号。",
   requirements: "招募需求",
+  /** 显示招募要求的序号。 */
   requirement: (index: number) => "需求 " + index,
   expectation: "期望",
   pickRequirement: "请选技能标签或填写期望。",
@@ -46,7 +48,8 @@ export const copy = {
   filterCollege: "按学院筛选",
   allColleges: "全部学院",
   qq: "QQ 号",
-  qqPrivacy: "击掌获同意后，仅申请双方可交换 QQ。",
+  qqPrivacy:
+    "关闭公开后，你的 QQ 不会出现在公开名片上；仅当对方同意击掌后，才会在该次击掌详情中向对方展示。双方可以留言，留言为选填。",
   major: "专业",
   grade: "年级",
   experience: "经历",
@@ -65,6 +68,7 @@ export const copy = {
   addImage: "添加图片",
   preparing: "正在处理图片…",
   removeImage: "移除",
+  /** 为证明图片生成可访问名称。 */
   evidenceLabel: (index: number) => "证明图片 " + index,
   imageType: "请选择有效的 JPG、PNG 或 WebP 图片。",
   imageTooLarge: "原图不能超过 20 MB。",
@@ -73,7 +77,7 @@ export const copy = {
   optional: "选填",
   public: "公开",
   save: "发布名片",
-  saved: "名片已发布。",
+  saved: "名片已保存。",
   published: "队伍已创建。",
   teamSaved: "队伍信息已保存。",
   teamArchived: "招募已下架。",
@@ -113,7 +117,9 @@ export const copy = {
   needTeam: "创建队伍后即可邀请队友。",
   failed: "操作失败，请重试。",
   unknownTeam: "击掌申请",
+  /** 显示匹配的队伍数量。 */
   teamCount: (count: number) => `${count} 支队伍`,
+  /** 显示队伍的招募人数。 */
   openCount: (count: number) => `缺 ${count} 人`,
   skillNames: {
     "data-analysis": "数据分析",

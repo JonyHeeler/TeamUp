@@ -1,0 +1,140 @@
+.editor-section {
+  display: grid;
+  gap: 1.25rem;
+}
+.editor-section + .editor-section {
+  border-top: 1px solid var(--line);
+  padding-top: 1.75rem;
+}
+.editor-section h2 {
+  font-size: 1.125rem;
+}
+.profile-basics-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.custom-editor,
+.position-editor {
+  display: grid;
+  min-width: 0;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0 0 0.625rem;
+  border: 0;
+}
+.custom-editor legend,
+.position-editor legend {
+  padding: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+.custom-editor > button {
+  justify-self: start;
+}
+.custom-skill-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.625rem;
+}
+.project-editor,
+.profile-projects {
+  display: grid;
+  gap: 0.625rem;
+  min-width: 0;
+}
+.custom-editor:has(.project-editor) {
+  gap: 1rem;
+}
+.project-editor,
+.profile-projects .details {
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: #f7f9fc;
+}
+.project-editor legend {
+  padding: 0 0.375rem;
+  font-weight: 700;
+}
+.project-editor > label + label,
+.project-editor > label + button {
+  margin-top: 1rem;
+}
+.project-editor > button {
+  justify-self: start;
+}
+.tags .custom-tag {
+  background: #f3f1f5;
+  color: #615865;
+}
+.position-editor {
+  display: block;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: #f7f9fc;
+}
+.position-editor > summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.position-editor[open] > summary {
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid #dce3ed;
+}
+.position-editor > :not(summary) {
+  margin-top: 1rem;
+}
+.position-skills {
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #dce3ed;
+  border-radius: 0.625rem;
+  background: var(--paper);
+}
+.position-skills[open] {
+  padding-bottom: 1rem;
+}
+.position-editor > .tags {
+  margin-top: 0.75rem;
+}
+.editor-section > button,
+.custom-editor > button,
+.project-editor > button,
+.position-editor > button {
+  justify-self: start;
+  --button-bg: #e8eff8;
+  --button-hover: #dbe8f7;
+  --button-ink: #15528d;
+}
+.position-editor legend {
+  padding: 0 0.375rem;
+}
+.position-skills summary,
+.recruitment-positions summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--action);
+  font-size: 0.875rem;
+  line-height: 2.5rem;
+}
+.position-skills summary .badge {
+  margin-inline-start: 0.375rem;
+}
+.position-skills .skill-picker {
+  margin-bottom: 0.5rem;
+}
+.recruitment-positions {
+  width: 100%;
+}
+.recruitment-positions ol {
+  display: grid;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.recruitment-positions ol > li {
+  display: grid;
+  gap: 0.375rem;
+  overflow-wrap: anywhere;
+}

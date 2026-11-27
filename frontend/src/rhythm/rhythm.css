@@ -1,0 +1,198 @@
+@import "./rhythm-board.css";
+@import "./rhythm-picker.css";
+
+.rhythm-page {
+  --rhythm-ink: #fff1d9;
+  --rhythm-muted: #b5c3dc;
+  --rhythm-panel: #142744;
+  --rhythm-edge: #385078;
+  --rhythm-orange: #ffb474;
+  --rhythm-blue: #83d8ff;
+  --rhythm-mono: "Cascadia Mono", Consolas, monospace;
+  min-height: 100svh;
+  background:
+    radial-gradient(ellipse at 15% 42%, #482c3b45, transparent 44%),
+    radial-gradient(ellipse at 77% 25%, #23447583, transparent 50%), #0d172a;
+  color: var(--rhythm-ink);
+}
+
+.rhythm-page :focus-visible {
+  outline-color: var(--rhythm-blue);
+}
+
+.rhythm-header,
+.rhythm-layout {
+  width: min(77rem, calc(100% - 4rem));
+  margin-inline: auto;
+}
+
+.rhythm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 4.75rem;
+  border-bottom: 1px solid #8197c044;
+}
+
+.rhythm-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  line-height: 1.15;
+  font-weight: 700;
+}
+
+.rhythm-brand img {
+  flex: none;
+}
+
+.rhythm-brand small {
+  display: block;
+  margin-top: 0.18rem;
+  color: var(--rhythm-muted);
+  font: 0.68rem var(--rhythm-mono);
+}
+
+.rhythm-exit {
+  min-height: 2.75rem;
+  padding-inline: 0.95rem;
+  border: 1px solid var(--rhythm-edge);
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--rhythm-ink);
+  font-size: 0.875rem;
+}
+
+.rhythm-exit:hover {
+  background: var(--rhythm-panel);
+}
+
+.rhythm-layout {
+  display: grid;
+  grid-template:
+    "intro play stats" max-content
+    "picker play stats" max-content
+    "guide play stats" 1fr / minmax(11rem, 1fr) minmax(17rem, 31rem) minmax(
+      8rem,
+      0.72fr
+    );
+  align-items: start;
+  gap: 1.35rem clamp(1.75rem, 4vw, 4.25rem);
+  padding-block: clamp(1.5rem, 5vh, 3.25rem) 2.5rem;
+}
+
+.rhythm-intro {
+  grid-area: intro;
+  padding-top: 0.4rem;
+}
+
+.rhythm-intro h1 {
+  font-family: Smartisan, "Microsoft YaHei UI", sans-serif;
+  font-size: clamp(3.25rem, 7.4vw, 7rem);
+  line-height: 0.99;
+  letter-spacing: -0.09em;
+}
+
+.rhythm-intro h1 span {
+  display: block;
+  color: var(--rhythm-orange);
+}
+
+.rhythm-guide {
+  grid-area: guide;
+}
+
+.rhythm-lessons {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rhythm-lessons li {
+  padding: 0.6rem 0.75rem;
+  border-left: 2px solid var(--rhythm-edge);
+}
+
+.rhythm-lessons li[aria-current] {
+  border-color: var(--rhythm-orange);
+  background: #ffc48d0d;
+}
+
+.rhythm-lessons p,
+.rhythm-stats dt {
+  color: var(--rhythm-muted);
+  font-size: 0.875rem;
+}
+
+.rhythm-lessons p {
+  margin-top: 0.15rem;
+}
+
+.rhythm-stats {
+  grid-area: stats;
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+}
+
+.rhythm-stats > div {
+  padding-top: 0.65rem;
+  border-top: 1px solid var(--rhythm-edge);
+}
+
+.rhythm-stats dd {
+  margin: 0.2rem 0 0;
+  font: 700 clamp(1.4rem, 3vw, 2.6rem)/1.15 var(--rhythm-mono);
+}
+
+@media (max-width: 55rem) {
+  .rhythm-header,
+  .rhythm-layout {
+    width: min(35rem, calc(100% - 2rem));
+  }
+
+  .rhythm-header {
+    min-height: 3.9rem;
+  }
+
+  .rhythm-layout {
+    grid-template:
+      "intro stats" auto
+      "picker picker" auto
+      "play play" auto
+      "guide guide" auto / minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem 0.5rem;
+    padding-top: 0.85rem;
+  }
+
+  .rhythm-intro h1 {
+    font-size: clamp(1.8rem, 7vw, 3.25rem);
+    letter-spacing: -0.075em;
+  }
+
+  .rhythm-intro h1 span {
+    display: inline;
+  }
+
+  .rhythm-stats {
+    grid-auto-flow: column;
+    gap: clamp(0.35rem, 1.9vw, 0.9rem);
+  }
+
+  .rhythm-stats > div {
+    padding-top: 0.35rem;
+  }
+
+  .rhythm-stats dt {
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .rhythm-stats dd {
+    font-size: clamp(1.06rem, 4.2vw, 1.75rem);
+  }
+}

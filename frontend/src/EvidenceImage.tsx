@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "./api/client";
 import type { EvidenceDraft } from "./evidence";
 
+/** 显示本地预览或读取服务器上的证明图片。 */
 export default function EvidenceImage({
   entry,
   userId,

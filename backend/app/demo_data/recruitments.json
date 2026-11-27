@@ -5,7 +5,7 @@
     "competition": "美赛",
     "teamName": "城市脉络建模队",
     "teamNumber": "20261124001",
-    "openings": 1,
+    "openings": "1",
     "skills": [
       "data-analysis",
       "data-visualization",
@@ -30,7 +30,7 @@
     "competition": "AI 智能体+ 大赛校赛",
     "teamName": "校园借用助手队",
     "teamNumber": "20261124002",
-    "openings": 2,
+    "openings": "2",
     "skills": [
       "agent-development",
       "backend",

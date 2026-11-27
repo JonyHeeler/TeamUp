@@ -1,0 +1,38 @@
+.competition-detail {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
+.competition-detail h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  line-height: 1.1;
+}
+.competition-detail h2 {
+  margin-top: 2rem;
+  font-size: 1.35rem;
+}
+.competition-detail a {
+  color: var(--action);
+  text-underline-offset: 0.18em;
+}
+.competition-detail p {
+  max-width: 42rem;
+  margin-top: 0.75rem;
+  line-height: 1.8;
+}
+.competition-detail .competition-eyebrow {
+  margin-top: 2rem;
+  color: var(--muted);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.competition-detail .competition-lead {
+  font-size: 1.25rem;
+}
+.competition-detail > button:last-child {
+  margin-top: 2rem;
+}
+.team-competition {
+  color: var(--muted);
+  font-size: 0.875rem;
+}

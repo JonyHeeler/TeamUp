@@ -1,87 +1,36 @@
+import { replaceMockEvidence } from "./mockEvidence";
+import { publicProfile } from "./mockProfile";
+import { matchesSkill } from "../profile/skillSearch";
+import { recruitmentDraft } from "./mockRecruitment";
 import fixture from "../../../contracts/examples/demo.json";
-import {
-  ApiError,
-  type Api,
-  type Intent,
-  type Me,
-  type OwnProfile,
-  type Persona,
-  type Profile,
-  type Recruitment,
-  type RecruitmentInput,
-  type Skill,
-} from "./client";
-const data = structuredClone(fixture) as {
-  personas: Record<Persona, Me>;
-  ownProfiles: Record<Persona, OwnProfile>;
-  recruitments: { items: Recruitment[] };
-};
+import type { Api } from "./client";
+import { ApiError } from "./http";
+import { createMockIntents, type MockData } from "./mockIntents";
+import type { Persona, Recruitment, Skill } from "./types";
+
+const data = structuredClone(fixture) as MockData;
+for (const profile of Object.values(data.ownProfiles)) {
+  profile.listed ??= true;
+  profile.publicFields.qq ??= true;
+}
 const sessionKey = "teamup-mock-persona";
 const previous = sessionStorage.getItem(sessionKey);
 let persona: Persona | null =
   previous && Object.hasOwn(data.personas, previous)
     ? (previous as Persona)
     : null;
-let intents: Intent[] = [];
-const intentMessages = new Map<string, string>();
 const pictures = new Map<string, Blob>();
 const examplePictures = import.meta.glob<string>("./demo-evidence/*.webp", {
   eager: true,
   query: "?url",
   import: "default",
 });
+/** Returns the current simulated identity. */
 const current = () => {
   if (!persona) throw new ApiError("请先选择演示身份。");
   return data.personas[persona];
 };
-const publicProfile = (p: OwnProfile, withEvidence = false): Profile => {
-  const result: Profile = {
-    userId: p.userId,
-    nickname: p.nickname,
-    skills: p.skills,
-    contribution: p.contribution,
-    customSkills: p.customSkills,
-  };
-  for (const field of [
-    "college",
-    "major",
-    "grade",
-    "experience",
-    "competitionIntent",
-  ] as const) {
-    if (
-      (["college", "major", "grade"].includes(field) ||
-        p.publicFields[field]) &&
-      p[field]
-    )
-      result[field] = p[field];
-  }
-  if (p.publicFields.experience && p.projects?.length)
-    result.projects = p.projects;
-  if (withEvidence && p.publicFields.experience && p.evidenceIds.length)
-    result.evidenceIds = p.evidenceIds;
-  return result;
-};
-const view = (i: Intent): Intent => ({
-  ...i,
-  teamName: data.recruitments.items.find((team) => team.id === i.recruitmentId)
-    ?.teamName,
-  counterpartNickname: Object.values(data.personas).find(
-    (user) =>
-      user.userId ===
-      (current().userId === i.candidateId ? i.ownerId : i.candidateId),
-  )?.nickname,
-  canRespond:
-    i.status === "pending" &&
-    (i.kind === "apply" ? i.ownerId : i.candidateId) === current().userId,
-});
-const lookup = (id: string) => {
-  const i = intents.find(
-    (x) => x.id === id && [x.ownerId, x.candidateId].includes(current().userId),
-  );
-  if (!i) throw new ApiError("未找到击掌申请。");
-  return i;
-};
+/** Finds a recruitment managed by the current identity. */
 function ownedTeam(id: string) {
   const owner = current();
   const team = data.recruitments.items.find((item) => item.id === id);
@@ -90,57 +39,45 @@ function ownedTeam(id: string) {
   return team;
 }
 
-function recruitmentDraft(body: RecruitmentInput) {
-  if (
-    !fixture.competitions.items.some((c) => c.name === body.competition.trim())
-  )
-    throw new ApiError(
-      "请选择官方比赛",
-      { competition: "请选择官方比赛" },
-      "validation_error",
-    );
-  if (
-    body.requirements.length !== body.openings ||
-    body.requirements.some(
-      (item) => !item.skills?.length && !item.expectation?.trim(),
-    )
-  )
-    throw new ApiError(
-      "请填写每个招募名额的需求",
-      { requirements: "请填写每个招募名额的需求" },
-      "validation_error",
-    );
-  return {
-    ...body,
-    competition: body.competition.trim(),
-    skills: [
-      ...new Set(body.requirements.flatMap((item) => item.skills ?? [])),
-    ],
-  };
+/** Projects a recruitment with its publisher's current nickname. */
+function publicTeam(team: Recruitment): Recruitment {
+  const owner = Object.values(data.ownProfiles).find(
+    (profile) => profile.userId === team.ownerId,
+  );
+  return { ...team, ownerNickname: owner?.nickname ?? team.ownerNickname };
 }
 
 export const mockApi: Api = {
+  /** Lists official competitions. */
   competitions: async () => fixture.competitions,
+  /** Restores the current identity. */
   me: async () => current(),
+  /** Switches the demo identity. */
   session: async (p) => {
     persona = p;
     sessionStorage.setItem(sessionKey, p);
     return current();
   },
+  /** Lists public profiles. */
   profiles: async (skill = "") => ({
     items: Object.values(data.ownProfiles)
+      .filter((p) => p.listed !== false)
       .map((p) => publicProfile(p))
-      .filter((p) => !skill || p.skills.includes(skill as Skill)),
+      .filter((p) => matchesSkill(p, skill)),
   }),
+  /** Loads one public profile. */
   profile: async (id) => {
     const p = Object.values(data.ownProfiles).find((x) => x.userId === id);
-    if (!p) throw new ApiError("未找到名片。");
+    if (!p || p.listed === false)
+      throw new ApiError("未找到名片。", undefined, "not_found");
     return publicProfile(p, true);
   },
+  /** Loads the current user profile. */
   ownProfile: async () => {
     current();
     return data.ownProfiles[persona!];
   },
+  /** Loads a profile evidence image. */
   evidence: async (userId, id) => {
     const profile = Object.values(data.ownProfiles).find(
       (entry) => entry.userId === userId,
@@ -150,7 +87,7 @@ export const mockApi: Api = {
     if (
       (!image && !example) ||
       !profile?.evidenceIds.includes(id) ||
-      (!profile.publicFields.experience &&
+      ((profile.listed === false || !profile.publicFields.experience) &&
         (!persona || current().userId !== userId))
     )
       throw new ApiError("未找到图片", undefined, "not_found");
@@ -159,6 +96,7 @@ export const mockApi: Api = {
     if (!response.ok) throw new ApiError("未找到图片", undefined, "not_found");
     return response.blob();
   },
+  /** Saves the current user profile. */
   saveProfile: async (body) => {
     const identity = current();
     const p = data.ownProfiles[persona!];
@@ -187,40 +125,35 @@ export const mockApi: Api = {
         { skills: "请至少选择或填写一项技能" },
         "validation_error",
       );
-    if (evidence) {
-      const ids = evidence.map((item) => {
-        if ("id" in item) return item.id;
-        const id = crypto.randomUUID();
-        const type = item.image.startsWith("iVBOR")
-          ? "image/png"
-          : item.image.startsWith("/9j/")
-            ? "image/jpeg"
-            : "image/webp";
-        const bytes = Uint8Array.from(atob(item.image), (character) =>
-          character.charCodeAt(0),
-        );
-        pictures.set(id, new Blob([bytes], { type }));
-        return id;
-      });
-      for (const id of p.evidenceIds)
-        if (!ids.includes(id)) pictures.delete(id);
-      p.evidenceIds = ids;
-    }
+    replaceMockEvidence(p, evidence, pictures);
     Object.assign(p, details);
     identity.nickname = p.nickname;
     return p;
   },
+  /** Changes the current profile discovery state. */
+  setProfileVisibility: async (listed) => {
+    current();
+    data.ownProfiles[persona!].listed = listed;
+    return { listed };
+  },
+  /** Lists published recruitments. */
   recruitments: async (skill = "") => ({
-    items: data.recruitments.items.filter(
-      (t) => t.isPublished && (!skill || t.skills.includes(skill as Skill)),
-    ),
+    items: data.recruitments.items
+      .filter(
+        (t) => t.isPublished && (!skill || t.skills.includes(skill as Skill)),
+      )
+      .map(publicTeam),
   }),
+  /** Lists the current user recruitments. */
   ownRecruitments: async () => {
     const ownerId = current().userId;
     return {
-      items: data.recruitments.items.filter((team) => team.ownerId === ownerId),
+      items: data.recruitments.items
+        .filter((team) => team.ownerId === ownerId)
+        .map(publicTeam),
     };
   },
+  /** Updates a recruitment. */
   updateRecruitment: async (id, body) => {
     const team = ownedTeam(id);
     Object.assign(team, recruitmentDraft(body), {
@@ -228,11 +161,13 @@ export const mockApi: Api = {
     });
     return { ...team };
   },
+  /** Changes a recruitment publication state. */
   setRecruitmentVisibility: async (id, isPublished) => {
     const team = ownedTeam(id);
     team.isPublished = isPublished;
     return { ...team };
   },
+  /** Creates a recruitment. */
   createRecruitment: async (body) => {
     const owner = current();
     const fields = recruitmentDraft(body);
@@ -258,71 +193,11 @@ export const mockApi: Api = {
       teamNumber,
       id: crypto.randomUUID(),
       ownerId: owner.userId,
+      ownerNickname: owner.nickname,
       createdAt: timestamp.toISOString(),
     };
     data.recruitments.items.unshift(t);
     return t;
   },
-  intents: async () => ({
-    items: intents
-      .filter((i) => [i.ownerId, i.candidateId].includes(current().userId))
-      .map(view),
-  }),
-  intent: async (id) => {
-    const i = lookup(id);
-    const message = intentMessages.get(i.id);
-    const other = i.ownerId === current().userId ? i.candidateId : i.ownerId;
-    const qq = Object.values(data.ownProfiles).find(
-      (profile) => profile.userId === other,
-    )?.qq;
-    return {
-      ...view(i),
-      ...(message ? { message } : {}),
-      ...(i.status === "accepted" && qq ? { counterpartQq: qq } : {}),
-    };
-  },
-  createIntent: async (body) => {
-    const user = current();
-    const t = data.recruitments.items.find((x) => x.id === body.recruitmentId);
-    if (!t) throw new ApiError("未找到招募。");
-    if (!t.isPublished) throw new ApiError("这支队伍的招募已下架");
-    const message = body.message?.trim();
-    if (message && Array.from(message).length > 300)
-      throw new ApiError(
-        "附言最多 300 字。",
-        { message: "附言最多 300 字。" },
-        "validation_error",
-      );
-    const candidateId = body.kind === "apply" ? user.userId : body.candidateId;
-    if (
-      !candidateId ||
-      candidateId === t.ownerId ||
-      (body.kind === "invite" && t.ownerId !== user.userId)
-    )
-      throw new ApiError("无法发出这条击掌申请。");
-    const existing = intents.find(
-      (i) => i.recruitmentId === t.id && i.candidateId === candidateId,
-    );
-    if (existing) return view(existing);
-    const i: Intent = {
-      id: crypto.randomUUID(),
-      recruitmentId: t.id,
-      candidateId,
-      ownerId: t.ownerId,
-      kind: body.kind,
-      status: "pending",
-      createdAt: new Date().toISOString(),
-      canRespond: false,
-    };
-    if (message) intentMessages.set(i.id, message);
-    intents.unshift(i);
-    return view(i);
-  },
-  respond: async (id, decision) => {
-    const i = lookup(id);
-    if (!view(i).canRespond) throw new ApiError("该击掌申请无法回应。");
-    i.status = decision;
-    i.respondedAt = new Date().toISOString();
-    return view(i);
-  },
+  ...createMockIntents(data, current),
 };

@@ -17,8 +17,56 @@ describe("demo profiles", () => {
           ? { evidenceIds: own.evidenceIds }
           : {}),
       });
-      expect(publicProfile).not.toHaveProperty("qq");
+      expect(publicProfile.qq).toBe(own.qq);
     }
+  });
+});
+
+describe("profile visibility", () => {
+  it("hides optional education fields in the list and detail", async () => {
+    const user = await mockApi.session("candidate-a");
+    const original = structuredClone(await mockApi.ownProfile());
+    await mockApi.saveProfile({
+      ...original,
+      qq: original.qq!,
+      college: original.college!,
+      major: original.major!,
+      grade: original.grade!,
+      publicFields: {
+        ...original.publicFields,
+        qq: false,
+        college: false,
+        major: false,
+        grade: false,
+      },
+    });
+    await expect(
+      mockApi.saveProfile({
+        ...original,
+        qq: original.qq!,
+        college: original.college!,
+        major: original.major!,
+        grade: original.grade!,
+        evidence: [{ id: "00000000-0000-4000-8000-000000000000" }],
+      }),
+    ).rejects.toThrow();
+    const card = (await mockApi.profiles()).items.find(
+      (item) => item.userId === user.userId,
+    )!;
+    const detail = await mockApi.profile(user.userId);
+    for (const profile of [card, detail]) {
+      expect(profile).not.toHaveProperty("college");
+      expect(profile).not.toHaveProperty("major");
+      expect(profile).not.toHaveProperty("grade");
+      expect(profile).not.toHaveProperty("qq");
+    }
+    await mockApi.saveProfile({
+      ...original,
+      qq: original.qq!,
+      college: original.college!,
+      major: original.major!,
+      grade: original.grade!,
+    });
   });
 });
 
@@ -35,6 +83,10 @@ describe("demo intent flow", () => {
     await expect(mockApi.intent(first.id)).rejects.toThrow();
     await mockApi.session("captain");
     await mockApi.respond(first.id, "accepted");
+    expect((await mockApi.respond(first.id, "accepted")).status).toBe(
+      "accepted",
+    );
+    await expect(mockApi.respond(first.id, "declined")).rejects.toThrow();
     expect((await mockApi.intent(first.id)).counterpartQq).toMatch(/^DEMO-QQ-/);
     const people = await mockApi.profiles();
     const candidate = people.items.find(

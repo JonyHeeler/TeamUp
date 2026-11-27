@@ -2,6 +2,8 @@ from typing import NamedTuple
 
 
 class CompetitionName(NamedTuple):
+    """Pair the Chinese and English names of an official competition."""
+
     name: str
     english: str
 

@@ -2,11 +2,12 @@ import { CardFacts, SummaryCard } from "../ui/SummaryCard";
 import { FilterSelect } from "../ui/FilterSelect";
 import { Button } from "../ui/Button";
 import { useState } from "react";
-import { api, type Recruitment } from "../api/client";
-import { Tags } from "../SkillFields";
+import { api, type Recruitment, type Skill } from "../api/client";
+import { skillGroups, Tags } from "../SkillFields";
 import "./people.css";
 import { copy as t } from "../copy";
-import { RecruitmentDetails } from "../RecruitmentEditor";
+import CaptainProfile from "./CaptainProfile";
+import { RecruitmentDetails } from "../recruitment/RecruitmentDetails";
 import {
   Alert,
   Dialog,
@@ -20,6 +21,7 @@ import {
   type PageProps,
 } from "./shared";
 
+/** 浏览招募并提交加入申请。 */
 export default function TeamsPage({
   me,
   navigate,
@@ -31,10 +33,12 @@ export default function TeamsPage({
   const list = useResource(api.recruitments);
   const { busy, run, clear, setError, error, fieldError } = useAction();
   const [notice, setNotice] = useState<Notice>();
+  const [skill, setSkill] = useState<Skill | "">("");
   const [team, setTeam] = useState<Recruitment | null>(null);
   const [applying, setApplying] = useState(false);
   const [message, setMessage] = useState("");
 
+  /** 加载选中的招募详情。 */
   function openTeam(entry: Recruitment) {
     clear();
     setMessage("");
@@ -42,6 +46,7 @@ export default function TeamsPage({
     setTeam(entry);
   }
 
+  /** 关闭队伍详情并清除申请表单状态。 */
   function closeTeam() {
     clear();
     setTeam(null);
@@ -50,9 +55,11 @@ export default function TeamsPage({
   const competition =
     competitions.find((item) => item.id === competitionId)?.name ?? "";
   const matchingTeams = (list.data?.items ?? []).filter(
-    (entry) => !competition || entry.competition === competition,
+    (entry) =>
+      (!competition || entry.competition === competition) &&
+      (!skill || entry.skills.includes(skill)),
   );
-  const feedback = error || list.error || catalog.error;
+  const feedback = list.error || catalog.error;
 
   return (
     <>
@@ -73,6 +80,20 @@ export default function TeamsPage({
           options={competitions.map((item) => ({
             value: item.name,
             label: item.name,
+          }))}
+        />
+        <FilterSelect
+          label={t.filter}
+          category={t.skills}
+          value={skill}
+          onChange={(value) => setSkill(value as Skill | "")}
+          all={t.allSkills}
+          groups={skillGroups.map(({ label, skills }) => ({
+            label,
+            options: skills.map((value) => ({
+              value,
+              label: t.skillNames[value],
+            })),
           }))}
         />
       </div>
@@ -103,7 +124,9 @@ export default function TeamsPage({
             <CardFacts
               items={[
                 [t.catalogCompetition, entry.competition],
-                [t.openings, t.openCount(entry.openings)],
+                ...(entry.openings
+                  ? [[t.openings, entry.openings] as [string, string]]
+                  : []),
               ]}
             />
             <p className="profile-card-summary">{entry.background}</p>
@@ -129,10 +152,15 @@ export default function TeamsPage({
         >
           <div className="team-card-meta">
             <span>{team.competition}</span>
-            <span className="badge">{t.openCount(team.openings)}</span>
+            {team.openings && (
+              <span className="badge">
+                {t.openings}：{team.openings}
+              </span>
+            )}
           </div>
           <Alert message={error} />
           <RecruitmentDetails recruitment={team} />
+          <CaptainProfile key={team.ownerId} userId={team.ownerId} />
           {team.ownerId === me?.userId ? (
             <span className="owned">{t.yourTeam}</span>
           ) : applying ? (
@@ -149,7 +177,10 @@ export default function TeamsPage({
                     }),
                   (result) => {
                     setTeam(null);
-                    setNotice(result.status);
+                  },
+                  {
+                    success: (result) =>
+                      result.created === false ? "已有加入申请" : "申请已发送",
                   },
                 );
               }}

@@ -1,6 +1,7 @@
 import "./summary-card.css";
 import type { ReactNode } from "react";
 
+/** 呈现列表项的标题、摘要和操作。 */
 export function SummaryCard({
   title,
   context,
@@ -38,6 +39,7 @@ export function SummaryCard({
   );
 }
 
+/** 呈现卡片中的标签与对应内容。 */
 export function CardFacts({
   items,
 }: {

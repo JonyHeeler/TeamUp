@@ -1,0 +1,196 @@
+@import "./rhythm-hands.css";
+
+.rhythm-play {
+  grid-area: play;
+  min-width: 0;
+  border: 1px solid var(--rhythm-edge);
+  border-radius: 1.2rem;
+  background: var(--rhythm-panel);
+  box-shadow: 0 1.7rem 3.75rem #040b1d87;
+  overflow: hidden;
+}
+
+.rhythm-stage-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 2.75rem;
+  padding: 0.45rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.rhythm-stage-header progress {
+  flex: 1;
+  width: 0;
+  height: 0.35rem;
+  accent-color: var(--rhythm-orange);
+}
+
+.rhythm-stage {
+  position: relative;
+  isolation: isolate;
+  height: clamp(20rem, 56svh, 36rem);
+  overflow: hidden;
+  border-block: 1px solid var(--rhythm-edge);
+  background:
+    repeating-linear-gradient(#9ab5e518 0 1px, transparent 1px 12.5%),
+    linear-gradient(90deg, #ffae6330, #ffae6310 50%, #7ccfff17 50%, #7ccfff2b),
+    #0b162c;
+}
+
+.rhythm-stage::before {
+  position: absolute;
+  inset: 0 50% 0 auto;
+  width: 1px;
+  background: #adc7f85b;
+  content: "";
+}
+
+.rhythm-page [data-lane="left"] {
+  --lane-color: var(--rhythm-orange);
+  --lane-edge: #d58350;
+}
+
+.rhythm-page [data-lane="right"] {
+  --lane-color: var(--rhythm-blue);
+  --lane-edge: #4699d1;
+}
+
+.rhythm-notes,
+.rhythm-note-row {
+  position: absolute;
+  inset-inline: 0;
+  pointer-events: none;
+}
+
+.rhythm-notes {
+  z-index: 2;
+  inset-block: 0;
+}
+
+.rhythm-note {
+  position: absolute;
+  left: 25%;
+  width: 32%;
+  height: clamp(0.88rem, 2.8vh, 1.24rem);
+  border: 1px solid #fff2d5a3;
+  border-bottom: 3px solid var(--lane-edge);
+  border-radius: 0.32rem;
+  background: var(--lane-color);
+  box-shadow: 0 0 0.8rem color-mix(in srgb, var(--lane-color) 26%, transparent);
+  transform: translate(-50%, -50%);
+}
+
+.rhythm-note[data-lane="right"] {
+  left: 75%;
+}
+
+.rhythm-note-link {
+  position: absolute;
+  left: 25%;
+  width: 50%;
+  height: 0.25rem;
+  background: #ffe4a3;
+  box-shadow: 0 0 0.8rem #ffc36298;
+  transform: translateY(-50%);
+}
+
+.rhythm-note-row[data-kind="roll"] .rhythm-note {
+  height: 0.82rem;
+  background:
+    repeating-linear-gradient(
+      115deg,
+      transparent 0 0.55rem,
+      #10203839 0.55rem 0.75rem
+    ),
+    var(--lane-color);
+}
+
+.rhythm-note-row--preview {
+  opacity: 0.72;
+}
+
+.rhythm-hit-line {
+  position: absolute;
+  z-index: 3;
+  inset: var(--rhythm-hit-line) 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.rhythm-hit-line span {
+  height: 3px;
+  background: var(--lane-color);
+  box-shadow: 0 0 0.45rem var(--lane-color);
+}
+
+.rhythm-hit-line span[data-hit="true"] {
+  height: 5px;
+  background: var(--rhythm-ink);
+  box-shadow: 0 0 1.2rem 0.25rem var(--lane-color);
+}
+
+.rhythm-pads {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--rhythm-edge);
+}
+
+.rhythm-pad {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 3.8rem;
+  border: 0;
+  border-bottom: 3px solid var(--lane-edge);
+  background: var(--rhythm-panel);
+  color: var(--lane-color);
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.rhythm-pad:focus-visible {
+  outline-offset: -4px;
+}
+
+.rhythm-pad kbd {
+  min-width: 1.65rem;
+  padding: 0.13rem 0.35rem;
+  border: 1px solid currentColor;
+  border-radius: 0.32rem;
+  font: 700 1rem var(--rhythm-mono);
+}
+
+.rhythm-pad span {
+  font-size: 0.875rem;
+}
+
+.rhythm-pad:hover {
+  background: #20385e;
+}
+
+.rhythm-pad[data-pressed="true"] {
+  background: var(--lane-color);
+  color: #101b2f;
+}
+
+@media (max-width: 55rem) {
+  .rhythm-stage {
+    height: clamp(15rem, 49svh, 32rem);
+  }
+
+  .rhythm-pad {
+    min-height: 3.45rem;
+  }
+}
+
+@media (max-height: 35rem) and (orientation: landscape) {
+  .rhythm-stage {
+    height: max(9rem, calc(100svh - 14rem));
+  }
+}

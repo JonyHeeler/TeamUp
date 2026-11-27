@@ -1,3 +1,4 @@
+/** 绘制欢迎页的击掌图形。 */
 export default function HighFiveScene() {
   return (
     <svg

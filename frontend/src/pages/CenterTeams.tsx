@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { api, type Recruitment, type RecruitmentInput } from "../api/client";
 import { copy as t } from "../copy";
-import RecruitmentEditor from "../RecruitmentEditor";
+import RecruitmentEditor from "../recruitment/RecruitmentEditor";
 import { Button } from "../ui/Button";
 import {
   Alert,
@@ -13,6 +13,7 @@ import {
 } from "./shared";
 import "./center-teams.css";
 
+/** 管理当前用户创建的队伍和招募可见性。 */
 export default function CenterTeams({
   teams: initialTeams,
   loadError,
@@ -33,21 +34,23 @@ export default function CenterTeams({
     ),
   ];
 
+  /** 关闭管理弹窗并清除请求状态。 */
   function close() {
     clear();
     setEditor(null);
     setVisibility(null);
   }
 
-  function saveTeam(team: Recruitment, result: Notice) {
+  /** 将 API 确认的队伍写入列表并通知用户。 */
+  function saveTeam(team: Recruitment) {
     setChanges((items) => [
       team,
       ...items.filter((item) => item.id !== team.id),
     ]);
     close();
-    setNotice(result);
   }
 
+  /** 根据表单模式创建或更新招募。 */
   function submit(draft: RecruitmentInput) {
     if (!editor) return;
     const creating = editor === "create";
@@ -56,7 +59,8 @@ export default function CenterTeams({
         creating
           ? api.createRecruitment(draft)
           : api.updateRecruitment(editor.id, draft),
-      (team) => saveTeam(team, creating ? "published" : "teamSaved"),
+      (team) => saveTeam(team),
+      { success: creating ? "招募已发布" : "招募已保存" },
     );
   }
 
@@ -81,7 +85,7 @@ export default function CenterTeams({
               <div className="managed-team-info">
                 <h3>{team.teamName}</h3>
                 <p>
-                  {team.competition} · {t.openCount(team.openings)} ·{" "}
+                  {team.competition} · {team.openings && `${team.openings} · `}
                   {team.teamNumber}
                 </p>
                 <span
@@ -173,11 +177,11 @@ export default function CenterTeams({
                       visibility.id,
                       !visibility.isPublished,
                     ),
-                  (team) =>
-                    saveTeam(
-                      team,
-                      team.isPublished ? "teamRestored" : "teamArchived",
-                    ),
+                  (team) => saveTeam(team),
+                  {
+                    success: (team) =>
+                      team.isPublished ? "招募已上架" : "招募已下架",
+                  },
                 )
               }
             >

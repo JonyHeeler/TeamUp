@@ -1,0 +1,73 @@
+.competition-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(0.875rem, 2.2vw, 1.5rem);
+}
+.competition-card {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0;
+  color: var(--ink);
+  background: var(--paper);
+  text-align: start;
+  transition:
+    border-color 180ms,
+    transform 180ms;
+}
+.competition-card:hover {
+  border-color: #afbdd0;
+}
+.competition-card:active {
+  transform: scale(0.989);
+  transition-duration: 90ms;
+}
+.competition-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+}
+.competition-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.875rem;
+  min-height: 6.375rem;
+  padding: 1rem clamp(1rem, 3vw, 1.625rem);
+}
+.caption-content {
+  display: grid;
+  gap: 0.25rem;
+}
+.caption-content strong {
+  font-size: clamp(1.125rem, 2.4vw, 1.5rem);
+  line-height: 1.24;
+  letter-spacing: -0.025em;
+}
+.caption-content > span {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.card-arrow,
+.icon-button {
+  display: inline-grid;
+  flex: 0 0 2.75rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #f0f1f4;
+  color: var(--ink);
+}
+.card-arrow .chevron {
+  translate: -0.085rem;
+}
+.competition-card:hover .card-arrow {
+  background: #e5edf8;
+  color: #005bb7;
+}

@@ -11,10 +11,11 @@ MAX_SEQUENCE = len(ALPHABET) ** 3 - 1
 
 
 class TeamNumberExhausted(ValueError):
-    pass
+    """Signal that the team number sequence is exhausted."""
 
 
 def next_team_number(db: Session, created_at: datetime) -> str:
+    """Allocate the next team number in the current transaction."""
     day = (created_at + timedelta(hours=8)).strftime("%Y%m%d")
     allocation = insert(TeamNumberCounter).values(day=day, last_index=1)
     db.execute(allocation.on_duplicate_key_update(last_index=TeamNumberCounter.last_index + 1))

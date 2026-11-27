@@ -1,113 +1,14 @@
 import { toast } from "sonner";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { ApiError, type Intent, type Me } from "../api/client";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { copy as t } from "../copy";
 
-export type Notice =
-  | "saved"
-  | "published"
-  | "teamSaved"
-  | "teamArchived"
-  | "teamRestored"
-  | Intent["status"];
-export type Navigate = (
-  href: string,
-  notice?: Notice,
-  replace?: boolean,
-) => void;
-export type PageProps = { me: Me | null; navigate: Navigate };
+import type { Notice } from "../pageTypes";
+import { ActionToaster } from "../ui/ActionToast";
 
-export function describeError(error: unknown): string {
-  if (!(error instanceof ApiError)) return t.failed;
-  return error.code === "unauthorized" ? t.needPersona : error.message;
-}
+export type { Notice, Navigate, PageProps } from "../pageTypes";
+export { describeError, useAction, useResource } from "./useRequest";
 
-export function useResource<T>(request: () => Promise<T>, enabled = true) {
-  const [state, setState] = useState<{ data?: T; error?: string }>({});
-  useEffect(() => {
-    if (!enabled) return;
-    let active = true;
-    void request().then(
-      (data) => {
-        if (active) setState({ data });
-      },
-      (error: unknown) => {
-        if (active) setState({ error: describeError(error) });
-      },
-    );
-    return () => {
-      active = false;
-    };
-  }, [request, enabled]);
-  return state;
-}
-
-export function useAction() {
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const revision = useRef(0);
-  const writing = useRef(false);
-
-  useEffect(
-    () => () => {
-      revision.current += 1;
-    },
-    [],
-  );
-
-  function clear() {
-    revision.current += 1;
-    setError("");
-    setFieldErrors({});
-  }
-
-  async function run<T>(
-    request: () => Promise<T>,
-    done: (result: T) => void,
-    write = true,
-  ) {
-    if (writing.current) return;
-    clear();
-    const operation = revision.current;
-    if (write) {
-      writing.current = true;
-      setBusy(true);
-    }
-    try {
-      const result = await request();
-      if (operation === revision.current) done(result);
-    } catch (error) {
-      if (operation === revision.current) {
-        setError(describeError(error));
-        if (error instanceof ApiError) setFieldErrors(error.fields ?? {});
-      }
-    } finally {
-      if (write) {
-        writing.current = false;
-        setBusy(false);
-      }
-    }
-  }
-
-  const fieldError = (key: string) => {
-    const message = Object.entries(fieldErrors).find(
-      ([field]) => field === key || field.startsWith(key + "."),
-    )?.[1];
-    return message && <small className="field-error">{message}</small>;
-  };
-  return {
-    run,
-    busy,
-    error,
-    setError,
-    clear,
-    fieldErrors,
-    setFieldErrors,
-    fieldError,
-  };
-}
-
+/** 显示页面标题。 */
 export function Heading({
   title,
   children,
@@ -123,6 +24,7 @@ export function Heading({
   );
 }
 
+/** 显示返回操作。 */
 export function Back({
   label,
   onClick,
@@ -138,6 +40,7 @@ export function Back({
   );
 }
 
+/** 通过提示消息显示操作结果。 */
 export function Feedback({
   error,
   notice,
@@ -155,7 +58,9 @@ export function Feedback({
   useEffect(() => {
     if (!message) return;
     const options = {
+      /** 响应用户手动关闭提示。 */
       onDismiss: () => dismiss.current?.(),
+      /** 响应提示超时关闭。 */
       onAutoClose: () => dismiss.current?.(),
     };
     const id = error
@@ -168,6 +73,7 @@ export function Feedback({
   return null;
 }
 
+/** 编辑意向附言。 */
 export function IntentMessage({
   value,
   onChange,
@@ -176,28 +82,37 @@ export function IntentMessage({
 }: {
   value: string;
   onChange: (value: string) => void;
-  kind: "apply" | "invite";
+  kind: "apply" | "invite" | "personal" | "response";
   error?: ReactNode;
 }) {
+  const hintId = useId();
+  const responding = kind === "response";
+  const placeholders = {
+    apply: t.applyHint,
+    invite: t.inviteHint,
+    personal: "说说想和对方交流或合作的方向。",
+    response: "可以补充你的想法或下一步安排。",
+  };
   return (
     <label className="intent-message">
-      <span>{t.intentMessage}</span>
+      <span>{responding ? "回应" : t.intentMessage}</span>
       <textarea
         rows={3}
         maxLength={300}
         value={value}
-        placeholder={kind === "apply" ? t.applyHint : t.inviteHint}
-        aria-describedby="intent-message-hint"
+        placeholder={placeholders[kind]}
+        aria-describedby={hintId}
         onChange={(event) => onChange(event.target.value)}
       />
-      <small id="intent-message-hint" className="consent">
-        {t.optionalMessage}
+      <small id={hintId} className="consent">
+        {responding ? "回应选填，最多 300 字。" : t.optionalMessage}
       </small>
       {error}
     </label>
   );
 }
 
+/** 生成赛事对应的队伍列表地址。 */
 export function teamsHref(competitionId?: string) {
   const path = "/teams";
   return competitionId
@@ -205,6 +120,7 @@ export function teamsHref(competitionId?: string) {
     : path;
 }
 
+/** 展示模态对话框并管理焦点。 */
 export function Dialog({
   title,
   close,
@@ -232,6 +148,7 @@ export function Dialog({
   return (
     <dialog
       ref={ref}
+      data-toast-scope={titleId}
       aria-labelledby={titleId}
       className="dialog"
       onCancel={(event) => {
@@ -255,10 +172,12 @@ export function Dialog({
         </button>
       </div>
       <div className="dialog-content">{children}</div>
+      <ActionToaster id={titleId} />
     </dialog>
   );
 }
 
+/** 显示错误提示。 */
 export function Alert({ message }: { message: string }) {
   return (
     message && (

@@ -22,6 +22,8 @@ THIRD = "candidate-b"
 
 
 def test_request_validation_and_disabled_demo(monkeypatch):
+    """Check validation with demo authentication explicitly disabled."""
+    monkeypatch.setenv("TEAMUP_AUTH_MODE", "off")
     monkeypatch.setenv("TEAMUP_ALLOWED_ORIGIN", ORIGIN)
     monkeypatch.setenv("TEAMUP_DEMO_MODE", "false")
     get_settings.cache_clear()
@@ -40,21 +42,23 @@ def test_request_validation_and_disabled_demo(monkeypatch):
 
 
 def test_intent_response_examples_match_contract():
-    from app.api import schemas
+    """Validate each checked-in intent response against its response model."""
+    from app.api.schemas.intents import Intent, IntentDetail
+    from app.api.schemas.system import Error
 
     path = Path(__file__).resolve().parents[2] / "contracts/examples/intent-responses.json"
     examples = json.loads(path.read_text(encoding="utf-8"))
-    pending = schemas.Intent.model_validate(examples["pendingForRecipient"])
+    pending = Intent.model_validate(examples["pendingForRecipient"])
     assert pending.status == "pending" and pending.canRespond
-    accepted = schemas.IntentDetail.model_validate(examples["acceptedDetailForCaptain"])
+    accepted = IntentDetail.model_validate(examples["acceptedDetailForCaptain"])
     assert accepted.status == "accepted" and accepted.counterpartQq.startswith("DEMO-QQ-")
-    declined = schemas.IntentDetail.model_validate(examples["declinedDetailForCaptain"])
+    declined = IntentDetail.model_validate(examples["declinedDetailForCaptain"])
     assert (
         declined.status == "declined"
         and "counterpartQq" not in examples["declinedDetailForCaptain"]
     )
     assert examples["nonParticipant"]["status"] == 404
-    schemas.Error.model_validate(examples["nonParticipant"]["body"])
+    Error.model_validate(examples["nonParticipant"]["body"])
 
 
 def test_hidden_account_endpoints_are_disabled_in_demo(monkeypatch):
@@ -77,6 +81,7 @@ def test_hidden_account_endpoints_are_disabled_in_demo(monkeypatch):
 
 @pytest.fixture
 def migrated_database(monkeypatch):
+    """Migrate the empty test schema and remove its tables after a test."""
     database_url = os.environ.get("TEAMUP_TEST_DATABASE_URL")
     if not database_url:
         pytest.skip("Set TEAMUP_TEST_DATABASE_URL to run isolated MySQL tests")
@@ -96,6 +101,7 @@ def migrated_database(monkeypatch):
     monkeypatch.setenv("TEAMUP_DB_NAME", "teamup_test")
     monkeypatch.setenv("TEAMUP_DB_USER", url.username or "")
     monkeypatch.setenv("TEAMUP_DB_PASSWORD", url.password or "")
+    monkeypatch.setenv("TEAMUP_AUTH_MODE", "demo")
     monkeypatch.setenv("TEAMUP_DEMO_MODE", "true")
     monkeypatch.setenv("TEAMUP_SESSION_SECRET", "test-secret-used-only-by-the-integration-suite")
     monkeypatch.setenv("TEAMUP_ALLOWED_ORIGIN", ORIGIN)
@@ -107,6 +113,14 @@ def migrated_database(monkeypatch):
         yield
     finally:
         # This fixture started with an empty schema and only owns its migration tables.
+        with engine.begin() as connection:
+            tables = inspect(connection).get_table_names()
+            if "intents" in tables:
+                connection.execute(text("DELETE FROM intents"))
+            if "recruitment_skills" in tables:
+                connection.execute(text("DELETE FROM recruitment_skills"))
+            if "recruitments" in tables:
+                connection.execute(text("DELETE FROM recruitments"))
         command.downgrade(config, "base")
         with engine.begin() as connection:
             connection.execute(text("DROP TABLE IF EXISTS alembic_version"))
@@ -210,7 +224,7 @@ def test_student_account_lifecycle(migrated_database, monkeypatch):
         assert (
             public.status_code == 200
             and student_id not in public.text
-            and "qq" not in public.json()
+            and public.json()["qq"] == draft["qq"]
         )
 
         second = login(other, password)
@@ -251,7 +265,7 @@ def publish(client, team_name):
         "/recruitments",
         competition="  美赛  ",
         teamName=team_name,
-        openings=1,
+        openings="1",
         requirements=[{"skills": ["data-analysis", "data-analysis"]}],
         background="负责清洗问卷数据",
     )
@@ -314,6 +328,7 @@ def test_p0_workflow_and_concurrent_intents(migrated_database):
                 ],
                 "experience": "隐藏的虚构经历",
                 "publicFields": {
+                    "qq": False,
                     "college": False,
                     "major": False,
                     "grade": False,
@@ -325,11 +340,19 @@ def test_p0_workflow_and_concurrent_intents(migrated_database):
         assert response.json()["experience"] == "隐藏的虚构经历"
         assert response.json()["contribution"] == "清理和分析问卷数据"
         public = captain.get(f"{BASE}/profiles/{candidate_id}").json()
-        assert public["college"] == "统计学院"
-        assert public["major"] == "统计学"
-        assert public["grade"] == "大二"
+        hidden = {"college", "major", "grade"}
+        assert hidden.isdisjoint(public)
+        profiles = captain.get(f"{BASE}/profiles", params={"skill": "data-analysis"})
+        assert profiles.status_code == 200
+        summary = next(item for item in profiles.json()["items"] if item["userId"] == candidate_id)
+        assert hidden.isdisjoint(summary)
         assert "competitionIntent" not in public
         own = candidate.get(f"{BASE}/me/profile").json()
+        assert own["college"] == "统计学院"
+        assert own["major"] == "统计学"
+        assert own["grade"] == "大二"
+        assert all(not own["publicFields"][field] for field in hidden)
+        own["publicFields"].update(dict.fromkeys(hidden, True))
         assert own["competitionIntent"] == "想参加数学建模比赛"
         assert {"projects", "experience"}.isdisjoint(public)
         assert own["projects"][0]["competition"] == "数学建模校赛"
@@ -337,12 +360,15 @@ def test_p0_workflow_and_concurrent_intents(migrated_database):
         own["publicFields"]["experience"] = True
         own.pop("userId")
         own.pop("evidenceIds")
+        own.pop("listed")
         own["publicFields"]["competitionIntent"] = True
         updated = candidate.put(f"{BASE}/me/profile", headers={"Origin": ORIGIN}, json=own)
         assert updated.status_code == 200, updated.text
         public = captain.get(f"{BASE}/profiles/{candidate_id}").json()
         assert public["competitionIntent"] == "想参加数学建模比赛"
         assert public["projects"] == own["projects"]
+        assert public["college"] == "统计学院"
+        assert public["major"] == "统计学"
         assert public["grade"] == "大二"
         assert {"qq", "counterpartQq"}.isdisjoint(public)
         matches = captain.get(f"{BASE}/profiles", params={"skill": "data-analysis"}).json()["items"]
@@ -403,7 +429,7 @@ def test_p0_workflow_and_concurrent_intents(migrated_database):
             != candidate.get(detail).json()["counterpartQq"]
         )
         assert third.get(detail).status_code == 404
-        assert captain.get(f"{BASE}/recruitments/{recruitment}").json()["openings"] == 1
+        assert captain.get(f"{BASE}/recruitments/{recruitment}").json()["openings"] == "1"
         assert post(candidate, "/intents", **application).status_code == 200
 
         invitation = {"kind": "invite", "recruitmentId": recruitment, "candidateId": third_id}
@@ -444,7 +470,7 @@ def test_p0_workflow_and_concurrent_intents(migrated_database):
         draft = {
             "competition": original_team["competition"],
             "teamName": "重新整理后的招募",
-            "openings": 2,
+            "openings": "2–4人",
             "background": "需要分别负责数据和可视化",
             "requirements": [{"skills": ["data-analysis"]}, {"skills": ["data-visualization"]}],
         }
@@ -497,3 +523,103 @@ def test_p0_workflow_and_concurrent_intents(migrated_database):
         assert candidate.get(f"{BASE}/me/profile").json()["experience"] == "隐藏的虚构经历"
         assert captain.get(detail).json()["status"] == "accepted"
         assert len(captain.get(f"{BASE}/recruitments").json()["items"]) == 4
+
+
+def test_personal_high_five_and_profile_visibility(migrated_database):
+    """Keep personal pairs unique and exchange hidden QQ only after acceptance."""
+    from app.seed import seed
+
+    seed()
+    with TestClient(app) as first, TestClient(app) as second, TestClient(app) as third:
+        first_id = start_session(first, FIRST)
+        second_id = start_session(second, THIRD)
+        start_session(third, CAPTAIN)
+        profile_path = f"{BASE}/profiles/{second_id}"
+        own_path = f"{BASE}/me/profile"
+        origin = {"Origin": ORIGIN}
+        own = second.get(own_path).json()
+        assert own["listed"] and first.get(profile_path).json()["qq"] == own["qq"]
+        profile = {
+            key: value
+            for key, value in own.items()
+            if key not in {"userId", "listed", "evidenceIds"}
+        }
+        profile["publicFields"]["qq"] = False
+        profile["customSkills"] = ["Python 自动化"]
+        invalid = second.put(own_path, headers=origin, json={**profile, "qq": ""})
+        assert invalid.status_code == 422
+        assert second.put(own_path, headers=origin, json=profile).status_code == 200
+        assert "qq" not in first.get(profile_path).json()
+        for term in ("python", "编程", "代码", "开发"):
+            assert second_id in {
+                item["userId"]
+                for item in first.get(f"{BASE}/profiles", params={"skill": term}).json()["items"]
+            }
+
+        assert second.patch(
+            own_path + "/visibility", headers=origin, json={"listed": False}
+        ).json() == {"listed": False}
+        assert first.get(profile_path).status_code == 404
+        assert all(
+            item["userId"] != second_id for item in first.get(f"{BASE}/profiles").json()["items"]
+        )
+        assert second.get(own_path).json()["qq"] == own["qq"]
+        assert post(first, "/intents", kind="personal", candidateId=second_id).status_code == 422
+        assert (
+            second.patch(
+                own_path + "/visibility", headers=origin, json={"listed": True}
+            ).status_code
+            == 200
+        )
+        assert post(first, "/intents", kind="personal", candidateId=first_id).status_code == 422
+
+        barrier = Barrier(2, timeout=10)
+
+        def high_five(client, candidate_id, note):
+            """Start both requests together to verify pair uniqueness."""
+            barrier.wait()
+            return post(client, "/intents", kind="personal", candidateId=candidate_id, message=note)
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            sent = executor.submit(high_five, first, second_id, "甲的附言")
+            reverse = executor.submit(high_five, second, first_id, "乙的附言")
+            responses = [sent.result(), reverse.result()]
+
+        assert sorted(response.status_code for response in responses) == [200, 201]
+        created = next(response.json() for response in responses if response.status_code == 201)
+        assert {response.json()["id"] for response in responses} == {created["id"]}
+        assert "recruitmentId" not in created and "ownerId" not in created
+        sender, recipient = (first, second) if created["senderId"] == first_id else (second, first)
+        original_message = "甲的附言" if sender is first else "乙的附言"
+        path = f"/intents/{created['id']}"
+        assert recipient.get(BASE + path).json()["canRespond"]
+        assert recipient.get(BASE + path).json()["message"] == original_message
+        assert "counterpartQq" not in recipient.get(BASE + path).json()
+        assert third.get(BASE + path).status_code == 404
+        assert post(sender, path + "/response", decision="accepted").status_code == 403
+        assert (
+            post(recipient, path + "/response", decision="accepted", message="字" * 301).status_code
+            == 422
+        )
+        assert (
+            post(
+                recipient, path + "/response", decision="accepted", message="  可以聊聊！  "
+            ).status_code
+            == 200
+        )
+        assert (
+            post(recipient, path + "/response", decision="accepted", message="重复回应").status_code
+            == 200
+        )
+        assert (
+            post(recipient, path + "/response", decision="declined", message="相反回应").status_code
+            == 409
+        )
+        for client in (first, second):
+            detail = client.get(BASE + path).json()
+            assert detail["message"] == original_message
+            assert detail["responseMessage"] == "可以聊聊！"
+            assert detail["counterpartQq"].startswith("DEMO-QQ-")
+            summary = client.get(f"{BASE}/me/intents").json()["items"][0]
+            assert {"message", "responseMessage", "counterpartQq"}.isdisjoint(summary)
+        assert first.get(BASE + path).json()["counterpartQq"] == own["qq"]

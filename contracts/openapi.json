@@ -607,6 +607,7 @@
     "/api/v1/profiles": {
       "get": {
         "summary": "Profiles",
+        "description": "List public profiles, with an optional skill filter.",
         "operationId": "profiles_api_v1_profiles_get",
         "parameters": [
           {
@@ -616,34 +617,6 @@
             "schema": {
               "anyOf": [
                 {
-                  "enum": [
-                    "data-analysis",
-                    "development",
-                    "design",
-                    "presentation",
-                    "mathematical-modeling",
-                    "machine-learning",
-                    "agent-development",
-                    "data-collection",
-                    "frontend",
-                    "backend",
-                    "product-management",
-                    "user-research",
-                    "academic-writing",
-                    "business-analysis",
-                    "finance",
-                    "video-editing",
-                    "project-management",
-                    "mobile-development",
-                    "statistics",
-                    "data-visualization",
-                    "ui-ux",
-                    "graphic-design",
-                    "market-research",
-                    "business-planning",
-                    "slide-design",
-                    "copywriting"
-                  ],
                   "type": "string"
                 },
                 {
@@ -691,6 +664,7 @@
     "/api/v1/profiles/{user_id}": {
       "get": {
         "summary": "Profile",
+        "description": "Return the public projection of one profile.",
         "operationId": "profile_api_v1_profiles__user_id__get",
         "parameters": [
           {
@@ -751,6 +725,7 @@
     "/api/v1/profiles/{user_id}/evidence/{image_id}": {
       "get": {
         "summary": "Profile Evidence",
+        "description": "Return one evidence image if the viewer can access it.",
         "operationId": "profile_evidence_api_v1_profiles__user_id__evidence__image_id__get",
         "parameters": [
           {
@@ -822,6 +797,7 @@
     "/api/v1/me/profile": {
       "get": {
         "summary": "My Profile",
+        "description": "Read the signed-in user's private editable profile.",
         "operationId": "my_profile_api_v1_me_profile_get",
         "responses": {
           "200": {
@@ -868,6 +844,7 @@
       },
       "put": {
         "summary": "Put Profile",
+        "description": "Validate and save the signed-in user's profile.",
         "operationId": "put_profile_api_v1_me_profile_put",
         "requestBody": {
           "content": {
@@ -943,9 +920,89 @@
         }
       }
     },
+    "/api/v1/me/profile/visibility": {
+      "patch": {
+        "summary": "Profile Visibility",
+        "description": "Publish or unpublish the signed-in user's profile.",
+        "operationId": "profile_visibility_api_v1_me_profile_visibility_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProfileVisibility"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfileVisibility"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/competitions": {
       "get": {
         "summary": "Competitions",
+        "description": "List officially supported competitions.",
         "operationId": "competitions_api_v1_competitions_get",
         "responses": {
           "200": {
@@ -964,6 +1021,7 @@
     "/api/v1/recruitments": {
       "get": {
         "summary": "Recruitments",
+        "description": "List published recruitments, with an optional skill filter.",
         "operationId": "recruitments_api_v1_recruitments_get",
         "parameters": [
           {
@@ -1046,6 +1104,7 @@
       },
       "post": {
         "summary": "Create Recruitment",
+        "description": "Create a recruitment owned by the signed-in user.",
         "operationId": "create_recruitment_api_v1_recruitments_post",
         "requestBody": {
           "required": true,
@@ -1124,6 +1183,7 @@
     "/api/v1/recruitments/{recruitment_id}": {
       "get": {
         "summary": "Recruitment",
+        "description": "Return a single published recruitment.",
         "operationId": "recruitment_api_v1_recruitments__recruitment_id__get",
         "parameters": [
           {
@@ -1182,6 +1242,7 @@
       },
       "put": {
         "summary": "Update Recruitment",
+        "description": "Save edits to a recruitment when requested by its owner.",
         "operationId": "update_recruitment_api_v1_recruitments__recruitment_id__put",
         "parameters": [
           {
@@ -1272,6 +1333,7 @@
     "/api/v1/me/recruitments": {
       "get": {
         "summary": "Own Recruitments",
+        "description": "List recruitments owned by the signed-in user.",
         "operationId": "own_recruitments_api_v1_me_recruitments_get",
         "responses": {
           "200": {
@@ -1310,6 +1372,7 @@
     "/api/v1/recruitments/{recruitment_id}/visibility": {
       "patch": {
         "summary": "Set Recruitment Visibility",
+        "description": "Publish or unpublish a recruitment when requested by its owner.",
         "operationId": "set_recruitment_visibility_api_v1_recruitments__recruitment_id__visibility_patch",
         "parameters": [
           {
@@ -1410,6 +1473,7 @@
     "/api/v1/me/intents": {
       "get": {
         "summary": "Intents",
+        "description": "Return summaries of all intents involving the signed-in user.",
         "operationId": "intents_api_v1_me_intents_get",
         "responses": {
           "200": {
@@ -1448,6 +1512,7 @@
     "/api/v1/intents/{intent_id}": {
       "get": {
         "summary": "Intent",
+        "description": "Return the detail visible to this participant.",
         "operationId": "intent_api_v1_intents__intent_id__get",
         "parameters": [
           {
@@ -1518,6 +1583,7 @@
     "/api/v1/intents": {
       "post": {
         "summary": "Create Intent",
+        "description": "Create an intent or return the original on duplicate submission.",
         "operationId": "create_intent_api_v1_intents_post",
         "requestBody": {
           "content": {
@@ -1616,6 +1682,7 @@
     "/api/v1/intents/{intent_id}/response": {
       "post": {
         "summary": "Respond",
+        "description": "Record the recipient's decision and optional response note.",
         "operationId": "respond_api_v1_intents__intent_id__response_post",
         "parameters": [
           {
@@ -1624,6 +1691,7 @@
             "required": true,
             "schema": {
               "type": "string",
+              "format": "uuid",
               "title": "Intent Id"
             }
           }
@@ -1802,7 +1870,8 @@
           "name",
           "nameEn"
         ],
-        "title": "Competition"
+        "title": "Competition",
+        "description": "Describe an entry in the official competition catalog."
       },
       "CompetitionList": {
         "properties": {
@@ -1819,7 +1888,8 @@
         "required": [
           "items"
         ],
-        "title": "CompetitionList"
+        "title": "CompetitionList",
+        "description": "Wrap the official competition catalog in a list response."
       },
       "Decision": {
         "properties": {
@@ -1830,6 +1900,18 @@
               "declined"
             ],
             "title": "Decision"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
           }
         },
         "additionalProperties": false,
@@ -1837,7 +1919,8 @@
         "required": [
           "decision"
         ],
-        "title": "Decision"
+        "title": "Decision",
+        "description": "Allow the recipient to accept or decline with an optional note."
       },
       "Error": {
         "properties": {
@@ -1892,7 +1975,14 @@
             "title": "Id"
           },
           "recruitmentId": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Recruitmentid"
           },
           "candidateId": {
@@ -1900,14 +1990,30 @@
             "title": "Candidateid"
           },
           "ownerId": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Ownerid"
+          },
+          "senderId": {
+            "type": "string",
+            "title": "Senderid"
+          },
+          "recipientId": {
+            "type": "string",
+            "title": "Recipientid"
           },
           "kind": {
             "type": "string",
             "enum": [
               "apply",
-              "invite"
+              "invite",
+              "personal"
             ],
             "title": "Kind"
           },
@@ -1968,15 +2074,16 @@
         "type": "object",
         "required": [
           "id",
-          "recruitmentId",
           "candidateId",
-          "ownerId",
+          "senderId",
+          "recipientId",
           "kind",
           "status",
           "createdAt",
           "canRespond"
         ],
-        "title": "Intent"
+        "title": "Intent",
+        "description": "Expose workflow state and the current viewer's available action."
       },
       "IntentDetail": {
         "properties": {
@@ -1985,7 +2092,14 @@
             "title": "Id"
           },
           "recruitmentId": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Recruitmentid"
           },
           "candidateId": {
@@ -1993,14 +2107,30 @@
             "title": "Candidateid"
           },
           "ownerId": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Ownerid"
+          },
+          "senderId": {
+            "type": "string",
+            "title": "Senderid"
+          },
+          "recipientId": {
+            "type": "string",
+            "title": "Recipientid"
           },
           "kind": {
             "type": "string",
             "enum": [
               "apply",
-              "invite"
+              "invite",
+              "personal"
             ],
             "title": "Kind"
           },
@@ -2067,6 +2197,17 @@
             ],
             "title": "Message"
           },
+          "responseMessage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsemessage"
+          },
           "counterpartQq": {
             "anyOf": [
               {
@@ -2083,15 +2224,16 @@
         "type": "object",
         "required": [
           "id",
-          "recruitmentId",
           "candidateId",
-          "ownerId",
+          "senderId",
+          "recipientId",
           "kind",
           "status",
           "createdAt",
           "canRespond"
         ],
-        "title": "IntentDetail"
+        "title": "IntentDetail",
+        "description": "Include the stored notes and the contact allowed for this viewer."
       },
       "IntentInput": {
         "properties": {
@@ -2099,13 +2241,21 @@
             "type": "string",
             "enum": [
               "apply",
-              "invite"
+              "invite",
+              "personal"
             ],
             "title": "Kind"
           },
           "recruitmentId": {
-            "type": "string",
-            "format": "uuid",
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Recruitmentid"
           },
           "candidateId": {
@@ -2136,10 +2286,10 @@
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "kind",
-          "recruitmentId"
+          "kind"
         ],
-        "title": "IntentInput"
+        "title": "IntentInput",
+        "description": "Validate a team or personal intent before it enters the workflow."
       },
       "IntentList": {
         "properties": {
@@ -2156,7 +2306,8 @@
         "required": [
           "items"
         ],
-        "title": "IntentList"
+        "title": "IntentList",
+        "description": "Wrap the current participant's intent summaries."
       },
       "Profile": {
         "properties": {
@@ -2286,6 +2437,10 @@
           "publicFields": {
             "$ref": "#/components/schemas/PublicFields"
           },
+          "listed": {
+            "type": "boolean",
+            "title": "Listed"
+          },
           "userId": {
             "type": "string",
             "title": "Userid"
@@ -2316,11 +2471,13 @@
           "nickname",
           "skills",
           "contribution",
+          "listed",
           "userId",
           "qq",
           "evidenceIds"
         ],
-        "title": "Profile"
+        "title": "Profile",
+        "description": "Return the owner's full editable profile and saved image IDs."
       },
       "ProfileInput": {
         "properties": {
@@ -2480,7 +2637,8 @@
           "grade",
           "qq"
         ],
-        "title": "ProfileInput"
+        "title": "ProfileInput",
+        "description": "Validate a profile update and its private contact information."
       },
       "ProfileList": {
         "properties": {
@@ -2497,7 +2655,8 @@
         "required": [
           "items"
         ],
-        "title": "ProfileList"
+        "title": "ProfileList",
+        "description": "Wrap public profiles in the standard list response."
       },
       "ProfileProject": {
         "properties": {
@@ -2531,10 +2690,31 @@
         "required": [
           "competition"
         ],
-        "title": "ProfileProject"
+        "title": "ProfileProject",
+        "description": "Describe a competition project and the owner's contribution."
+      },
+      "ProfileVisibility": {
+        "properties": {
+          "listed": {
+            "type": "boolean",
+            "title": "Listed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "listed"
+        ],
+        "title": "ProfileVisibility",
+        "description": "Change whether a profile appears in public discovery."
       },
       "PublicFields": {
         "properties": {
+          "qq": {
+            "type": "boolean",
+            "title": "Qq",
+            "default": true
+          },
           "college": {
             "type": "boolean",
             "title": "College",
@@ -2563,10 +2743,22 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "title": "PublicFields"
+        "title": "PublicFields",
+        "description": "Record which optional profile fields the owner has made public."
       },
       "PublicProfile": {
         "properties": {
+          "qq": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Qq"
+          },
           "userId": {
             "type": "string",
             "title": "Userid"
@@ -2708,7 +2900,8 @@
           "skills",
           "contribution"
         ],
-        "title": "PublicProfile"
+        "title": "PublicProfile",
+        "description": "Expose the public projection of a profile."
       },
       "Ready": {
         "properties": {
@@ -2734,6 +2927,10 @@
           "ownerId": {
             "type": "string",
             "title": "Ownerid"
+          },
+          "ownerNickname": {
+            "type": "string",
+            "title": "Ownernickname"
           },
           "createdAt": {
             "type": "string",
@@ -2761,7 +2958,14 @@
             "title": "Teamnumber"
           },
           "openings": {
-            "type": "integer",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Openings"
           },
           "skills": {
@@ -2818,6 +3022,7 @@
         "required": [
           "id",
           "ownerId",
+          "ownerNickname",
           "createdAt",
           "isPublished",
           "competition",
@@ -2828,7 +3033,8 @@
           "requirements",
           "background"
         ],
-        "title": "Recruitment"
+        "title": "Recruitment",
+        "description": "Expose a saved recruitment and its generated team number."
       },
       "RecruitmentInput": {
         "properties": {
@@ -2851,9 +3057,15 @@
             "title": "Teamname"
           },
           "openings": {
-            "type": "integer",
-            "maximum": 100.0,
-            "exclusiveMinimum": 0.0,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 40
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Openings"
           },
           "requirements": {
@@ -2862,7 +3074,6 @@
             },
             "type": "array",
             "maxItems": 100,
-            "minItems": 1,
             "title": "Requirements"
           },
           "background": {
@@ -2876,11 +3087,11 @@
         "type": "object",
         "required": [
           "competition",
-          "openings",
           "requirements",
           "background"
         ],
-        "title": "RecruitmentInput"
+        "title": "RecruitmentInput",
+        "description": "Validate the fields supplied when creating or editing a recruitment."
       },
       "RecruitmentList": {
         "properties": {
@@ -2897,7 +3108,8 @@
         "required": [
           "items"
         ],
-        "title": "RecruitmentList"
+        "title": "RecruitmentList",
+        "description": "Wrap recruitment records in the standard list response."
       },
       "RecruitmentRequirement": {
         "properties": {
@@ -2951,7 +3163,8 @@
         },
         "additionalProperties": false,
         "type": "object",
-        "title": "RecruitmentRequirement"
+        "title": "RecruitmentRequirement",
+        "description": "Describe the expectations for one recruitment slot."
       },
       "RecruitmentVisibility": {
         "properties": {
@@ -2965,7 +3178,8 @@
         "required": [
           "isPublished"
         ],
-        "title": "RecruitmentVisibility"
+        "title": "RecruitmentVisibility",
+        "description": "Request a change to a recruitment's published status."
       },
       "Registration": {
         "properties": {
@@ -3040,7 +3254,8 @@
         "required": [
           "id"
         ],
-        "title": "RetainEvidence"
+        "title": "RetainEvidence",
+        "description": "Reference an existing evidence image to keep on save."
       },
       "SessionInput": {
         "properties": {
@@ -3049,7 +3264,8 @@
             "enum": [
               "captain",
               "candidate-a",
-              "candidate-b"
+              "candidate-b",
+              "candidate-c"
             ],
             "title": "Persona"
           }
@@ -3076,7 +3292,8 @@
             "enum": [
               "captain",
               "candidate-a",
-              "candidate-b"
+              "candidate-b",
+              "candidate-c"
             ],
             "title": "Persona"
           }
@@ -3130,7 +3347,8 @@
         "required": [
           "image"
         ],
-        "title": "UploadEvidence"
+        "title": "UploadEvidence",
+        "description": "Carry a new image encoded as base64."
       }
     }
   }

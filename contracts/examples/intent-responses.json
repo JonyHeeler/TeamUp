@@ -9,7 +9,9 @@
     "kind": "apply",
     "status": "pending",
     "createdAt": "2026-11-24T01:02:03Z",
-    "canRespond": true
+    "canRespond": true,
+    "senderId": "00000000-0000-4000-8000-000000000002",
+    "recipientId": "00000000-0000-4000-8000-000000000001"
   },
   "acceptedDetailForCaptain": {
     "id": "20000000-0000-4000-8000-000000000001",
@@ -23,7 +25,11 @@
     "createdAt": "2026-11-24T01:02:03Z",
     "respondedAt": "2026-11-24T01:03:04Z",
     "canRespond": false,
-    "counterpartQq": "DEMO-QQ-002"
+    "counterpartQq": "DEMO-QQ-002",
+    "senderId": "00000000-0000-4000-8000-000000000002",
+    "recipientId": "00000000-0000-4000-8000-000000000001",
+    "message": "我可以清洗问卷数据。",
+    "responseMessage": "欢迎加入，可以先聊聊数据来源。"
   },
   "declinedDetailForCaptain": {
     "id": "20000000-0000-4000-8000-000000000002",
@@ -36,12 +42,18 @@
     "status": "declined",
     "createdAt": "2026-11-24T01:04:00Z",
     "respondedAt": "2026-11-24T01:05:00Z",
-    "canRespond": false
+    "canRespond": false,
+    "senderId": "00000000-0000-4000-8000-000000000001",
+    "recipientId": "00000000-0000-4000-8000-000000000003",
+    "responseMessage": "这次时间有冲突，感谢邀请。"
   },
   "nonParticipant": {
     "status": 404,
     "body": {
-      "error": { "code": "not_found", "message": "未找到记录" }
+      "error": {
+        "code": "not_found",
+        "message": "未找到记录"
+      }
     }
   }
 }

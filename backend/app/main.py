@@ -12,12 +12,15 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 from starlette.exceptions import HTTPException
 
-from app.api.routes import ACCOUNT_COOKIE, router
+from app.api.dependencies import ACCOUNT_COOKIE
+from app.api.routes import router
 from app.config import get_settings
 from app.db.session import SessionLocal
-from app.services import accounts, teamup
+from app.services import accounts
+from app.services.common import ServiceError
 
 
+# Validate the authentication environment before accepting requests.
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     settings = get_settings()
@@ -38,6 +41,7 @@ logger = logging.getLogger("uvicorn.teamup")
 logging.getLogger("uvicorn.access").disabled = True
 
 
+# Return the standard error envelope with private cache settings.
 def error(status: int, code: str, message: str, fields: dict | None = None) -> JSONResponse:
     body = {"code": code, "message": message}
     if fields:
@@ -57,11 +61,13 @@ PUBLIC_PATHS = AUTH_FORMS | {
 MUTATIONS = {"POST", "PUT", "PATCH", "DELETE"}
 
 
+# Resolve a student session in its own database context.
 def find_account_user(token: str | None) -> str | None:
     with SessionLocal() as db:
         return accounts.session_user(db, token)
 
 
+# Enforce mode-specific access, origin, and CSRF rules before routing.
 async def check_request(request: Request):
     settings = get_settings()
     mode = settings.auth_mode
@@ -95,6 +101,7 @@ async def check_request(request: Request):
     return None
 
 
+# Guard requests and log their status and duration without payloads.
 @app.middleware("http")
 async def security_and_log(request: Request, call_next):
     start = time.monotonic()
@@ -111,6 +118,7 @@ async def security_and_log(request: Request, call_next):
     return response
 
 
+# Convert framework HTTP errors to the public error envelope.
 @app.exception_handler(HTTPException)
 async def http_error(request: Request, exc: HTTPException):
     return error(
@@ -118,12 +126,14 @@ async def http_error(request: Request, exc: HTTPException):
     )
 
 
+# Translate input validation failures into field-level errors.
 @app.exception_handler(RequestValidationError)
 async def validation_error(request: Request, exc: RequestValidationError):
     fields = {".".join(str(x) for x in e["loc"][1:]): e["msg"] for e in exc.errors()}
     return error(422, "validation_error", "输入无效", fields)
 
 
-@app.exception_handler(teamup.ServiceError)
-async def service_error(request: Request, exc: teamup.ServiceError):
+# Convert domain errors to their documented HTTP response.
+@app.exception_handler(ServiceError)
+async def service_error(request: Request, exc: ServiceError):
     return error(exc.status, exc.code, exc.message, exc.fields)

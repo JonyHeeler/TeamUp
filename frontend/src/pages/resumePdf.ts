@@ -15,9 +15,11 @@ type ResumeExport = {
 const ink = "#192333";
 const muted = "#5D6B81";
 const accent = "#3353A4";
+/** 解析应用部署路径下的字体或标志 URL。 */
 const assetUrl = (path: string) =>
   new URL(import.meta.env.BASE_URL + path, window.location.origin).href;
 
+/** 将证明图片转换为适合嵌入 PDF 的 JPEG。 */
 async function evidenceImage(url: string) {
   const image = new Image();
   image.src = url;
@@ -37,6 +39,7 @@ async function evidenceImage(url: string) {
   return canvas.toDataURL("image/jpeg", 0.9);
 }
 
+/** 按所选字段生成并下载简历 PDF。 */
 export async function downloadResume({
   name,
   profile,
@@ -89,6 +92,7 @@ export async function downloadResume({
     },
   ];
 
+  /** 追加简历章节标题和正文。 */
   function section(title: string, ...body: Content[]) {
     content.push({ text: title, style: "section", headlineLevel: 1 }, ...body);
   }
@@ -160,6 +164,7 @@ export async function downloadResume({
       projectTitle: { fontSize: 11.25, color: ink },
     },
     content,
+    /** 避免章节标题单独留在页末。 */
     pageBreakBefore: (node, following) =>
       node.headlineLevel === 1 &&
       (Array.isArray(following)
@@ -169,6 +174,7 @@ export async function downloadResume({
           ).getFollowingNodesOnPage().length === 0),
     ...(logo
       ? {
+          /** 为启用署名的简历生成页脚。 */
           footer: () => ({
             margin: [48, 9, 48, 0],
             columns: [

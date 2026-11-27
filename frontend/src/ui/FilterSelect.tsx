@@ -3,6 +3,7 @@ import * as Select from "@radix-ui/react-select";
 type Option = { value: string; label: string };
 type Group = { label: string; options: Option[] };
 
+/** 显示支持分组、全部项和键盘导航的筛选菜单。 */
 export function FilterSelect({
   label,
   category,
@@ -20,7 +21,9 @@ export function FilterSelect({
   options?: Option[];
   groups?: Group[];
 }) {
+  /** 将空筛选值转换为 Radix 可接受的非空选项值。 */
   const encode = (value: string) => "value:" + value;
+  /** 显示一个筛选选项及其选择标记。 */
   const option = ({ value, label }: Option) => (
     <Select.Item className="filter-option" value={encode(value)} key={value}>
       <Select.ItemText>{label}</Select.ItemText>

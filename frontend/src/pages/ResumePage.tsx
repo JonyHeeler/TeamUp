@@ -1,4 +1,5 @@
 import { Button } from "../ui/Button";
+import { showToast } from "../ui/ActionToast";
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import {
@@ -31,6 +32,7 @@ const labels: Record<Section, string> = {
   credit: "平台标识",
 };
 
+/** 预览按用户选择字段生成的简历。 */
 export default function ResumePage({ me, navigate }: PageProps) {
   const profile = useResource(api.ownProfile, Boolean(me));
   const [name, setName] = useState("");
@@ -75,6 +77,7 @@ export default function ResumePage({ me, navigate }: PageProps) {
       urls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [p, me]);
+  /** 准备图片数据并下载简历 PDF。 */
   async function exportResume() {
     if (!p || exporting) return;
     setExporting(true);
@@ -87,6 +90,7 @@ export default function ResumePage({ me, navigate }: PageProps) {
         visible,
         evidenceUrls: evidence.urls,
       });
+      showToast("简历 PDF 已导出", "success");
     } catch {
       setExportError("简历生成失败，请重试。");
     } finally {
@@ -230,6 +234,7 @@ export default function ResumePage({ me, navigate }: PageProps) {
   );
 }
 
+/** 显示可选的平台署名。 */
 function ResumeCredit() {
   return (
     <footer>

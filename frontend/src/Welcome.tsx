@@ -3,6 +3,7 @@ import type { ReactNode, Ref } from "react";
 import { copy } from "./copy";
 import HighFiveScene from "./HighFiveScene";
 
+/** 绘制导航中使用的一拍即合标志。 */
 export function BrandMark() {
   return (
     <img
@@ -15,6 +16,7 @@ export function BrandMark() {
   );
 }
 
+/** 展示站点介绍和比赛目录。 */
 export default function Welcome({
   heading,
   onAbout,

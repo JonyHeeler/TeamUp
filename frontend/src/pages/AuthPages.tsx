@@ -7,6 +7,7 @@ import "./auth.css";
 export type AuthPage =
   "login" | "register" | "reset" | "security" | "onboarding";
 
+/** 登录成功后将浏览器带回个人中心。 */
 function returnToCenter() {
   const target = new URLSearchParams(window.location.search).get("returnTo");
   const allowed =
@@ -14,6 +15,7 @@ function returnToCenter() {
   return target && allowed.test(target) ? target : "/center";
 }
 
+/** 根据地址显示登录、注册或密码重置表单。 */
 export default function AuthPages({
   page,
   me,
@@ -53,11 +55,13 @@ export default function AuthPages({
     security: "账号安全",
     onboarding: "完善个人名片",
   }[page];
+  /** 返回登录表单并携带操作结果。 */
   function returnToLogin() {
     setMe(null);
     navigate("/login?changed=1", undefined, true);
   }
 
+  /** 提交当前表单并处理账号操作结果。 */
   function submit(event: FormEvent) {
     event.preventDefault();
     if (page === "login")
@@ -67,6 +71,7 @@ export default function AuthPages({
           setMe(user);
           navigate(returnToCenter(), undefined, true);
         },
+        { success: "登录成功" },
       );
     if (page === "register")
       void run(
@@ -75,16 +80,19 @@ export default function AuthPages({
           setMe(user);
           navigate("/onboarding", undefined, true);
         },
+        { success: "账号已注册" },
       );
     if (page === "reset")
       void run(
         () => authApi.reset({ studentId, resetToken: token, password }),
         returnToLogin,
+        { success: "密码已重置" },
       );
     if (page === "security")
       void run(
         () => authApi.change({ currentPassword, password }),
         returnToLogin,
+        { success: "密码已更新" },
       );
   }
   return (
@@ -247,6 +255,7 @@ export default function AuthPages({
                         setMe(null);
                         navigate("/login", undefined, true);
                       },
+                      { success: "已退出登录" },
                     )
                   }
                 >

@@ -47,6 +47,7 @@ export const skillGroups = [
   },
 ] satisfies { label: string; skills: Skill[] }[];
 
+/** 显示预设技能和自定义技能的标签。 */
 export function Tags({
   skills,
   custom = [],
@@ -69,6 +70,7 @@ export function Tags({
   );
 }
 
+/** 按技能分组编辑已选择的预设技能。 */
 export function Skills({
   value,
   onChange,
@@ -81,6 +83,7 @@ export function Skills({
   grouped?: boolean;
 }) {
   const errorId = useId();
+  /** 渲染可勾选的单个技能。 */
   const option = (skill: Skill) => (
     <label className="skill-option" key={skill}>
       <input

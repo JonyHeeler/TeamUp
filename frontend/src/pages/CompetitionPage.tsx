@@ -1,6 +1,7 @@
 import { Button } from "../ui/Button";
 import { Back, teamsHref, type Navigate } from "./shared";
 
+/** 按比赛编号显示官方赛题介绍。 */
 export default function CompetitionPage({
   id,
   navigate,
@@ -19,6 +20,7 @@ export default function CompetitionPage({
   );
 }
 
+/** 展示美赛的简介和参与方式。 */
 function ModelingIntro() {
   return (
     <>
@@ -47,6 +49,7 @@ function ModelingIntro() {
   );
 }
 
+/** 展示 AI 智能体校赛的简介和参与方式。 */
 function AgentIntro() {
   return (
     <>

@@ -306,7 +306,7 @@ describe("TeamUP", () => {
       "我可以清洗问卷并验证模型。",
     );
     await userEvent.click(details.getByRole("button", { name: "发送申请" }));
-    expect(await screen.findByText("待回应")).toBeInTheDocument();
+    expect(await screen.findByText("申请已发送")).toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     const request = vi
       .mocked(fetch)
@@ -512,7 +512,7 @@ describe("TeamUP", () => {
     await chooseFilter("按比赛筛选", "AI 智能体+ 大赛校赛");
     expect(screen.queryByText("城市脉络建模队")).not.toBeInTheDocument();
     expect(screen.getByText("校园借用助手队")).toBeInTheDocument();
-    expect(screen.queryByLabelText("按技能筛选")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("按技能筛选")).toBeInTheDocument();
     await userEvent.click(welcome);
     expect(screen.getByRole("heading", { name: "平台介绍" })).toHaveFocus();
     await userEvent.click(screen.getByRole("button", { name: "找队友" }));

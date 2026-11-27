@@ -6,12 +6,15 @@ const SOURCE_LIMIT = 20_000_000;
 export type EvidenceDraft = { id: string; dataUrl?: string };
 export type ImageProblem =
   "imageType" | "imageTooLarge" | "imageFailed" | "imageCount";
+/** 向表单报告无法处理的证明图片。 */
 export class EvidenceError extends Error {
+  /** 保存可向用户展示的图片处理错误。 */
   constructor(public issue: ImageProblem) {
     super(issue);
   }
 }
 
+/** 读取可在表单中预览的图片数据。 */
 function previewData(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -21,6 +24,7 @@ function previewData(blob: Blob): Promise<string> {
   });
 }
 
+/** 将画布内容编码为指定格式的图片。 */
 function encode(
   canvas: HTMLCanvasElement,
   type: string,
@@ -29,6 +33,7 @@ function encode(
   return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
 }
 
+/** 校验、缩小并编码待上传的证明图片。 */
 export async function prepareEvidence(file: File): Promise<EvidenceDraft> {
   if (!EVIDENCE_ACCEPT.split(",").includes(file.type))
     throw new EvidenceError("imageType");

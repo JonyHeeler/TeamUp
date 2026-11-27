@@ -11,8 +11,8 @@ from app.config import get_settings
 from app.db.models import Contact, Profile, ProfileEvidence, Recruitment, Skill, User
 from app.db.session import SessionLocal
 from app.demo import PERSONAS
+from app.services.profiles.read import PROFILE_FIELDS
 from app.services.team_numbers import next_team_number
-from app.services.teamup import PROFILE_FIELDS
 from app.skills import SKILL_LABELS
 
 DEMO_DATA = Path(__file__).with_name("demo_data")
@@ -24,8 +24,13 @@ PREVIOUS_INTRODUCTIONS = {
 
 
 def seed_profiles(db: Session, fill_profiles: bool) -> None:
+    """Fill missing demo profile data and evidence in the current transaction."""
     records = json.loads((DEMO_DATA / "profiles.json").read_text(encoding="utf-8"))
     for persona, user_id in PERSONAS.items():
+        if persona == "candidate-c":
+            if not db.get(User, user_id):
+                db.add(User(id=user_id, nickname="同学丙"))
+            continue
         record = records[persona]
         if not db.get(User, user_id):
             db.add(User(id=user_id, nickname=record["nickname"]))
@@ -84,6 +89,7 @@ def seed_profiles(db: Session, fill_profiles: bool) -> None:
 def seed(
     fill_profiles: bool = False, refresh_recruitments: bool = False, foundation_only: bool = False
 ):
+    """Initialize skills and optional demo data for the configured environment."""
     foundation_only = foundation_only or get_settings().auth_mode == "student"
     with SessionLocal() as db:
         for code, label in SKILL_LABELS.items():

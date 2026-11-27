@@ -3,36 +3,33 @@ import { FilterSelect } from "../ui/FilterSelect";
 import { Button } from "../ui/Button";
 import { useState } from "react";
 import "./people.css";
-import { api, type Profile, type Recruitment, type Skill } from "../api/client";
+import { api, type Profile, type Skill } from "../api/client";
 import { copy as t } from "../copy";
-import EvidenceImage from "../EvidenceImage";
-import { ProfileDetails, ProfileSummary } from "../ProfileEditor";
+import { ProfileSummary } from "../profile/ProfileViews";
 import { skillGroups } from "../SkillFields";
+import { matchesSkill } from "../profile/skillSearch";
+import PersonDialog from "./PersonDialog";
 import {
-  Alert,
-  Dialog,
   Feedback,
   Heading,
-  IntentMessage,
   useAction,
   useResource,
-  type Notice,
   type PageProps,
 } from "./shared";
 
+/** 按公开资料筛选同学并发出组队邀请。 */
 export default function PeoplePage({ me }: Pick<PageProps, "me">) {
   const list = useResource(api.profiles);
-  const { busy, run, clear, error, fieldError } = useAction();
-  const [notice, setNotice] = useState<Notice>();
-  const [skill, setSkill] = useState<Skill | "">("");
+  const { run } = useAction();
+  const [skill, setSkill] = useState("");
+  const [search, setSearch] = useState("");
   const [collegeFilter, setCollegeFilter] = useState("");
   const [gradeFilter, setGradeFilter] = useState("");
   const [person, setPerson] = useState<Profile | null>(null);
-  const [inviteTeam, setInviteTeam] = useState("");
-  const [message, setMessage] = useState("");
-  const [ownTeams, setOwnTeams] = useState<Recruitment[]>([]);
-  const [inviteError, setInviteError] = useState("");
   const people = list.data?.items ?? [];
+  const customSkills = [
+    ...new Set(people.flatMap((entry) => entry.customSkills ?? [])),
+  ].sort((a, b) => a.localeCompare(b, "zh"));
   const colleges = [
     ...new Set(
       people.flatMap((entry) => (entry.college ? [entry.college] : [])),
@@ -45,58 +42,58 @@ export default function PeoplePage({ me }: Pick<PageProps, "me">) {
     (entry) =>
       entry.userId !== me?.userId &&
       (!gradeFilter || entry.grade === gradeFilter) &&
-      (!skill || entry.skills.includes(skill)) &&
+      (!skill ||
+        (skill.startsWith("custom:")
+          ? entry.customSkills?.includes(skill.slice("custom:".length))
+          : entry.skills.includes(skill as Skill))) &&
+      matchesSkill(entry, search) &&
       (!collegeFilter || entry.college === collegeFilter),
   );
 
-  function closeDetail() {
-    clear();
-    setPerson(null);
-  }
-
+  /** 加载所选候选人的公开名片。 */
   function openProfile(userId: string) {
-    setNotice(undefined);
-    void run(
-      async () => {
-        const [profile, teams] = await Promise.allSettled([
-          api.profile(userId),
-          me ? api.recruitments() : Promise.resolve({ items: [] }),
-        ]);
-        if (profile.status === "rejected") throw profile.reason;
-        return { profile: profile.value, teams };
-      },
-      ({ profile, teams }) => {
-        setOwnTeams(
-          teams.status === "fulfilled"
-            ? teams.value.items.filter((team) => team.ownerId === me?.userId)
-            : [],
-        );
-        setInviteError(teams.status === "rejected" ? t.failed : "");
-        setInviteTeam("");
-        setMessage("");
-        setPerson(profile);
-      },
-      false,
-    );
+    void run(() => api.profile(userId), setPerson, false);
   }
 
   return (
     <>
       <Heading title={t.people} />
       <div className="view-tools">
+        <label className="skill-search">
+          <span>搜索技能</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="技能或关键词"
+          />
+        </label>
         <FilterSelect
           label={t.filter}
           category={t.skills}
           value={skill}
-          onChange={(value) => setSkill(value as Skill | "")}
+          onChange={setSkill}
           all={t.allSkills}
-          groups={skillGroups.map(({ label, skills }) => ({
-            label,
-            options: skills.map((value) => ({
-              value,
-              label: t.skillNames[value],
+          groups={[
+            ...skillGroups.map(({ label, skills }) => ({
+              label,
+              options: skills.map((value) => ({
+                value,
+                label: t.skillNames[value],
+              })),
             })),
-          }))}
+            ...(customSkills.length
+              ? [
+                  {
+                    label: t.customSkills,
+                    options: customSkills.map((label) => ({
+                      value: "custom:" + label,
+                      label,
+                    })),
+                  },
+                ]
+              : []),
+          ]}
         />
         <FilterSelect
           label={t.filterCollege}
@@ -115,16 +112,7 @@ export default function PeoplePage({ me }: Pick<PageProps, "me">) {
           options={grades.map((value) => ({ value, label: value }))}
         />
       </div>
-      {!person && (
-        <Feedback
-          error={error || list.error}
-          notice={notice}
-          onDismiss={() => {
-            clear();
-            setNotice(undefined);
-          }}
-        />
-      )}
+      {!person && <Feedback error={list.error} />}
       <div className="results">
         {matchingPeople.map((entry) => (
           <SummaryCard
@@ -144,75 +132,12 @@ export default function PeoplePage({ me }: Pick<PageProps, "me">) {
         )}
       </div>
       {person && (
-        <Dialog
-          title={person.nickname}
-          closeLabel={t.close}
-          busy={busy}
-          close={closeDetail}
-        >
-          <Alert message={error} />
-          <ProfileDetails profile={person} />
-          {person.evidenceIds && person.evidenceIds.length > 0 && (
-            <div className="proof-grid" role="group" aria-label={t.evidence}>
-              {person.evidenceIds.map((id, index) => (
-                <EvidenceImage
-                  key={id}
-                  entry={{ id }}
-                  userId={person.userId}
-                  label={t.evidenceLabel(index + 1)}
-                />
-              ))}
-            </div>
-          )}
-          {ownTeams.length ? (
-            <div className="dialog-section">
-              <select
-                aria-label={t.inviteTeam}
-                value={inviteTeam}
-                onChange={(event) => setInviteTeam(event.target.value)}
-              >
-                <option value="">{t.inviteTeam}</option>
-                {ownTeams.map((entry) => (
-                  <option key={entry.id} value={entry.id}>
-                    {entry.teamName} · {entry.competition}
-                  </option>
-                ))}
-              </select>
-              <IntentMessage
-                value={message}
-                onChange={setMessage}
-                kind="invite"
-                error={fieldError("message")}
-              />
-              <Button
-                tone="blue"
-                disabled={!inviteTeam || busy}
-                onClick={() =>
-                  void run(
-                    () =>
-                      api.createIntent({
-                        kind: "invite",
-                        recruitmentId: inviteTeam,
-                        candidateId: person.userId,
-                        message,
-                      }),
-                    (result) => {
-                      setPerson(null);
-                      setNotice(result.status);
-                    },
-                  )
-                }
-              >
-                {t.invite}
-              </Button>
-              <small className="consent">{t.share}</small>
-            </div>
-          ) : inviteError ? (
-            <Alert message={inviteError} />
-          ) : (
-            me && <p className="consent">{t.needTeam}</p>
-          )}
-        </Dialog>
+        <PersonDialog
+          key={person.userId}
+          person={person}
+          canSend={Boolean(me)}
+          close={() => setPerson(null)}
+        />
       )}
     </>
   );
