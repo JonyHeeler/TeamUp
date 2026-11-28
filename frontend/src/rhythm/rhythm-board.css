@@ -69,6 +69,10 @@
   inset-block: 0;
 }
 
+.rhythm-notes[data-playing] {
+  will-change: transform;
+}
+
 .rhythm-note {
   position: absolute;
   left: 25%;
@@ -170,8 +174,10 @@
   font-size: 0.875rem;
 }
 
-.rhythm-pad:hover {
-  background: #20385e;
+@media (hover: hover) and (pointer: fine) {
+  .rhythm-pad:hover {
+    background: #20385e;
+  }
 }
 
 .rhythm-pad[data-pressed="true"] {

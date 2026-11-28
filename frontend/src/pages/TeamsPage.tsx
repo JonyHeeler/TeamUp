@@ -3,11 +3,14 @@ import { FilterSelect } from "../ui/FilterSelect";
 import { Button } from "../ui/Button";
 import { useState } from "react";
 import { api, type Recruitment, type Skill } from "../api/client";
-import { skillGroups, Tags } from "../SkillFields";
+import { Tags } from "../SkillFields";
 import "./people.css";
 import { copy as t } from "../copy";
-import CaptainProfile from "./CaptainProfile";
 import { RecruitmentDetails } from "../recruitment/RecruitmentDetails";
+import { LoadingStatus } from "./LoadingStatus";
+import type { TeamDiscovery } from "./teamDiscovery";
+import { SkillFilter } from "./SkillFilter";
+import { SkillSearch, useSkillSearch } from "./SkillSearch";
 import {
   Alert,
   Dialog,
@@ -16,7 +19,6 @@ import {
   Heading,
   teamsHref,
   useAction,
-  useResource,
   type Notice,
   type PageProps,
 } from "./shared";
@@ -26,14 +28,17 @@ export default function TeamsPage({
   me,
   navigate,
   competitionId,
+  discovery,
 }: PageProps & {
   competitionId: string;
+  discovery: TeamDiscovery;
 }) {
-  const catalog = useResource(api.competitions);
-  const list = useResource(api.recruitments);
+  const { catalog, recruitments } = discovery;
   const { busy, run, clear, setError, error, fieldError } = useAction();
   const [notice, setNotice] = useState<Notice>();
-  const [skill, setSkill] = useState<Skill | "">("");
+  const [skills, setSkills] = useState<Skill[]>([]);
+  const [search, setSearch] = useState("");
+  const list = useSkillSearch(api.recruitments, search, recruitments);
   const [team, setTeam] = useState<Recruitment | null>(null);
   const [applying, setApplying] = useState(false);
   const [message, setMessage] = useState("");
@@ -54,17 +59,29 @@ export default function TeamsPage({
   const competitions = catalog.data?.items ?? [];
   const competition =
     competitions.find((item) => item.id === competitionId)?.name ?? "";
-  const matchingTeams = (list.data?.items ?? []).filter(
-    (entry) =>
-      (!competition || entry.competition === competition) &&
-      (!skill || entry.skills.includes(skill)),
+  const waitingForCompetition = Boolean(
+    competitionId && !catalog.data && !catalog.error,
   );
+  const matchingTeams = (waitingForCompetition ? [] : (list.data?.items ?? []))
+    .filter(
+      (entry) =>
+        (!competition || entry.competition === competition) &&
+        (!skills.length ||
+          entry.skills.some((skill) => skills.includes(skill))),
+    )
+    .sort(
+      (first, second) =>
+        Date.parse(second.createdAt) - Date.parse(first.createdAt),
+    );
   const feedback = list.error || catalog.error;
+  const waiting =
+    !list.error && (waitingForCompetition || !list.data || list.pending);
 
   return (
     <>
       <Heading title={t.teams} />
       <div className="view-tools">
+        <SkillSearch value={search} onChange={setSearch} />
         <FilterSelect
           label={t.filterCompetition}
           category={t.catalogCompetition}
@@ -82,20 +99,7 @@ export default function TeamsPage({
             label: item.name,
           }))}
         />
-        <FilterSelect
-          label={t.filter}
-          category={t.skills}
-          value={skill}
-          onChange={(value) => setSkill(value as Skill | "")}
-          all={t.allSkills}
-          groups={skillGroups.map(({ label, skills }) => ({
-            label,
-            options: skills.map((value) => ({
-              value,
-              label: t.skillNames[value],
-            })),
-          }))}
-        />
+        <SkillFilter value={skills} onChange={setSkills} />
       </div>
       {!team && (
         <Feedback
@@ -107,7 +111,7 @@ export default function TeamsPage({
           }}
         />
       )}
-      <div className="results">
+      <div className="results" aria-busy={waiting}>
         {matchingTeams.map((entry) => (
           <SummaryCard
             key={entry.id}
@@ -133,15 +137,17 @@ export default function TeamsPage({
             <Tags skills={entry.skills.slice(0, 4)} />
           </SummaryCard>
         ))}
-        {!matchingTeams.length && !list.error && (
-          <p className="empty">
-            {list.data
-              ? competition
+        {!matchingTeams.length &&
+          !list.error &&
+          (waiting ? (
+            <LoadingStatus />
+          ) : (
+            <p className="empty">
+              {competition || skills.length || search.trim()
                 ? t.emptyMatches
-                : t.emptyTeams
-              : t.loading}
-          </p>
-        )}
+                : t.emptyTeams}
+            </p>
+          ))}
       </div>
       {team && (
         <Dialog
@@ -149,67 +155,63 @@ export default function TeamsPage({
           closeLabel={t.close}
           close={closeTeam}
           busy={busy}
+          className="team-detail-dialog"
         >
-          <div className="team-card-meta">
-            <span>{team.competition}</span>
-            {team.openings && (
-              <span className="badge">
-                {t.openings}：{team.openings}
-              </span>
-            )}
-          </div>
-          <Alert message={error} />
-          <RecruitmentDetails recruitment={team} />
-          <CaptainProfile key={team.ownerId} userId={team.ownerId} />
-          {team.ownerId === me?.userId ? (
-            <span className="owned">{t.yourTeam}</span>
-          ) : applying ? (
-            <form
-              className="dialog-section"
-              onSubmit={(event) => {
-                event.preventDefault();
-                void run(
-                  () =>
-                    api.createIntent({
-                      kind: "apply",
-                      recruitmentId: team.id,
-                      message,
-                    }),
-                  (result) => {
-                    setTeam(null);
-                  },
-                  {
-                    success: (result) =>
-                      result.created === false ? "已有加入申请" : "申请已发送",
-                  },
-                );
-              }}
-            >
-              <IntentMessage
-                value={message}
-                onChange={setMessage}
-                kind="apply"
-                error={fieldError("message")}
-              />
-              <div className="dialog-actions">
-                <Button tone="blue" disabled={busy}>
-                  {t.sendApplication}
-                </Button>
-              </div>
-              <small className="consent">{t.share}</small>
-            </form>
-          ) : (
-            <div className="dialog-section">
-              <Button
-                tone="blue"
-                onClick={() =>
-                  me ? setApplying(true) : setError(t.needPersona)
-                }
-              >
-                {t.apply}
-              </Button>
-              <small className="consent">{t.share}</small>
-            </div>
+          {(dismiss) => (
+            <>
+              <Alert message={error} />
+              <RecruitmentDetails recruitment={team} />
+              {team.ownerId === me?.userId ? (
+                <span className="owned">{t.yourTeam}</span>
+              ) : applying ? (
+                <form
+                  className="dialog-section motion-reveal"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    void run(
+                      () =>
+                        api.createIntent({
+                          kind: "apply",
+                          recruitmentId: team.id,
+                          message,
+                        }),
+                      dismiss,
+                      {
+                        success: (result) =>
+                          result.created === false
+                            ? "已有加入申请"
+                            : "申请已发送",
+                      },
+                    );
+                  }}
+                >
+                  <IntentMessage
+                    value={message}
+                    onChange={setMessage}
+                    kind="apply"
+                    error={fieldError("message")}
+                  />
+                  <div className="team-apply-actions">
+                    <small className="consent">{t.share}</small>
+                    <Button tone="blue" disabled={busy}>
+                      {t.sendApplication}
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="dialog-section team-apply-actions">
+                  <small className="consent">{t.share}</small>
+                  <Button
+                    tone="blue"
+                    onClick={() =>
+                      me ? setApplying(true) : setError(t.needPersona)
+                    }
+                  >
+                    {t.apply}
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </Dialog>
       )}

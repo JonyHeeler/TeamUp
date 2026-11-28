@@ -1,108 +1,96 @@
+#root:has(> .page-viewport) {
+  display: flex;
+  min-height: 100svh;
+  flex-direction: column;
+}
+
 .page-viewport {
   display: flow-root;
-  overflow: clip;
-}
-
-html[data-route-direction] {
-  view-transition-name: none;
-  --route-in: 100%;
-  --route-out: -100%;
-}
-
-html[data-route-direction="back"] {
-  --route-in: -100%;
-  --route-out: 100%;
-}
-
-html[data-route-direction] .page-viewport {
-  view-transition-name: teamup-page;
-}
-
-html[data-route-direction]::view-transition {
-  clip-path: inset(var(--route-header-edge, 0px) 0 0);
-  pointer-events: none;
-}
-
-html[data-route-direction]::view-transition-group(teamup-page) {
-  animation: none;
-}
-
-html[data-route-direction]::view-transition-image-pair(teamup-page) {
-  isolation: auto;
-}
-
-html[data-route-direction]::view-transition-old(teamup-page) {
-  animation: page-out var(--route-time) var(--route-easing) both;
-  mix-blend-mode: normal;
-}
-
-html[data-route-direction]::view-transition-new(teamup-page) {
-  animation: page-in var(--route-time) var(--route-easing) both;
-  mix-blend-mode: normal;
-}
-
-@keyframes page-in {
-  from {
-    transform: translateX(var(--route-in));
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
-@keyframes page-out {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(var(--route-out));
-  }
+  flex: 1;
+  overflow-x: clip;
 }
 
 .dialog[open] {
-  animation: dialog-in 200ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  --dialog-time: 200ms;
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity var(--dialog-time) var(--motion-out),
+    transform var(--dialog-time) var(--motion-out);
 }
 
 .dialog[open]::backdrop {
-  animation: backdrop-in 170ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  opacity: 1;
+  transition: opacity 160ms var(--motion-out);
 }
 
-@keyframes dialog-in {
-  from {
+.dialog[open][data-closing] {
+  --dialog-time: 150ms;
+  opacity: 0;
+  transform: translateY(6px) scale(0.99);
+}
+
+.dialog[open][data-closing]::backdrop {
+  opacity: 0;
+  transition-duration: 120ms;
+}
+
+@starting-style {
+  .dialog[open]:not([data-closing]) {
     opacity: 0;
-    transform: translateY(10px) scale(0.985);
+    transform: translateY(6px) scale(0.99);
   }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
 
-@keyframes backdrop-in {
-  from {
+  .dialog[open]:not([data-closing])::backdrop {
     opacity: 0;
   }
-  to {
-    opacity: 1;
-  }
 }
 
-.filter-trigger,
-.editor input,
-.editor textarea,
-.editor select,
-.dialog textarea,
-.dialog select,
-.resume-options label,
-.skill-picker .skill-option {
+.motion-reveal,
+[data-contact-reveal],
+[data-project-reveal] {
+  --reveal-time: 150ms;
   transition:
-    border-color 130ms,
-    background-color 130ms;
+    opacity var(--reveal-time) var(--motion-out),
+    transform var(--reveal-time) var(--motion-out);
 }
 
-.result-card,
-.managed-teams li {
-  transition: border-color 160ms;
+[data-contact-reveal] {
+  --reveal-time: 180ms;
+}
+
+@starting-style {
+  .motion-reveal,
+  [data-contact-reveal],
+  [data-project-reveal] {
+    opacity: 0.45;
+    transform: translateY(4px);
+  }
+}
+
+.position-editor::details-content,
+.position-skills::details-content {
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 100ms var(--motion-out),
+    transform 100ms var(--motion-out),
+    content-visibility 100ms allow-discrete;
+}
+
+.position-editor[open]::details-content,
+.position-skills[open]::details-content {
+  opacity: 1;
+  transform: none;
+  transition-duration: 140ms, 140ms, 0ms;
+}
+
+@starting-style {
+  .position-editor[open]::details-content,
+  .position-skills[open]::details-content {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
 }
 
 .result-card:focus-within,
@@ -118,10 +106,29 @@ html[data-route-direction]::view-transition-new(teamup-page) {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html[data-route-direction]::view-transition-old(teamup-page),
-  html[data-route-direction]::view-transition-new(teamup-page),
   .dialog[open],
-  .dialog[open]::backdrop {
-    animation: none;
+  .dialog[open][data-closing],
+  .dialog[open]::backdrop,
+  .motion-reveal,
+  [data-contact-reveal],
+  [data-project-reveal] {
+    transform: none;
+    transition: opacity 80ms var(--motion-out) !important;
+  }
+
+  @starting-style {
+    .dialog[open]:not([data-closing]),
+    .motion-reveal,
+    [data-contact-reveal],
+    [data-project-reveal],
+    .position-editor[open]::details-content,
+    .position-skills[open]::details-content {
+      transform: none;
+    }
+  }
+
+  .position-editor::details-content,
+  .position-skills::details-content {
+    transform: none;
   }
 }

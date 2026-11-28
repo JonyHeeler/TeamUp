@@ -41,6 +41,7 @@
   justify-self: center;
   width: min(100%, 32rem);
   height: auto;
+  overflow: visible;
 }
 .high-five-burst {
   opacity: 0;
@@ -55,18 +56,18 @@
 }
 @media (prefers-reduced-motion: no-preference) {
   .high-five-orange {
-    --entry-x: -248px;
-    --entry-tilt: -15deg;
-    --ready-x: -139px;
+    --entry-x: -64px;
+    --entry-tilt: -11deg;
+    --ready-x: -84px;
     --ready-tilt: -7deg;
     --contact-x: -71.4px;
     --follow-through-x: -13px;
     transform-origin: 152px 544px;
   }
   .high-five-blue {
-    --entry-x: 248px;
-    --entry-tilt: 15deg;
-    --ready-x: 139px;
+    --entry-x: 64px;
+    --entry-tilt: 11deg;
+    --ready-x: 84px;
     --ready-tilt: 7deg;
     --contact-x: 71.4px;
     --follow-through-x: 13px;
@@ -74,32 +75,36 @@
   }
   .high-five-orange,
   .high-five-blue {
-    animation: high-five-swing 900ms both;
+    animation: high-five-swing 700ms both;
   }
   .high-five-burst {
     transform-origin: 329px 276px;
-    animation: high-five-impact 900ms both;
+    animation: high-five-impact 700ms both;
   }
 }
 @keyframes high-five-swing {
   0% {
-    transform: translate(var(--entry-x), 118px) rotate(var(--entry-tilt));
+    opacity: 0.55;
+    transform: translate(var(--entry-x), 24px) rotate(var(--entry-tilt))
+      scale(0.84);
     animation-timing-function: cubic-bezier(0.18, 0.7, 0.34, 1);
   }
   38% {
-    transform: translate(var(--ready-x), 18px) rotate(var(--ready-tilt));
+    opacity: 1;
+    transform: translate(var(--ready-x), 12px) rotate(var(--ready-tilt))
+      scale(0.94);
     animation-timing-function: cubic-bezier(0.55, 0, 0.9, 0.62);
   }
   60% {
-    transform: translate(var(--contact-x), 0) rotate(0deg);
+    transform: translate(var(--contact-x), 0) rotate(0deg) scale(1);
     animation-timing-function: cubic-bezier(0.18, 0.58, 0.38, 1);
   }
   78% {
-    transform: translate(var(--follow-through-x), -3px);
-    animation-timing-function: ease-out;
+    transform: translate(var(--follow-through-x), -3px) rotate(0deg) scale(1);
+    animation-timing-function: var(--motion-out);
   }
   100% {
-    transform: translateX(var(--rest-x));
+    transform: translate(var(--rest-x), 0) rotate(0deg) scale(1);
   }
 }
 @keyframes high-five-impact {
@@ -115,8 +120,8 @@
   }
   75% {
     opacity: 1;
-    transform: scale(1.025);
-    animation-timing-function: ease-out;
+    transform: scale(0.98);
+    animation-timing-function: var(--motion-out);
   }
   100% {
     opacity: 0;

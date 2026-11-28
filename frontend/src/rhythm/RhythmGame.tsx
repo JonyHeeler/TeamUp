@@ -26,6 +26,10 @@ export default function RhythmGame({ exit }: { exit: () => void }) {
   const round = frame?.round;
   const finished = Boolean(frame && time >= duration && !starting);
   const playing = Boolean(frame && !finished && !starting);
+  // 原生进度条只需低频更新，音符继续跟随每帧的音频时钟。
+  const progress = finished
+    ? duration
+    : Math.min(duration, Math.floor(Math.max(0, time) * 10) / 10);
   const section = sections.reduce((current, next) =>
     time >= next.start ? next : current,
   );
@@ -89,11 +93,7 @@ export default function RhythmGame({ exit }: { exit: () => void }) {
         <section className="rhythm-play" aria-label="双轨击掌谱面">
           <div className="rhythm-stage-header">
             <span>{finished ? "曲目完成" : section.name}</span>
-            <progress
-              max={duration}
-              value={Math.min(duration, Math.max(0, time))}
-              aria-label="歌曲进度"
-            />
+            <progress max={duration} value={progress} aria-label="歌曲进度" />
           </div>
           <RhythmStage
             cues={track.cues}

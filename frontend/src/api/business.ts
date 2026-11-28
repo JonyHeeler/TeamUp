@@ -25,9 +25,9 @@ export const httpApi = {
     return request<Me>("/demo/session", write("POST", { persona }));
   },
   /** Lists public profiles. */
-  profiles: (skill = "") =>
+  profiles: (search = "") =>
     request<{ items: Profile[] }>(
-      `/profiles${skill ? `?skill=${encodeURIComponent(skill)}` : ""}`,
+      `/profiles${search ? `?${new URLSearchParams({ search })}` : ""}`,
     ),
   /** Loads one public profile. */
   profile: (id: string) => request<Profile>(`/profiles/${id}`),
@@ -46,9 +46,9 @@ export const httpApi = {
       write("PATCH", { listed }),
     ),
   /** Lists published recruitments. */
-  recruitments: (skill = "") =>
+  recruitments: (search = "") =>
     request<{ items: Recruitment[] }>(
-      `/recruitments${skill ? `?skill=${encodeURIComponent(skill)}` : ""}`,
+      `/recruitments${search ? `?${new URLSearchParams({ search })}` : ""}`,
     ),
   /** Lists the current user recruitments. */
   ownRecruitments: () => request<{ items: Recruitment[] }>("/me/recruitments"),

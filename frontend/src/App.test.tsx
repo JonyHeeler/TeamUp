@@ -10,6 +10,8 @@ import userEvent from "@testing-library/user-event";
 import { StrictMode } from "react";
 import App from "./App";
 import fixture from "../../contracts/examples/demo.json";
+import { matchesSkill } from "./api/skillSearch";
+import type { Skill } from "./api/client";
 
 async function chooseFilter(label: string, choice: string) {
   screen.getByRole("combobox", { name: label }).focus();
@@ -70,10 +72,20 @@ describe("TeamUP", () => {
             items: teams.filter((team) => team.ownerId === owner),
           });
         }
-        if (path.endsWith("/recruitments"))
+        if (path.split("?")[0].endsWith("/recruitments")) {
+          const search =
+            new URLSearchParams(path.split("?")[1]).get("search") ?? "";
           return Response.json({
-            items: teams.filter((team) => team.isPublished),
+            items: teams.filter(
+              (team) =>
+                team.isPublished &&
+                matchesSkill(search, team.skills as Skill[], [
+                  team.background,
+                  ...team.requirements.map((item) => item.expectation ?? ""),
+                ]),
+            ),
           });
+        }
         if (path.includes("/recruitments/")) {
           const team = teams.find((entry) => path.includes(entry.id));
           if (team && init?.body) {
@@ -151,6 +163,102 @@ describe("TeamUP", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("keeps the discovery page until the first center snapshot and reuses it on return", async () => {
+    activePersona = "candidate-a";
+    window.history.replaceState(null, "", "/people");
+    let finishFirstRead = () => {};
+    pendingIntents = new Promise<void>((resolve) => {
+      finishFirstRead = resolve;
+    });
+    render(<App />);
+    await screen.findByText(fixture.profiles.items[0].contribution);
+
+    await userEvent.click(screen.getByRole("button", { name: "个人中心" }));
+    expect(screen.getByRole("heading", { name: "找队友" })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "个人中心" })).toBeNull();
+    finishFirstRead();
+    expect(
+      await screen.findByRole("article", { name: "我的公开名片" }),
+    ).toBeVisible();
+
+    let finishRefresh = () => {};
+    pendingIntents = new Promise<void>((resolve) => {
+      finishRefresh = resolve;
+    });
+    await userEvent.click(screen.getByRole("button", { name: "找队友" }));
+    await userEvent.click(screen.getByRole("button", { name: "个人中心" }));
+    expect(screen.getByRole("article", { name: "我的公开名片" })).toBeVisible();
+    expect(screen.queryByRole("status", { name: "加载中…" })).toBeNull();
+    finishRefresh();
+  });
+
+  it("slides the main content between all four primary tabs", async () => {
+    activePersona = "candidate-a";
+    render(<App />);
+    const animate = vi.fn(() => ({ cancel: vi.fn() }));
+    Object.defineProperty(screen.getByRole("main"), "animate", {
+      value: animate,
+    });
+
+    const nav = within(screen.getByRole("navigation"));
+    for (const [tab, title] of [
+      ["找队伍", "找队伍"],
+      ["找队友", "找队友"],
+      ["个人中心", "个人中心"],
+      ["欢迎", "平台介绍"],
+    ]) {
+      await userEvent.click(nav.getByRole("button", { name: tab }));
+      await screen.findByRole("heading", { name: title });
+    }
+
+    expect(animate).toHaveBeenCalledTimes(4);
+    expect(animate.mock.calls).toEqual(
+      [48, 48, 48, -48].map((offset) => [
+        [{ transform: "translateX(" + offset + "px)" }, { transform: "none" }],
+        expect.objectContaining({ duration: 220 }),
+      ]),
+    );
+  });
+
+  it("reuses discovery lists across tabs and refreshes an expired list on return", async () => {
+    const clock = vi.spyOn(Date, "now");
+    try {
+      activePersona = "candidate-a";
+      window.history.replaceState(null, "", "/people");
+      render(<App />);
+      const nav = within(screen.getByRole("navigation"));
+      const person = fixture.profiles.items[0];
+      const team = fixture.recruitments.items[0];
+      /** 统计默认列表的请求次数。 */
+      const reads = (path: string) =>
+        vi.mocked(fetch).mock.calls.filter(([url]) => url === path).length;
+
+      await screen.findByRole("heading", { name: person.nickname });
+      await userEvent.click(nav.getByRole("button", { name: "找队伍" }));
+      await screen.findByRole("heading", { name: team.teamName });
+      await userEvent.click(nav.getByRole("button", { name: "找队友" }));
+      expect(
+        screen.getByRole("heading", { name: person.nickname }),
+      ).toBeVisible();
+      await userEvent.click(nav.getByRole("button", { name: "找队伍" }));
+      expect(
+        screen.getByRole("heading", { name: team.teamName }),
+      ).toBeVisible();
+      expect(reads("/api/v1/profiles")).toBe(1);
+      expect(reads("/api/v1/recruitments")).toBe(1);
+      expect(reads("/api/v1/competitions")).toBe(1);
+
+      clock.mockReturnValue(Date.now() + 31_000);
+      await userEvent.click(nav.getByRole("button", { name: "找队友" }));
+      expect(
+        screen.getByRole("heading", { name: person.nickname }),
+      ).toBeVisible();
+      await waitFor(() => expect(reads("/api/v1/profiles")).toBe(2));
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
   it("manages a signed-in captain's recruitment from the personal center", async () => {
     activePersona = "captain";
     window.history.replaceState(null, "", "/center");
@@ -158,6 +266,9 @@ describe("TeamUP", () => {
     expect(
       await screen.findByRole("button", { name: "创建队伍" }),
     ).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "找队伍" }));
+    await screen.findByRole("heading", { name: "城市脉络建模队" });
+    await userEvent.click(screen.getByRole("button", { name: "个人中心" }));
     const row = () => within(screen.getByText("城市脉络建模队").closest("li")!);
     await userEvent.click(
       (await screen.findAllByRole("button", { name: "编辑招募" }))[0],
@@ -475,6 +586,78 @@ describe("TeamUP", () => {
         "/competitions/" + file,
       );
     }
+  });
+
+  it("shows published recruitments newest first even if the response is unsorted", async () => {
+    const request = vi.mocked(fetch).getMockImplementation()!;
+    const [older, newer] = fixture.recruitments.items;
+    vi.mocked(fetch).mockImplementation((url, init) => {
+      if (url === "/api/v1/recruitments") {
+        return Promise.resolve(
+          Response.json({
+            items: [
+              { ...older, createdAt: "2026-11-23T13:00:00Z" },
+              { ...newer, createdAt: "2026-11-24T08:00:00Z" },
+            ],
+          }),
+        );
+      }
+      return request(url, init);
+    });
+    window.history.replaceState(null, "", "/teams");
+    render(<App />);
+
+    const cards = await screen.findAllByRole("article");
+    expect(
+      within(cards[0]).getByRole("heading", { name: newer.teamName }),
+    ).toBeVisible();
+    expect(
+      within(cards[1]).getByRole("heading", { name: older.teamName }),
+    ).toBeVisible();
+  });
+
+  it("combines keyword search with any selected skill on team discovery", async () => {
+    window.history.replaceState(null, "", "/teams");
+    render(<App />);
+    const [modelingTeam, campusTeam] = fixture.recruitments.items;
+    await screen.findByRole("heading", { name: modelingTeam.teamName });
+    await userEvent.click(screen.getByRole("button", { name: "按技能筛选" }));
+    const filter = screen.getByRole("dialog", { name: "按技能筛选" });
+    await userEvent.click(
+      within(filter).getByRole("checkbox", { name: "数据分析" }),
+    );
+    await userEvent.click(
+      within(filter).getByRole("checkbox", { name: "智能体开发" }),
+    );
+    await userEvent.click(
+      within(filter).getByRole("button", { name: "匹配任一选中技能（2）" }),
+    );
+    expect(
+      screen.getByRole("heading", { name: modelingTeam.teamName }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: campusTeam.teamName }),
+    ).toBeInTheDocument();
+
+    await userEvent.type(
+      screen.getByRole("searchbox", { name: "搜索技能" }),
+      "编程",
+    );
+    expect(
+      screen.getByRole("heading", { name: modelingTeam.teamName }),
+    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("heading", { name: modelingTeam.teamName }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(
+      screen.getByRole("heading", { name: campusTeam.teamName }),
+    ).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/v1/recruitments?search=%E7%BC%96%E7%A8%8B",
+      expect.anything(),
+    );
   });
 
   it("opens the AI competition introduction and its filtered teams", async () => {

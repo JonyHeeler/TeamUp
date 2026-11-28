@@ -15,24 +15,19 @@ import "./center-teams.css";
 
 /** 管理当前用户创建的队伍和招募可见性。 */
 export default function CenterTeams({
-  teams: initialTeams,
+  teams,
   loadError,
+  onSaved,
 }: {
   teams: Recruitment[];
   loadError?: string;
+  onSaved: (team: Recruitment) => void;
 }) {
-  const [changes, setChanges] = useState<Recruitment[]>([]);
   const [editor, setEditor] = useState<Recruitment | "create" | null>(null);
   const [visibility, setVisibility] = useState<Recruitment | null>(null);
   const catalog = useResource(api.competitions, editor !== null);
   const { busy, error, clear, run, fieldError } = useAction();
   const [notice, setNotice] = useState<Notice>();
-  const teams = [
-    ...changes,
-    ...initialTeams.filter(
-      (team) => !changes.some((changed) => changed.id === team.id),
-    ),
-  ];
 
   /** 关闭管理弹窗并清除请求状态。 */
   function close() {
@@ -42,16 +37,13 @@ export default function CenterTeams({
   }
 
   /** 将 API 确认的队伍写入列表并通知用户。 */
-  function saveTeam(team: Recruitment) {
-    setChanges((items) => [
-      team,
-      ...items.filter((item) => item.id !== team.id),
-    ]);
-    close();
+  function saveTeam(team: Recruitment, dismiss: () => void) {
+    onSaved(team);
+    dismiss();
   }
 
   /** 根据表单模式创建或更新招募。 */
-  function submit(draft: RecruitmentInput) {
+  function submit(draft: RecruitmentInput, dismiss: () => void) {
     if (!editor) return;
     const creating = editor === "create";
     void run(
@@ -59,7 +51,7 @@ export default function CenterTeams({
         creating
           ? api.createRecruitment(draft)
           : api.updateRecruitment(editor.id, draft),
-      (team) => saveTeam(team),
+      (team) => saveTeam(team, dismiss),
       { success: creating ? "招募已发布" : "招募已保存" },
     );
   }
@@ -136,17 +128,21 @@ export default function CenterTeams({
           closeLabel={t.close}
           busy={busy}
         >
-          <Alert message={error || catalog.error || ""} />
-          {catalog.data ? (
-            <RecruitmentEditor
-              competitions={catalog.data.items}
-              initialTeam={editor === "create" ? undefined : editor}
-              busy={busy}
-              fieldError={fieldError}
-              onPublish={submit}
-            />
-          ) : (
-            !catalog.error && <p role="status">{t.loading}</p>
+          {(dismiss) => (
+            <>
+              <Alert message={error || catalog.error || ""} />
+              {catalog.data ? (
+                <RecruitmentEditor
+                  competitions={catalog.data.items}
+                  initialTeam={editor === "create" ? undefined : editor}
+                  busy={busy}
+                  fieldError={fieldError}
+                  onPublish={(draft) => submit(draft, dismiss)}
+                />
+              ) : (
+                !catalog.error && <p role="status">{t.loading}</p>
+              )}
+            </>
           )}
         </Dialog>
       )}
@@ -157,37 +153,41 @@ export default function CenterTeams({
           closeLabel={t.close}
           busy={busy}
         >
-          <p>
-            {visibility.isPublished
-              ? "下架后，其他同学无法在找队伍中看到这条招募或发起新申请。已有击掌记录仍可查看和处理。"
-              : "重新上架后，这条招募会再次出现在找队伍。"}{" "}
-          </p>
-          <Alert message={error} />
-          <div className="dialog-actions">
-            <Button type="button" disabled={busy} onClick={close}>
-              取消
-            </Button>
-            <Button
-              disabled={busy}
-              tone={visibility.isPublished ? "urgent" : "blue"}
-              onClick={() =>
-                void run(
-                  () =>
-                    api.setRecruitmentVisibility(
-                      visibility.id,
-                      !visibility.isPublished,
-                    ),
-                  (team) => saveTeam(team),
-                  {
-                    success: (team) =>
-                      team.isPublished ? "招募已上架" : "招募已下架",
-                  },
-                )
-              }
-            >
-              {visibility.isPublished ? "确认下架" : "确认上架"}
-            </Button>
-          </div>
+          {(dismiss) => (
+            <>
+              <p>
+                {visibility.isPublished
+                  ? "下架后，其他同学无法在找队伍中看到这条招募或发起新申请。已有击掌记录仍可查看和处理。"
+                  : "重新上架后，这条招募会再次出现在找队伍。"}{" "}
+              </p>
+              <Alert message={error} />
+              <div className="dialog-actions">
+                <Button type="button" disabled={busy} onClick={dismiss}>
+                  取消
+                </Button>
+                <Button
+                  disabled={busy}
+                  tone={visibility.isPublished ? "urgent" : "blue"}
+                  onClick={() =>
+                    void run(
+                      () =>
+                        api.setRecruitmentVisibility(
+                          visibility.id,
+                          !visibility.isPublished,
+                        ),
+                      (team) => saveTeam(team, dismiss),
+                      {
+                        success: (team) =>
+                          team.isPublished ? "招募已上架" : "招募已下架",
+                      },
+                    )
+                  }
+                >
+                  {visibility.isPublished ? "确认下架" : "确认上架"}
+                </Button>
+              </div>
+            </>
+          )}
         </Dialog>
       )}
     </section>

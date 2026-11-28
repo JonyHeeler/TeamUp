@@ -36,6 +36,25 @@
   display: grid;
   gap: 0.875rem;
 }
+.detail-entries {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.detail-entries > li {
+  display: grid;
+  min-width: 0;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #eff3f8;
+  overflow-wrap: anywhere;
+}
+.detail-entries .tags li {
+  background: #dfeafa;
+}
 .icon-button {
   border: 0;
   font-size: 1.4rem;

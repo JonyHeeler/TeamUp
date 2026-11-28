@@ -14,16 +14,16 @@
   color: var(--ink);
   background: var(--paper);
   text-align: start;
-  transition:
-    border-color 180ms,
-    transform 180ms;
+  transition: transform 140ms var(--motion-out);
 }
-.competition-card:hover {
-  border-color: #afbdd0;
+@media (hover: hover) and (pointer: fine) {
+  .competition-card:hover {
+    border-color: #afbdd0;
+  }
 }
 .competition-card:active {
   transform: scale(0.989);
-  transition-duration: 90ms;
+  transition-duration: 100ms;
 }
 .competition-art {
   display: block;

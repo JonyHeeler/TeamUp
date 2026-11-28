@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { ProfileInput } from "../api/client";
 import { copy as t } from "../copy";
 import { Button } from "../ui/Button";
@@ -16,10 +16,15 @@ export default function ProjectEditor({
   setProjects: (projects: Project[]) => void;
   fieldError: (field: string) => ReactNode;
 }) {
+  const [addedIndex, setAddedIndex] = useState<number>();
   return (
     <div className="custom-editor">
       {projects.map((project, index) => (
-        <fieldset className="project-editor" key={index}>
+        <fieldset
+          className="project-editor"
+          key={index}
+          data-project-reveal={index === addedIndex || undefined}
+        >
           <legend>
             {t.project} {index + 1}
           </legend>
@@ -60,9 +65,10 @@ export default function ProjectEditor({
             type="button"
 
             aria-label={t.removeProject + " " + (index + 1)}
-            onClick={() =>
-              setProjects(projects.filter((_, position) => position !== index))
-            }
+            onClick={() => {
+              setAddedIndex(undefined);
+              setProjects(projects.filter((_, position) => position !== index));
+            }}
           >
             {t.removeProject}
           </Button>
@@ -72,12 +78,13 @@ export default function ProjectEditor({
         <Button
           type="button"
 
-          onClick={() =>
+          onClick={() => {
+            setAddedIndex(projects.length);
             setProjects([
               ...projects,
               { competition: "", role: "", award: "", description: "" },
-            ])
-          }
+            ]);
+          }}
         >
           {t.addProject}
         </Button>

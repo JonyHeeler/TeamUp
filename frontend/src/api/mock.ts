@@ -1,12 +1,12 @@
 import { replaceMockEvidence } from "./mockEvidence";
 import { publicProfile } from "./mockProfile";
-import { matchesSkill } from "../profile/skillSearch";
+import { matchesSkill } from "./skillSearch";
 import { recruitmentDraft } from "./mockRecruitment";
 import fixture from "../../../contracts/examples/demo.json";
 import type { Api } from "./client";
 import { ApiError } from "./http";
 import { createMockIntents, type MockData } from "./mockIntents";
-import type { Persona, Recruitment, Skill } from "./types";
+import type { Persona, Recruitment } from "./types";
 
 const data = structuredClone(fixture) as MockData;
 for (const profile of Object.values(data.ownProfiles)) {
@@ -63,7 +63,7 @@ export const mockApi: Api = {
     items: Object.values(data.ownProfiles)
       .filter((p) => p.listed !== false)
       .map((p) => publicProfile(p))
-      .filter((p) => matchesSkill(p, skill)),
+      .filter((p) => matchesSkill(skill, p.skills, [p.contribution])),
   }),
   /** Loads one public profile. */
   profile: async (id) => {
@@ -140,7 +140,12 @@ export const mockApi: Api = {
   recruitments: async (skill = "") => ({
     items: data.recruitments.items
       .filter(
-        (t) => t.isPublished && (!skill || t.skills.includes(skill as Skill)),
+        (team) =>
+          team.isPublished &&
+          matchesSkill(skill, team.skills, [
+            team.background,
+            ...team.requirements.map((item) => item.expectation ?? ""),
+          ]),
       )
       .map(publicTeam),
   }),

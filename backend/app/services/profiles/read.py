@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.config import get_settings
 from app.db.models import Contact, Profile, ProfileEvidence
 from app.services.common import active_account, missing, visible_member
-from app.services.profiles.search import matches_skill
+from app.services.skill_search import matches_skill
 
 PROFILE_FIELDS = {
     "college": "college",
@@ -51,7 +51,15 @@ def list_profiles(db: Session, skill: str | None = None) -> list[dict[str, Any]]
         query = query.where(active_account(Profile.user_id))
     profiles = list(db.scalars(query.order_by(Profile.user_id)))
     if skill and skill.strip():
-        profiles = [p for p in profiles if matches_skill(p, skill)]
+        profiles = [
+            p
+            for p in profiles
+            if matches_skill(
+                skill,
+                (tag.code for tag in p.skills),
+                descriptions=(p.introduction,),
+            )
+        ]
     return [public_data(db, p) for p in profiles]
 
 

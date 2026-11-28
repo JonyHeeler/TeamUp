@@ -36,21 +36,17 @@
   align-items: center;
   gap: 0.625rem;
 }
-.project-editor,
-.profile-projects {
+.project-editor {
   display: grid;
   gap: 0.625rem;
   min-width: 0;
-}
-.custom-editor:has(.project-editor) {
-  gap: 1rem;
-}
-.project-editor,
-.profile-projects .details {
   padding: 1rem;
   border: 1px solid var(--line);
   border-radius: 0.75rem;
   background: #f7f9fc;
+}
+.custom-editor:has(.project-editor) {
+  gap: 1rem;
 }
 .project-editor legend {
   padding: 0 0.375rem;
@@ -109,8 +105,7 @@
 .position-editor legend {
   padding: 0 0.375rem;
 }
-.position-skills summary,
-.recruitment-positions summary {
+.position-skills summary {
   width: fit-content;
   cursor: pointer;
   color: var(--action);
@@ -122,19 +117,4 @@
 }
 .position-skills .skill-picker {
   margin-bottom: 0.5rem;
-}
-.recruitment-positions {
-  width: 100%;
-}
-.recruitment-positions ol {
-  display: grid;
-  gap: 0.625rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.recruitment-positions ol > li {
-  display: grid;
-  gap: 0.375rem;
-  overflow-wrap: anywhere;
 }

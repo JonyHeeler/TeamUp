@@ -1532,6 +1532,7 @@ export interface operations {
         parameters: {
             query?: {
                 skill?: string | null;
+                search?: string | null;
             };
             header?: never;
             path?: never;
@@ -1876,6 +1877,7 @@ export interface operations {
         parameters: {
             query?: {
                 skill?: ("data-analysis" | "development" | "design" | "presentation" | "mathematical-modeling" | "machine-learning" | "agent-development" | "data-collection" | "frontend" | "backend" | "product-management" | "user-research" | "academic-writing" | "business-analysis" | "finance" | "video-editing" | "project-management" | "mobile-development" | "statistics" | "data-visualization" | "ui-ux" | "graphic-design" | "market-research" | "business-planning" | "slide-design" | "copywriting") | null;
+                search?: string | null;
             };
             header?: never;
             path?: never;

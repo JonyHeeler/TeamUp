@@ -1,8 +1,15 @@
 import type { Profile } from "../api/client";
 import { copy as t } from "../copy";
+import EvidenceImage from "../EvidenceImage";
 import { Tags } from "../SkillFields";
 import { CardFacts } from "../ui/SummaryCard";
-import { fields, projectFields } from "./fields";
+import "./profile-details.css";
+
+const basicFields = ["college", "major", "grade"] as const;
+const projectFacts = [
+  ["role", t.projectRole],
+  ["award", t.projectAward],
+] as const;
 
 /** 展示可见的名片详情及已授权联系方式。 */
 export function ProfileDetails({
@@ -12,48 +19,98 @@ export function ProfileDetails({
   profile: Profile;
   qq?: string | null;
 }) {
-  qq = qq ?? profile.qq;
-  const visibleFields = fields.filter((field) => !!profile[field]);
+  const contact = qq ?? profile.qq;
+  const facts = basicFields.flatMap((field) => {
+    const value = profile[field];
+    return value ? [{ label: t[field], value }] : [];
+  });
+  if (contact) facts.push({ label: t.qq, value: contact });
+  const hasSkills = profile.skills.length > 0 || !!profile.customSkills?.length;
   const projects = profile.projects ?? [];
+  const evidence = profile.evidenceIds ?? [];
   return (
-    <>
-      <Tags skills={profile.skills} custom={profile.customSkills} />
-      <p className="body-text">{profile.contribution}</p>
-      {(visibleFields.length > 0 || qq) && (
-        <dl className="details">
-          {qq && (
-            <div>
-              <dt>{t.qq}</dt>
-              <dd>{qq}</dd>
-            </div>
-          )}
-          {visibleFields.map((field) => (
-            <div key={field}>
-              <dt>{t[field]}</dt>
-              <dd>{profile[field]}</dd>
+    <div className="profile-details">
+      {facts.length > 0 && (
+        <dl className="profile-facts">
+          {facts.map(({ label, value }) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
             </div>
           ))}
         </dl>
       )}
-      {projects.length > 0 && (
-        <div className="profile-projects">
-          <strong>{t.experience}</strong>
-          {projects.map((project, index) => (
-            <dl className="details" key={index}>
-              {projectFields.map(
-                ([field, label]) =>
-                  project[field] && (
-                    <div key={field}>
-                      <dt>{label}</dt>
-                      <dd>{project[field]}</dd>
-                    </div>
-                  ),
-              )}
-            </dl>
-          ))}
+      {(profile.contribution || hasSkills) && (
+        <div className="profile-overview">
+          {profile.contribution && (
+            <section>
+              <h3>{t.contribution}</h3>
+              <p className="body-text">{profile.contribution}</p>
+            </section>
+          )}
+          {hasSkills && (
+            <section>
+              <h3>{t.skills}</h3>
+              <Tags skills={profile.skills} custom={profile.customSkills} />
+            </section>
+          )}
         </div>
       )}
-    </>
+      {profile.competitionIntent && (
+        <section>
+          <h3>{t.competitionIntent}</h3>
+          <p className="body-text">{profile.competitionIntent}</p>
+        </section>
+      )}
+      {(profile.experience || projects.length > 0) && (
+        <section>
+          <h3>{t.experience}</h3>
+          {profile.experience && (
+            <p className="body-text">{profile.experience}</p>
+          )}
+          {projects.length > 0 && (
+            <ul className="detail-entries profile-projects" role="list">
+              {projects.map((project, index) => (
+                <li key={index}>
+                  {project.competition && <h4>{project.competition}</h4>}
+                  {(project.role || project.award) && (
+                    <dl className="profile-project-facts">
+                      {projectFacts.map(
+                        ([field, label]) =>
+                          project[field] && (
+                            <div key={field}>
+                              <dt>{label}</dt>
+                              <dd>{project[field]}</dd>
+                            </div>
+                          ),
+                      )}
+                    </dl>
+                  )}
+                  {project.description && (
+                    <p className="body-text">{project.description}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+      {evidence.length > 0 && (
+        <section>
+          <h3>{t.evidence}</h3>
+          <div className="proof-grid">
+            {evidence.map((id, index) => (
+              <EvidenceImage
+                key={id}
+                entry={{ id }}
+                userId={profile.userId}
+                label={t.evidenceLabel(index + 1)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+    </div>
   );
 }
 

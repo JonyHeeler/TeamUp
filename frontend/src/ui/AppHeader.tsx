@@ -27,14 +27,14 @@ export default function AppHeader({
   const taps = useRef({ count: 0, startedAt: 0 });
 
   /** 单击返回首页，连续三击打开节奏彩蛋。 */
-  function tapBrand(pointerClick: boolean) {
+  function tapBrand() {
     const now = performance.now();
     if (now - taps.current.startedAt > tripleClickWindow)
       taps.current.count = 0;
     taps.current.count += 1;
     if (taps.current.count === 1) {
       taps.current.startedAt = now;
-      move("/", undefined, "push", pointerClick);
+      move("/", undefined, "push", false);
     }
     if (taps.current.count === 3) {
       taps.current.count = 0;
@@ -58,7 +58,7 @@ export default function AppHeader({
         <button
           className="brand"
           aria-label={t.brand + " · " + t.brandEnglish}
-          onClick={(event) => tapBrand(event.detail !== 0)}
+          onClick={tapBrand}
         >
           <span className="brand-mark" aria-hidden="true">
             <BrandMark />
@@ -76,25 +76,19 @@ export default function AppHeader({
                 ? "page"
                 : undefined
             }
-            onClick={(event) =>
-              move("/", undefined, "push", event.detail !== 0)
-            }
+            onClick={() => move("/")}
           >
             {t.welcome}
           </button>
           <button
             aria-current={page === "teams" ? "page" : undefined}
-            onClick={(event) =>
-              move("/teams", undefined, "push", event.detail !== 0)
-            }
+            onClick={() => move("/teams")}
           >
             {t.teams}
           </button>
           <button
             aria-current={page === "people" ? "page" : undefined}
-            onClick={(event) =>
-              move("/people", undefined, "push", event.detail !== 0)
-            }
+            onClick={() => move("/people")}
           >
             {t.people}
           </button>
@@ -110,9 +104,7 @@ export default function AppHeader({
                 ? "page"
                 : undefined
             }
-            onClick={(event) =>
-              move("/center", undefined, "push", event.detail !== 0)
-            }
+            onClick={() => move("/center")}
           >
             {t.center}
           </button>

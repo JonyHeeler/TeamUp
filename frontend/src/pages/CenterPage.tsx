@@ -2,15 +2,14 @@ import CenterTeams from "./CenterTeams";
 import CenterLoading from "./CenterLoading";
 import IntentDialog from "./IntentDialog";
 import IntentLists from "./IntentLists";
-import { loadDashboard } from "./centerData";
+import type { useCenterDashboard } from "./centerData";
 import { SummaryCard } from "../ui/SummaryCard";
 import { Button } from "../ui/Button";
 import { showToast } from "../ui/ActionToast";
-import { useCallback, useState } from "react";
-import { api, type Intent, type IntentDetail } from "../api/client";
+import { useState } from "react";
+import { api, type IntentDetail } from "../api/client";
 import { copy as t } from "../copy";
 import { ProfileDetails, ProfileSummary } from "../profile/ProfileViews";
-import EvidenceImage from "../EvidenceImage";
 import {
   Alert,
   Dialog,
@@ -18,7 +17,6 @@ import {
   Heading,
   describeError,
   useAction,
-  useResource,
   type Notice,
   type PageProps,
 } from "./shared";
@@ -29,20 +27,19 @@ export default function CenterPage({
   me,
   navigate,
   arrival,
-}: PageProps & { arrival?: Notice }) {
-  const userId = me?.userId;
-  const [listedOverride, setListedOverride] = useState<boolean>();
-  const [profileRevision, setProfileRevision] = useState(0);
-  const load = useCallback(
-    () => loadDashboard(userId!),
-    [userId, profileRevision],
-  );
-  const { data: dashboard, error: loadError } = useResource(load, Boolean(me));
+  invalidateProfiles,
+  invalidateRecruitments,
+  dashboard: { data: dashboard, refresh, update },
+}: PageProps & {
+  arrival?: Notice;
+  invalidateProfiles: () => void;
+  invalidateRecruitments: () => void;
+  dashboard: ReturnType<typeof useCenterDashboard>;
+}) {
   const ownProfile = dashboard?.profile.data;
-  const listed = listedOverride ?? ownProfile?.listed;
+  const listed = ownProfile?.listed;
   const publicProfile = listed ? dashboard?.publicProfile.data : null;
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [updated, setUpdated] = useState<Record<string, Intent>>({});
   const [intent, setIntent] = useState<IntentDetail | null>(null);
   const { busy, run, clear, error, setError, fieldError } = useAction();
   const visibility = useAction();
@@ -52,8 +49,15 @@ export default function CenterPage({
     void visibility.run(
       () => api.setProfileVisibility(!listed),
       (result) => {
-        setListedOverride(result.listed);
-        setProfileRevision((revision) => revision + 1);
+        invalidateProfiles();
+        update((current) => ({
+          ...current,
+          profile: current.profile.data
+            ? { data: { ...current.profile.data, listed: result.listed } }
+            : current.profile,
+          publicProfile: result.listed ? current.publicProfile : { data: null },
+        }));
+        void refresh();
       },
       { success: (result) => (result.listed ? "名片已上架" : "名片已下架") },
     );
@@ -85,7 +89,16 @@ export default function CenterPage({
         }
       },
       ({ summary, detail, error }) => {
-        setUpdated((items) => ({ ...items, [entry.id]: summary }));
+        update((current) => ({
+          ...current,
+          requests: {
+            data: {
+              items: (current.requests.data?.items ?? []).map((item) =>
+                item.id === summary.id ? summary : item,
+              ),
+            },
+          },
+        }));
         setIntent(detail ?? { ...entry, ...summary });
         if (error) {
           setError(error);
@@ -105,8 +118,6 @@ export default function CenterPage({
       <Feedback notice={arrival} />
       {!me ? (
         <p className="empty">{t.needPersona}</p>
-      ) : loadError ? (
-        <Alert message={loadError} />
       ) : !dashboard ? (
         <CenterLoading />
       ) : (
@@ -156,11 +167,25 @@ export default function CenterPage({
           <CenterTeams
             teams={dashboard.teams.data?.items ?? []}
             loadError={dashboard.teams.error}
+            onSaved={(team) => {
+              invalidateRecruitments();
+              update((current) => ({
+                ...current,
+                teams: {
+                  data: {
+                    items: [
+                      team,
+                      ...(current.teams.data?.items ?? []).filter(
+                        (item) => item.id !== team.id,
+                      ),
+                    ],
+                  },
+                },
+              }));
+            }}
           />
           <IntentLists
-            intents={(dashboard.requests.data?.items ?? []).map(
-              (item) => updated[item.id] ?? item,
-            )}
+            intents={dashboard.requests.data?.items ?? []}
             userId={me.userId}
             error={dashboard.requests.error}
             openIntent={openIntent}
@@ -169,24 +194,12 @@ export default function CenterPage({
       )}
       {previewOpen && publicProfile && me && (
         <Dialog
-          title="完整公开名片"
+          title={`完整公开名片 · ${publicProfile.nickname}`}
           closeLabel={t.close}
           close={() => setPreviewOpen(false)}
+          className="profile-dialog"
         >
-          <strong>{publicProfile.nickname}</strong>
           <ProfileDetails profile={publicProfile} />
-          {(publicProfile.evidenceIds?.length ?? 0) > 0 && (
-            <div className="proof-grid" role="group" aria-label={t.evidence}>
-              {publicProfile.evidenceIds?.map((id, index) => (
-                <EvidenceImage
-                  key={id}
-                  entry={{ id }}
-                  userId={me.userId}
-                  label={t.evidenceLabel(index + 1)}
-                />
-              ))}
-            </div>
-          )}
         </Dialog>
       )}
       {intent && (

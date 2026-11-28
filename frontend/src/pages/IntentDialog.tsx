@@ -26,6 +26,7 @@ export default function IntentDialog({
   fieldError?: ReactNode;
 }) {
   const [message, setMessage] = useState("");
+  const [openedPending] = useState(intent.status === "pending");
   const { title, context } = intentLabels(intent);
   return (
     <Dialog title={title} closeLabel={t.close} busy={busy} close={close}>
@@ -47,7 +48,10 @@ export default function IntentDialog({
         </div>
       )}
       {intent.status === "accepted" && intent.counterpartQq && (
-        <div className="contact">
+        <div
+          className="contact"
+          data-contact-reveal={openedPending || undefined}
+        >
           <small>{t.otherContact}</small>
           <strong>{intent.counterpartQq}</strong>
         </div>

@@ -12,6 +12,18 @@ const preview = [
   { lane: "right", top: 70 },
 ] as const;
 
+/** 找到最早仍可能出现在谱面里的音符。 */
+function firstVisibleCue(cues: Track["cues"], time: number) {
+  let start = 0;
+  let end = cues.length;
+  while (start < end) {
+    const middle = Math.floor((start + end) / 2);
+    if (cues[middle].time - time < -0.16) start = middle + 1;
+    else end = middle;
+  }
+  return start;
+}
+
 /** 让品牌手掌跟随命中摆动，双手同拍时碰出星芒。 */
 function RhythmHands({ round, time }: { round?: Round; time: number }) {
   const paired =
@@ -62,12 +74,59 @@ export default function RhythmStage({
   showPreview: boolean;
   children: ReactNode;
 }) {
+  const notes = [];
+  // 定期重置原点，让整层移动时仅更新一处 transform，并限制层的绘制范围。
+  const anchor =
+    time === null ? 0 : Math.floor(time / approachTime) * approachTime;
+  if (time !== null) {
+    for (
+      let index = firstVisibleCue(cues, time);
+      index < cues.length;
+      index++
+    ) {
+      const cue = cues[index];
+      const until = cue.time - time;
+      if (until > approachTime) break;
+      const pending = cue.notes.filter((note) => !round?.resolved.has(note.id));
+      if (!pending.length) continue;
+      const position = hitLine * (1 - (cue.time - anchor) / approachTime);
+      notes.push(
+        <div
+          className="rhythm-note-row"
+          data-kind={cue.kind}
+          key={cue.step}
+          style={{ top: position + "%" }}
+        >
+          {pending.length === 2 && <span className="rhythm-note-link" />}
+          {pending.map((note) => (
+            <span
+              className="rhythm-note"
+              data-lane={note.lane}
+              data-note={note.id}
+              key={note.id}
+            />
+          ))}
+        </div>,
+      );
+    }
+  }
   return (
     <div
       className="rhythm-stage"
       style={{ "--rhythm-hit-line": hitLine + "%" } as CSSProperties}
     >
-      <div className="rhythm-notes" aria-hidden="true">
+      <div
+        className="rhythm-notes"
+        data-playing={time !== null || undefined}
+        aria-hidden="true"
+        style={
+          time !== null
+            ? {
+                transform: `translateY(${(hitLine * (time - anchor)) / approachTime}%)`,
+              }
+            : undefined
+        }
+      >
         {showPreview &&
           preview.map(({ lane, top }) => (
             <div
@@ -78,34 +137,7 @@ export default function RhythmStage({
               <span className="rhythm-note" data-lane={lane} />
             </div>
           ))}
-        {time !== null &&
-          cues.map((cue) => {
-            const until = cue.time - time;
-            if (until > approachTime || until < -0.16) return null;
-            const pending = cue.notes.filter(
-              (note) => !round?.resolved.has(note.id),
-            );
-            if (!pending.length) return null;
-            const position = hitLine * (1 - until / approachTime);
-            return (
-              <div
-                className="rhythm-note-row"
-                data-kind={cue.kind}
-                key={cue.step}
-                style={{ top: position + "%" }}
-              >
-                {pending.length === 2 && <span className="rhythm-note-link" />}
-                {pending.map((note) => (
-                  <span
-                    className="rhythm-note"
-                    data-lane={note.lane}
-                    data-note={note.id}
-                    key={note.id}
-                  />
-                ))}
-              </div>
-            );
-          })}
+        {notes}
       </div>
       <RhythmHands time={time ?? 0} round={round} />
       <div className="rhythm-hit-line" aria-hidden="true">

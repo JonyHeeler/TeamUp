@@ -21,14 +21,17 @@ export class Round {
   perfect = 0;
   good = 0;
   missed = 0;
+  private nextNote = 0;
 
   /** 将判定绑定到开局时选择的谱面。 */
   constructor(private readonly notes: readonly Note[]) {}
 
   /** 将超出判定窗口的音符记为漏拍。 */
   advance(time: number) {
-    for (const note of this.notes) {
+    while (this.nextNote < this.notes.length) {
+      const note = this.notes[this.nextNote];
       if (note.time >= time - hitWindow) break;
+      this.nextNote++;
       if (this.resolved.has(note.id)) continue;
       this.resolved.add(note.id);
       this.missed += 1;
@@ -42,7 +45,8 @@ export class Round {
     this.advance(time);
     let closest: Note | undefined;
     let error = hitWindow;
-    for (const note of this.notes) {
+    for (let index = this.nextNote; index < this.notes.length; index++) {
+      const note = this.notes[index];
       if (note.time > time + hitWindow) break;
       if (note.lane !== lane || this.resolved.has(note.id)) continue;
       const offset = Math.abs(note.time - time);

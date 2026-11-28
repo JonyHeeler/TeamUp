@@ -26,17 +26,17 @@
 
 .rhythm-hand[data-motion="tap"] {
   --hand-impact: var(--hand-tap);
-  animation: rhythm-clap 250ms ease-out both;
+  animation: rhythm-clap 190ms var(--motion-out) both;
 }
 
 .rhythm-hand[data-motion="pair"] {
   --hand-impact: 0px;
-  animation: rhythm-clap 320ms ease-out both;
+  animation: rhythm-clap 250ms var(--motion-out) both;
 }
 
 .rhythm-spark {
   transform-origin: center;
-  animation: rhythm-spark 320ms ease-out both;
+  animation: rhythm-spark 250ms var(--motion-out) both;
 }
 
 @keyframes rhythm-clap {
@@ -100,8 +100,10 @@
   font-weight: 700;
 }
 
-.rhythm-start:hover {
-  background: #ffd1a0;
+@media (hover: hover) and (pointer: fine) {
+  .rhythm-start:hover {
+    background: #ffd1a0;
+  }
 }
 
 .rhythm-countdown {
@@ -137,7 +139,6 @@
 @media (prefers-reduced-motion: reduce) {
   .rhythm-hand[data-motion] {
     animation: none;
-    transform: translateX(var(--hand-impact));
     opacity: 1;
   }
 

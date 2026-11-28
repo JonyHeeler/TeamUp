@@ -3,8 +3,8 @@ import { useEffect, useId, useRef, type ReactNode } from "react";
 import { copy as t } from "../copy";
 
 import type { Notice } from "../pageTypes";
-import { ActionToaster } from "../ui/ActionToast";
 
+export { Dialog } from "../ui/Dialog";
 export type { Notice, Navigate, PageProps } from "../pageTypes";
 export { describeError, useAction, useResource } from "./useRequest";
 
@@ -118,63 +118,6 @@ export function teamsHref(competitionId?: string) {
   return competitionId
     ? path + "?" + new URLSearchParams({ competition: competitionId })
     : path;
-}
-
-/** 展示模态对话框并管理焦点。 */
-export function Dialog({
-  title,
-  close,
-  closeLabel,
-  busy = false,
-  children,
-}: {
-  title: string;
-  close: () => void;
-  closeLabel: string;
-  busy?: boolean;
-  children: ReactNode;
-}) {
-  const ref = useRef<HTMLDialogElement>(null);
-  const titleId = useId();
-  useEffect(() => {
-    const dialog = ref.current;
-    const trigger = document.activeElement;
-    dialog?.showModal?.();
-    return () => {
-      dialog?.close?.();
-      if (trigger instanceof HTMLElement) trigger.focus();
-    };
-  }, []);
-  return (
-    <dialog
-      ref={ref}
-      data-toast-scope={titleId}
-      aria-labelledby={titleId}
-      className="dialog"
-      onCancel={(event) => {
-        event.preventDefault();
-        if (!busy) close();
-      }}
-      onClick={(event) => {
-        if (!busy && event.target === event.currentTarget) close();
-      }}
-    >
-      <div className="dialog-heading">
-        <h2 id={titleId}>{title}</h2>
-        <button
-          type="button"
-          className="icon-button"
-          aria-label={closeLabel}
-          disabled={busy}
-          onClick={close}
-        >
-          ×
-        </button>
-      </div>
-      <div className="dialog-content">{children}</div>
-      <ActionToaster id={titleId} />
-    </dialog>
-  );
 }
 
 /** 显示错误提示。 */

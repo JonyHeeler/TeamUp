@@ -18,9 +18,9 @@ router = APIRouter()
     response_model_exclude_unset=True,
     responses=errors(422, 503),
 )
-def profiles(skill: str | None = None, db: Session = DB_DEP):
+def profiles(skill: str | None = None, search: str | None = None, db: Session = DB_DEP):
     """List public profiles, with an optional skill filter."""
-    return {"items": list_profiles(db, skill)}
+    return {"items": list_profiles(db, search or skill)}
 
 
 @router.get(

@@ -1,5 +1,7 @@
 import { ActionToaster, showToast } from "./ui/ActionToast";
 import { usePageNavigation } from "./ui/usePageNavigation";
+import { useCenterNavigation } from "./ui/useCenterNavigation";
+import { useCenterDashboard } from "./pages/centerData";
 import { Fragment, lazy, Suspense, useEffect, useRef, useState } from "react";
 import {
   api,
@@ -11,6 +13,8 @@ import {
 import { copy as t } from "./copy";
 import AppHeader from "./ui/AppHeader";
 import WelcomePage from "./pages/WelcomePage";
+import { LoadingStatus } from "./pages/LoadingStatus";
+import { useTeamDiscovery } from "./pages/teamDiscovery";
 import AboutPage from "./pages/AboutPage";
 import TeamsPage from "./pages/TeamsPage";
 import PeoplePage from "./pages/PeoplePage";
@@ -49,7 +53,12 @@ const accountPages = new Map<string, AuthPage>([
 
 /** 管理会话、路由以及页面切换。 */
 export default function App() {
-  const { location, setLocation, move, focusHeading } = usePageNavigation();
+  const {
+    location,
+    setLocation,
+    move: movePage,
+    focusHeading,
+  } = usePageNavigation();
   const [me, setMe] = useState<Me | null>(null);
   const mock = import.meta.env.VITE_TEAMUP_MOCK === "true";
   const [mode, setMode] = useState<AuthMode | null>(mock ? "demo" : null);
@@ -66,6 +75,28 @@ export default function App() {
     ? "competition"
     : (accountPage ?? pages.get(path) ?? "welcome");
   const competitionId = new URLSearchParams(search).get("competition") ?? "";
+  const discovery = useTeamDiscovery({
+    teamView:
+      path !== "/rhythm" &&
+      ["welcome", "about", "competition", "teams"].includes(page)
+        ? page
+        : undefined,
+    showPeople: page === "people",
+    scope:
+      !restoring && !switching && (mode === "demo" || me)
+        ? [mode, me?.userId].join(":")
+        : undefined,
+  });
+  const centerUserId = restoring || switching ? undefined : me?.userId;
+  const dashboard = useCenterDashboard(
+    centerUserId,
+    page === "center",
+    path !== "/rhythm" && ["welcome", "teams", "people"].includes(page),
+  );
+  const { navigate: move, cancel: cancelPendingCenter } = useCenterNavigation(
+    movePage,
+    centerUserId && !dashboard.data ? dashboard.refresh : undefined,
+  );
 
   useEffect(() => {
     let active = true;
@@ -114,6 +145,7 @@ export default function App() {
   /** 切换演示身份并清理上一个身份的提示。 */
   async function switchPersona(next: Persona) {
     if (switchingRef.current || next === me?.persona) return;
+    cancelPendingCenter();
     switchingRef.current = true;
     setSwitching(true);
     setSessionError("");
@@ -173,9 +205,7 @@ export default function App() {
             onDismiss={() => setSessionError("")}
           />
           {loading ? (
-            <p className="empty" role="status">
-              {t.loading}
-            </p>
+            <LoadingStatus />
           ) : accountPage && mode !== "student" ? (
             <Heading title="当前环境未开放账号入口" />
           ) : requiresLogin ? (
@@ -205,21 +235,43 @@ export default function App() {
                   navigate={navigate}
                 />
               )}
-              {page === "welcome" && <WelcomePage navigate={navigate} />}
+              {page === "welcome" && (
+                <WelcomePage navigate={navigate} discovery={discovery} />
+              )}
               {page === "about" && <AboutPage navigate={navigate} />}
               {page === "competition" && competitionPageId && (
                 <CompetitionPage id={competitionPageId} navigate={navigate} />
               )}
               {page === "resume" && <ResumePage {...props} />}
               {page === "teams" && (
-                <TeamsPage {...props} competitionId={competitionId} />
+                <TeamsPage
+                  {...props}
+                  competitionId={competitionId}
+                  discovery={discovery}
+                />
               )}
-              {page === "people" && <PeoplePage me={me} />}
+              {page === "people" && (
+                <PeoplePage me={me} unfiltered={discovery.profiles} />
+              )}
               {page === "center" && (
-                <CenterPage {...props} arrival={location.notice} />
+                <CenterPage
+                  {...props}
+                  dashboard={dashboard}
+                  arrival={location.notice}
+                  invalidateProfiles={discovery.invalidateProfiles}
+                  invalidateRecruitments={discovery.invalidateRecruitments}
+                />
               )}
               {page === "profile" && (
-                <EditProfilePage {...props} updateMe={setMe} />
+                <EditProfilePage
+                  {...props}
+                  updateMe={setMe}
+                  refreshCenter={() => {
+                    discovery.invalidateProfiles();
+                    discovery.invalidateRecruitments();
+                    return dashboard.refresh(true);
+                  }}
+                />
               )}
             </Fragment>
           )}

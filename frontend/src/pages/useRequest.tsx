@@ -18,7 +18,12 @@ export function describeError(error: unknown): string {
 export function useResource<T>(request: () => Promise<T>, enabled = true) {
   const [state, setState] = useState<{ data?: T; error?: string }>({});
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) {
+      setState((current) =>
+        current.data !== undefined || current.error ? {} : current,
+      );
+      return;
+    }
     let active = true;
     void request().then(
       (data) => {

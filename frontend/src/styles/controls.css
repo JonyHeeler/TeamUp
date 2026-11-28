@@ -8,9 +8,7 @@
   font-size: 0.875rem;
   font-weight: 500;
   white-space: nowrap;
-  transition:
-    background-color 150ms ease,
-    transform 160ms var(--motion-slide);
+  transition: transform 140ms var(--motion-out);
 }
 .button--blue {
   --button-bg: var(--action);
@@ -22,12 +20,14 @@
   --button-hover: var(--urgent-hover);
   --button-ink: white;
 }
-.button:hover:not(:disabled) {
-  background: var(--button-hover);
+@media (hover: hover) and (pointer: fine) {
+  .button:hover:not(:disabled) {
+    background: var(--button-hover);
+  }
 }
 .button:active:not(:disabled) {
-  transform: scale(0.97);
-  transition-duration: 90ms;
+  transform: scale(0.975);
+  transition-duration: 100ms;
 }
 
 .view-tools {
@@ -120,14 +120,6 @@
   color: var(--ink);
   background: var(--paper);
   box-shadow: 0 0.65rem 1.9rem #15325222;
-  transform-origin: var(--radix-select-content-transform-origin);
-  animation: filter-open 140ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-@keyframes filter-open {
-  from {
-    opacity: 0;
-    transform: scale(0.98);
-  }
 }
 .filter-viewport {
   padding: 0.3rem;
@@ -183,6 +175,9 @@
   inset-inline: 0;
   border-color: #d8e4f1;
   box-shadow: 0 0.5rem 1.6rem #21395422;
+  transition:
+    transform 200ms var(--motion-out),
+    opacity 160ms var(--motion-out);
 }
 .app-toaster [data-type="success"] [data-icon] {
   color: var(--action);

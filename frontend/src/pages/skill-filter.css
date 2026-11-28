@@ -1,0 +1,70 @@
+.filter-chevron .chevron {
+  transform: translateY(-2px) rotate(135deg);
+}
+
+.skill-filter-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.skill-filter-dialog .dialog-content {
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 0;
+  padding: 0;
+}
+
+.skill-filter-dialog .dialog-heading h2 {
+  font-size: 1.125rem;
+}
+
+.skill-filter-dialog .skill-filter-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 1.25rem;
+  padding: 1rem clamp(1rem, 4vw, 1.75rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.skill-filter-groups .skill-group {
+  margin: 0;
+}
+
+.skill-filter-groups .skill-option {
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  color: #181818;
+  font-size: 0.875rem;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.skill-filter-groups .skill-option:has(:checked) {
+  background: #edf3fb;
+  border-color: #adc9eb;
+}
+
+.skill-filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.75rem clamp(1rem, 4vw, 1.75rem);
+  border-top: 1px solid var(--line);
+}
+
+.skill-filter-actions .back {
+  margin: 0;
+}
+
+@media (max-width: 38rem) {
+  .skill-filter-dialog .skill-filter-groups {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+}

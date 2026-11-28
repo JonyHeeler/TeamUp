@@ -91,14 +91,6 @@
 }
 @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
   .topbar {
-    background: #fafafc;
-    backdrop-filter: none;
     border-color: #98989e;
   }
-}
-
-.about-copy {
-  display: grid;
-  gap: 0.75rem;
-  max-width: 42rem;
 }

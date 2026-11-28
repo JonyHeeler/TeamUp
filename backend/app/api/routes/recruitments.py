@@ -24,9 +24,9 @@ def competitions() -> s.CompetitionList:
 
 
 @router.get("/recruitments", response_model=s.RecruitmentList, responses=errors(422, 503))
-def recruitments(skill: Skill | None = None, db: Session = DB_DEP):
+def recruitments(skill: Skill | None = None, search: str | None = None, db: Session = DB_DEP):
     """List published recruitments, with an optional skill filter."""
-    return {"items": service.list_recruitments(db, skill)}
+    return {"items": service.list_recruitments(db, skill, search)}
 
 
 @router.get(

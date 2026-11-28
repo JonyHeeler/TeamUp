@@ -32,6 +32,8 @@ const labels: Record<Section, string> = {
   credit: "平台标识",
 };
 
+import { LoadingStatus } from "./LoadingStatus";
+
 /** 预览按用户选择字段生成的简历。 */
 export default function ResumePage({ me, navigate }: PageProps) {
   const profile = useResource(api.ownProfile, Boolean(me));
@@ -107,7 +109,7 @@ export default function ResumePage({ me, navigate }: PageProps) {
         ) : profile.error ? (
           <Alert message={profile.error} />
         ) : !p ? (
-          <p role="status">{t.loading}</p>
+          <LoadingStatus />
         ) : (
           <div className="editor resume-settings">
             <label className="resume-name">

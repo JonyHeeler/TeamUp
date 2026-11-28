@@ -20,6 +20,7 @@ from app.services.common import (
     timestamp,
     visible_member,
 )
+from app.services.skill_search import matches_skill
 from app.services.team_numbers import TeamNumberExhausted, next_team_number
 
 
@@ -49,7 +50,9 @@ def recruitment_data(recruitment: Recruitment) -> dict[str, Any]:
     }
 
 
-def list_recruitments(db: Session, skill: str | None = None) -> list[dict[str, Any]]:
+def list_recruitments(
+    db: Session, skill: str | None = None, search: str | None = None
+) -> list[dict[str, Any]]:
     """List publicly visible recruitments."""
     query = select(Recruitment).where(
         Recruitment.is_published.is_(True),
@@ -59,7 +62,23 @@ def list_recruitments(db: Session, skill: str | None = None) -> list[dict[str, A
         query = query.where(active_account(Recruitment.owner_id))
     if skill:
         query = query.where(Recruitment.skills.any(Skill.code == skill))
-    return [recruitment_data(r) for r in db.scalars(query.order_by(Recruitment.created_at.desc()))]
+    results = (
+        recruitment_data(r) for r in db.scalars(query.order_by(Recruitment.created_at.desc()))
+    )
+    return [
+        entry
+        for entry in results
+        if not search
+        or not search.strip()
+        or matches_skill(
+            search,
+            entry["skills"],
+            descriptions=(
+                entry["background"],
+                *(item["expectation"] for item in entry["requirements"] if item.get("expectation")),
+            ),
+        )
+    ]
 
 
 def get_recruitment(db: Session, recruitment_id: str) -> dict[str, Any]:

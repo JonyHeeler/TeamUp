@@ -14,13 +14,17 @@ import {
 import { showToast } from "../ui/ActionToast";
 import { Alert, Back, Heading, useAction, type PageProps } from "./shared";
 
+import { LoadingStatus } from "./LoadingStatus";
+
 /** 加载并保存当前用户的名片草稿。 */
 export default function EditProfilePage({
   me,
   navigate,
   updateMe,
+  refreshCenter,
 }: PageProps & {
   updateMe: (user: Me) => void;
+  refreshCenter: () => Promise<void>;
 }) {
   const { run, busy, error, fieldError, fieldErrors, setFieldErrors } =
     useAction();
@@ -142,8 +146,8 @@ export default function EditProfilePage({
               return;
             }
             void run(
-              () =>
-                api.saveProfile({
+              async () => {
+                const saved = await api.saveProfile({
                   ...profile,
                   customSkills,
                   evidence: proofs.map((item) =>
@@ -151,7 +155,10 @@ export default function EditProfilePage({
                       ? { image: item.dataUrl.split(",", 2)[1] }
                       : { id: item.id },
                   ),
-                }),
+                });
+                await refreshCenter();
+                return saved;
+              },
               (savedProfile) => {
                 if (me.nickname !== savedProfile.nickname)
                   updateMe({ ...me, nickname: savedProfile.nickname });
@@ -220,11 +227,7 @@ export default function EditProfilePage({
           </fieldset>
         </ProfileEditor>
       ) : (
-        !error && (
-          <p className="empty" role="status">
-            {t.loading}
-          </p>
-        )
+        !error && <LoadingStatus />
       )}
     </>
   );

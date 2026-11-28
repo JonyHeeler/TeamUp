@@ -50,18 +50,3 @@
     min-height: 27.5rem;
   }
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .center-dashboard {
-    animation: center-reveal 160ms ease-out;
-  }
-}
-
-@keyframes center-reveal {
-  from {
-    opacity: 0.78;
-  }
-  to {
-    opacity: 1;
-  }
-}

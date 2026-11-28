@@ -1,7 +1,7 @@
 import re
+from collections.abc import Iterable
 from unicodedata import normalize
 
-from app.db.models import Profile
 from app.skills import SKILL_LABELS
 
 PROGRAMMING_TERMS = {"编程", "代码", "开发", "programming", "coding", "development"}
@@ -17,19 +17,18 @@ def search_text(value: str) -> str:
     return normalize("NFKC", value).casefold()
 
 
-def matches_skill(profile: Profile, query: str) -> bool:
-    """Match listed skills and related development terms."""
+def matches_skill(
+    query: str,
+    codes: Iterable[str],
+    *,
+    descriptions: Iterable[str] = (),
+) -> bool:
+    """Match skill codes, labels, related terms and public descriptions."""
     term = search_text(query.strip())
-    codes = [skill.code for skill in profile.skills]
-    skills = [
-        search_text(label)
-        for label in [
-            *codes,
-            *(SKILL_LABELS[code] for code in codes),
-            *(profile.custom_skills or []),
-        ]
-    ]
-    if any(term in value for value in [*skills, search_text(profile.introduction)]):
+    skills = [search_text(value) for code in codes for value in (code, SKILL_LABELS[code])]
+    if any(term in value for value in skills) or any(
+        term in search_text(description) for description in descriptions
+    ):
         return True
     if term in PROGRAMMING_TERMS:
         return any(PROGRAMMING_SKILLS.search(skill) for skill in skills)

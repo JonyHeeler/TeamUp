@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { ApiError, api } from "../api/client";
 import { describeError } from "./shared";
 
@@ -32,5 +34,66 @@ export async function loadDashboard(userId: string) {
     publicProfile: sectionResult(publicProfile),
     teams: sectionResult(teams),
     requests: sectionResult(requests),
+  };
+}
+
+export type Dashboard = Awaited<ReturnType<typeof loadDashboard>>;
+
+type DashboardEntry = { userId: string; data: Dashboard };
+type DashboardRequest = { userId: string; done: Promise<void> };
+
+/** 在主标签间复用当前身份的个人中心，刷新时保留已渲染的数据。 */
+export function useCenterDashboard(
+  userId: string | undefined,
+  visible: boolean,
+  prefetch: boolean,
+) {
+  const [entry, setEntry] = useState<DashboardEntry>();
+  const inFlight = useRef<DashboardRequest | null>(null);
+
+  /** 复用同一会话的请求，写入成功后可强制重新读取。 */
+  const refresh = useCallback(
+    (replace = false) => {
+      if (!userId) return Promise.resolve();
+      if (!replace && inFlight.current?.userId === userId) {
+        return inFlight.current.done;
+      }
+      const done = loadDashboard(userId).then((data) => {
+        if (inFlight.current?.done !== done) return;
+        inFlight.current = null;
+        // 冷启动导航等待此请求，确保目标页首帧已经拿到数据。
+        flushSync(() => setEntry({ userId, data }));
+      });
+      inFlight.current = { userId, done };
+      return done;
+    },
+    [userId],
+  );
+
+  /** 合并服务端确认的修改，并作废修改前启动的查询。 */
+  function update(change: (dashboard: Dashboard) => Dashboard) {
+    inFlight.current = null;
+    setEntry((current) =>
+      current && current.userId === userId
+        ? { ...current, data: change(current.data) }
+        : current,
+    );
+  }
+
+  useEffect(() => {
+    setEntry((current) => (current?.userId === userId ? current : undefined));
+    return () => {
+      inFlight.current = null;
+    };
+  }, [userId]);
+
+  useEffect(() => {
+    if (visible || prefetch) void refresh();
+  }, [visible, prefetch, refresh]);
+
+  return {
+    data: userId && entry?.userId === userId ? entry.data : undefined,
+    refresh,
+    update,
   };
 }

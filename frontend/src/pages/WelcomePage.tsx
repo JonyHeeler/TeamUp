@@ -1,8 +1,9 @@
 import { useRef } from "react";
-import { api } from "../api/client";
+import { LoadingStatus } from "./LoadingStatus";
+import type { TeamDiscovery } from "./teamDiscovery";
 import { copy as t } from "../copy";
 import Welcome from "../Welcome";
-import { Alert, useResource, type Navigate } from "./shared";
+import { Alert, type Navigate } from "./shared";
 
 const competitionCovers = new Map([
   ["mcm-icm", "mcm-icm.svg"],
@@ -23,10 +24,15 @@ function CompetitionArt({ id }: { id: string }) {
   );
 }
 /** 加载官方比赛目录并呈现欢迎页。 */
-export default function WelcomePage({ navigate }: { navigate: Navigate }) {
+export default function WelcomePage({
+  navigate,
+  discovery,
+}: {
+  navigate: Navigate;
+  discovery: TeamDiscovery;
+}) {
   const heading = useRef<HTMLHeadingElement>(null);
-  const catalog = useResource(api.competitions);
-  const recruitments = useResource(api.recruitments);
+  const { catalog, recruitments } = discovery;
   const competitions = catalog.data?.items;
   const teams = recruitments.data?.items ?? [];
   return (
@@ -67,9 +73,7 @@ export default function WelcomePage({ navigate }: { navigate: Navigate }) {
       ) : catalog.error ? (
         <Alert message={catalog.error} />
       ) : (
-        <p className="empty" role="status">
-          {t.loading}
-        </p>
+        <LoadingStatus />
       )}
     </Welcome>
   );

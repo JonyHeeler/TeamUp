@@ -549,8 +549,15 @@ def test_personal_high_five_and_profile_visibility(migrated_database):
         invalid = second.put(own_path, headers=origin, json={**profile, "qq": ""})
         assert invalid.status_code == 422
         assert second.put(own_path, headers=origin, json=profile).status_code == 200
-        assert "qq" not in first.get(profile_path).json()
-        for term in ("python", "编程", "代码", "开发"):
+        public_profile = first.get(profile_path).json()
+        assert "qq" not in public_profile
+        assert public_profile["customSkills"] == ["Python 自动化"]
+        for parameter in ("skill", "search"):
+            results = first.get(f"{BASE}/profiles", params={parameter: "Python 自动化"}).json()[
+                "items"
+            ]
+            assert all(item["userId"] != second_id for item in results)
+        for term in ("编程", "代码", "开发"):
             assert second_id in {
                 item["userId"]
                 for item in first.get(f"{BASE}/profiles", params={"skill": term}).json()["items"]
